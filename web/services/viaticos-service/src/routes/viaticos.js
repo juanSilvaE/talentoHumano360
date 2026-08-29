@@ -92,7 +92,8 @@ router.post('/', auth, async (req, res) => {
   const { persona, documento, dependencia, cargo, destino, motivo, fechaInicio, fechaFin, dias, valorDiario, estado, observaciones } = req.body;
   if (!persona || !documento || !destino) return res.status(400).json({ error: 'Persona, documento y destino son requeridos.' });
 
-  const today = new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'/');
+  const d = new Date();
+  const today = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
   try {
     const r = await pool.query(
       `INSERT INTO viaticos(dependencia,apellidos_nombres,documento,cargo,destino,motivo,fecha_inicio,fecha_fin,dias,valor_diario,estado,observaciones,fecha_solicitud)

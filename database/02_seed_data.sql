@@ -3,13 +3,10 @@
 -- 3. Insertar el usuario administrador
 --    La contraseña se guarda hasheada con bcrypt (nunca en texto plano).
 INSERT INTO public.usuarios (username, password, nombre, rol, estado)
-VALUES (
-           'admin@boyaca.gov.co',
-           'admin123',
-           'Administrador',
-           'Administrador',
-           'ACTIVO'
-       )
+VALUES 
+    ('admin@boyaca.gov.co', 'admin123', 'Administrador', 'Administrador', 'ACTIVO'),
+    ('carlos@boyaca.gov.co', 'carlos123', 'Carlos Andrés Torres Rivera', 'Coordinador', 'ACTIVO'),
+    ('maria@boyaca.gov.co', 'maria123', 'María Camila Rodríguez Niño', 'Consulta', 'ACTIVO')
     ON CONFLICT (username) DO NOTHING;
 
 -- ============================================================

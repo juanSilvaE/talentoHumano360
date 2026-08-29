@@ -40,17 +40,22 @@ router.get('/stats', auth, async (_, res) => {
         FROM viaticos`),
       // Últimas actividades (mezcla de módulos)
       pool.query(`
-        (SELECT 'Vacación' AS tipo_modulo, COALESCE(apellidos_nombres,'Sin nombre') AS persona,
-                COALESCE(dependencia,'') AS dependencia, COALESCE(estado,'Pendiente') AS estado,
-                COALESCE(hoy,TO_CHAR(NOW(),'DD/MM/YYYY')) AS fecha
-         FROM vacaciones ORDER BY id_vacacion DESC LIMIT 5)
-        UNION ALL
-        (SELECT tipo AS tipo_modulo, COALESCE(apellidos_nombres,'Sin nombre'), COALESCE(dependencia,''), estado, COALESCE(fecha_solicitud,TO_CHAR(NOW(),'DD/MM/YYYY'))
-         FROM solicitudes_admin ORDER BY id_solicitud DESC LIMIT 5)
-        UNION ALL
-        (SELECT 'Viático', COALESCE(apellidos_nombres,'Sin nombre'), COALESCE(dependencia,''), estado, COALESCE(fecha_solicitud,TO_CHAR(NOW(),'DD/MM/YYYY'))
-         FROM viaticos ORDER BY id_viatico DESC LIMIT 5)
-        ORDER BY fecha DESC LIMIT 10`)
+        SELECT tipo_modulo, persona, dependencia, estado, fecha FROM (
+          (SELECT 'Vacación' AS tipo_modulo, COALESCE(apellidos_nombres,'Sin nombre') AS persona,
+                  COALESCE(dependencia,'') AS dependencia, COALESCE(estado,'Pendiente') AS estado,
+                  COALESCE(hoy,TO_CHAR(NOW(),'DD/MM/YYYY')) AS fecha,
+                  id_vacacion AS orden_id
+           FROM vacaciones ORDER BY id_vacacion DESC LIMIT 5)
+          UNION ALL
+          (SELECT tipo AS tipo_modulo, COALESCE(apellidos_nombres,'Sin nombre'), COALESCE(dependencia,''), estado, COALESCE(fecha_solicitud,TO_CHAR(NOW(),'DD/MM/YYYY')),
+                  id_solicitud AS orden_id
+           FROM solicitudes_admin ORDER BY id_solicitud DESC LIMIT 5)
+          UNION ALL
+          (SELECT 'Viático' AS tipo_modulo, COALESCE(apellidos_nombres,'Sin nombre'), COALESCE(dependencia,''), estado, COALESCE(fecha_solicitud,TO_CHAR(NOW(),'DD/MM/YYYY')),
+                  id_viatico AS orden_id
+           FROM viaticos ORDER BY id_viatico DESC LIMIT 5)
+        ) sub
+        ORDER BY orden_id DESC LIMIT 10`)
     ]);
 
     const e = empleados.rows[0];

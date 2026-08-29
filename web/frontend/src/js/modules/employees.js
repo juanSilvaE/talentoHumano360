@@ -322,6 +322,3 @@ const EmployeesModule = (() => {
 
   return { render, openCreate, openEdit, confirmDelete, goPage, search, clearSearch };
 })();
-
-function truncate(str, n) { return str && str.length > n ? str.substring(0, n) + '…' : str; }
-function escHtml(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }

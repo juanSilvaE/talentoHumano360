@@ -28,7 +28,7 @@ router.post('/login', async (req, res) => {
     const result = await pool.query(
       `SELECT username, nombre, rol
        FROM usuarios
-       WHERE LOWER(username) = $1
+       WHERE (LOWER(username) = $1 OR LOWER(SPLIT_PART(username, '@', 1)) = $1)
          AND password = $2
          AND estado = 'ACTIVO'
        LIMIT 1`,

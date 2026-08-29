@@ -1,6 +1,21 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   api.js — HTTP Client for all microservices
+   api.js — HTTP Client and Global Utilities for all microservices
    ═══════════════════════════════════════════════════════════════════════════ */
+
+function escHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function truncate(str, n = 30) {
+  if (!str) return '';
+  return str.length > n ? str.substring(0, n) + '…' : str;
+}
 
 const API = (() => {
   const BASE = '/api';

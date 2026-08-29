@@ -135,11 +135,11 @@ router.post('/', auth, async (req, res) => {
       return prefix + String(max + 1).padStart(width, '0');
     };
 
-    const findOrCreate = async (table, idCol, nameCol, name, insertFn) => {
+    const findOrCreate = async (table, idCol, nameCol, prefix, width, name, insertFn) => {
       const cleanName = clean(name) || 'NO REGISTRADO';
       const existing = await client.query(`SELECT ${idCol} FROM ${table} WHERE LOWER(${nameCol}) = LOWER($1) LIMIT 1`, [cleanName]);
       if (existing.rows.length > 0) return existing.rows[0][idCol.toLowerCase()];
-      const id = await nextId(table, idCol, idCol.substring(0, 3).toUpperCase(), 3);
+      const id = await nextId(table, idCol, prefix, width);
       await insertFn(id, cleanName);
       return id;
     };
@@ -149,13 +149,13 @@ router.post('/', auth, async (req, res) => {
     const educationId = await nextId('educacion', 'id_educacion', 'EDU', 4);
     const recordId = await nextId('rel_principal', 'id_registro', 'REL', 4);
 
-    const deptId = await findOrCreate('dependencias', 'id_dependencia', 'dependencia', dependencia || 'NO REGISTRADO', async (id, name) =>
+    const deptId = await findOrCreate('dependencias', 'id_dependencia', 'dependencia', 'DEP', 3, dependencia || 'NO REGISTRADO', async (id, name) =>
       client.query('INSERT INTO dependencias(id_dependencia, dependencia) VALUES ($1,$2)', [id, name]));
 
-    const cargoId = await findOrCreate('cargos', 'id_cargo', 'cargo', cargoActual || 'NO REGISTRADO', async (id, name) =>
+    const cargoId = await findOrCreate('cargos', 'id_cargo', 'cargo', 'CAR', 3, cargoActual || 'NO REGISTRADO', async (id, name) =>
       client.query("INSERT INTO cargos(id_cargo, tipo_cargo, cargo, codigo, grado, asignacion_sueldo, nivel) VALUES ($1,'PLANTA',$2,'N/A','N/A','$0','NO REGISTRADO')", [id, name]));
 
-    const statusId = await findOrCreate('estados', 'id_estado', 'situacion', 'ACTIVO', async (id, name) =>
+    const statusId = await findOrCreate('estados', 'id_estado', 'situacion', 'EST', 3, 'ACTIVO', async (id, name) =>
       client.query("INSERT INTO estados(id_estado, clasificacion_empleo, situacion, funciones_pagadas, novedades, opec) VALUES ($1,'NO REGISTRADO',$2,'NO REGISTRADO','','NO REGISTRADO')", [id, name]));
 
     const cleanNombre = clean(nombreCompleto);
@@ -203,20 +203,49 @@ router.put('/:cedula', auth, async (req, res) => {
     if (r.rows.length === 0) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'Servidor no encontrado.' }); }
     const { id_registro, id_persona, id_contacto } = r.rows[0];
 
-    await client.query('UPDATE personas SET nombre_completo=$1, sexo=$2 WHERE id_persona=$3',
-      [clean(nombreCompleto) || 'NO REGISTRADO', clean(sexo) || 'NO REGISTRADO', id_persona]);
+    const cleanNombre = clean(nombreCompleto);
+    const parts = cleanNombre.split(' ');
+    const apellido1 = parts[0] || 'NO REGISTRADO';
+    const apellido2 = parts[1] || 'NO REGISTRADO';
+    const nombres   = parts.slice(2).join(' ') || parts[0] || 'NO REGISTRADO';
+
+    await client.query(
+      'UPDATE personas SET nombre_completo=$1, primer_apellido=$2, segundo_apellido=$3, nombres=$4, sexo=$5 WHERE id_persona=$6',
+      [cleanNombre || 'NO REGISTRADO', apellido1, apellido2, nombres, clean(sexo) || 'NO REGISTRADO', id_persona]);
 
     await client.query('UPDATE contactos SET correo_institucional=$1, celular=$2 WHERE id_contacto=$3',
       [(correo || 'NO REGISTRADO').toLowerCase(), celular || 'NO REGISTRADO', id_contacto]);
 
-    const findId = async (table, idCol, nameCol, val) => {
-      const cleanVal = clean(val) || 'NO REGISTRADO';
-      const ex = await client.query(`SELECT ${idCol} FROM ${table} WHERE LOWER(${nameCol})=LOWER($1) LIMIT 1`, [cleanVal]);
-      return ex.rows.length ? ex.rows[0][idCol.toLowerCase()] : null;
+    const nextId = async (table, col, prefix, width) => {
+      const qr = await client.query(`SELECT ${col} FROM ${table}`);
+      let max = 0;
+      qr.rows.forEach(row => {
+        const digits = (row[col.toLowerCase()] || '').replace(/\D/g, '');
+        if (digits) max = Math.max(max, parseInt(digits));
+      });
+      return prefix + String(max + 1).padStart(width, '0');
     };
 
-    const deptId  = await findId('dependencias', 'id_dependencia', 'dependencia', dependencia);
-    const cargoId = await findId('cargos', 'id_cargo', 'cargo', cargoActual);
+    const findOrCreate = async (table, idCol, nameCol, prefix, width, name, insertFn) => {
+      const cleanName = clean(name) || 'NO REGISTRADO';
+      const existing = await client.query(`SELECT ${idCol} FROM ${table} WHERE LOWER(${nameCol}) = LOWER($1) LIMIT 1`, [cleanName]);
+      if (existing.rows.length > 0) return existing.rows[0][idCol.toLowerCase()];
+      const id = await nextId(table, idCol, prefix, width);
+      await insertFn(id, cleanName);
+      return id;
+    };
+
+    let deptId = null;
+    if (dependencia) {
+      deptId = await findOrCreate('dependencias', 'id_dependencia', 'dependencia', 'DEP', 3, dependencia, async (id, name) =>
+        client.query('INSERT INTO dependencias(id_dependencia, dependencia) VALUES ($1,$2)', [id, name]));
+    }
+
+    let cargoId = null;
+    if (cargoActual) {
+      cargoId = await findOrCreate('cargos', 'id_cargo', 'cargo', 'CAR', 3, cargoActual, async (id, name) =>
+        client.query("INSERT INTO cargos(id_cargo, tipo_cargo, cargo, codigo, grado, asignacion_sueldo, nivel) VALUES ($1,'PLANTA',$2,'N/A','N/A','$0','NO REGISTRADO')", [id, name]));
+    }
 
     const updateParts = ['fecha_ingreso=$1'];
     const updateVals  = [fechaIngreso || 'NO REGISTRADO'];
@@ -239,16 +268,29 @@ router.put('/:cedula', auth, async (req, res) => {
 router.delete('/:cedula', auth, async (req, res) => {
   if (!canEdit(req.user.role)) return res.status(403).json({ error: 'Permisos insuficientes.' });
   const { cedula } = req.params;
+  const client = await pool.connect();
   try {
-    const r = await pool.query(
-      'SELECT r.id_registro FROM rel_principal r JOIN personas p ON p.id_persona=r.id_persona WHERE p.cedula=$1 LIMIT 1',
+    await client.query('BEGIN');
+    const r = await client.query(
+      'SELECT r.id_registro, r.id_persona, r.id_contacto, r.id_educacion FROM rel_principal r JOIN personas p ON p.id_persona=r.id_persona WHERE p.cedula=$1 LIMIT 1',
       [cedula]);
-    if (r.rows.length === 0) return res.status(404).json({ error: 'Servidor no encontrado.' });
-    await pool.query('DELETE FROM rel_principal WHERE id_registro=$1', [r.rows[0].id_registro]);
+    if (r.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Servidor no encontrado.' });
+    }
+    const { id_registro, id_persona, id_contacto, id_educacion } = r.rows[0];
+    await client.query('DELETE FROM rel_principal WHERE id_registro=$1', [id_registro]);
+    if (id_contacto) await client.query('DELETE FROM contactos WHERE id_contacto=$1', [id_contacto]);
+    if (id_educacion) await client.query('DELETE FROM educacion WHERE id_educacion=$1', [id_educacion]);
+    if (id_persona) await client.query('DELETE FROM personas WHERE id_persona=$1', [id_persona]);
+    await client.query('COMMIT');
     res.json({ message: 'Servidor eliminado exitosamente.' });
   } catch (err) {
+    await client.query('ROLLBACK');
     console.error('[employees] delete error:', err.message);
     res.status(500).json({ error: 'Error al eliminar el servidor.' });
+  } finally {
+    client.release();
   }
 });
 

@@ -116,7 +116,8 @@ router.post('/', auth, async (req, res) => {
   if (!persona || !documento || !dependencia || !fechaInicio)
     return res.status(400).json({ error: 'Persona, documento, dependencia y fecha son requeridos.' });
 
-  const today = new Date().toLocaleDateString('es-CO', {day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'/');
+  const d = new Date();
+  const today = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
   const numero = 'SOL-WEB-' + String(Math.abs(Date.now() % 100000)).padStart(5,'0');
   const notaFinal = `Tipo: ${tipo||'Vacaciones'} | Estado inicial: ${estadoInicial||'Pendiente'}` + (observaciones ? ` | ${observaciones}` : '');
 

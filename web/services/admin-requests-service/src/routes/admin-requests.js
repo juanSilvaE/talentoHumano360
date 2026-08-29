@@ -111,7 +111,8 @@ router.post('/', auth, async (req, res) => {
   if (!persona || !documento)
     return res.status(400).json({ error: 'Persona y documento son requeridos.' });
 
-  const today = new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'/');
+  const d = new Date();
+  const today = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
   try {
     const r = await pool.query(
       `INSERT INTO solicitudes_admin(tipo,dependencia,apellidos_nombres,documento,cargo,fecha_inicio,fecha_fin,
