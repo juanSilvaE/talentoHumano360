@@ -122,7 +122,7 @@ const App = (() => {
     }
   }
 
-  // ─── Login ─────────────────────────────────────────────────────────────────
+  // ─── Login & App Views ──────────────────────────────────────────────────────
   function showLogin() {
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
@@ -133,19 +133,147 @@ const App = (() => {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'grid';
 
-    // Populate user info
+    updateUserDisplay(user);
+  }
+
+  function updateUserDisplay(user = {}) {
+    const name = user.name || 'Angela Ussa';
+    const role = user.role || 'Administrador';
+    const initial = name.charAt(0).toUpperCase();
+
+    // Sidebar
     const nameEl = document.getElementById('user-name');
     const roleEl = document.getElementById('user-role');
     const avatarEl = document.getElementById('user-avatar');
-    const roleEl2 = document.getElementById('topbar-role-badge');
-    if (nameEl) nameEl.textContent = user.name || 'Usuario';
-    if (roleEl) roleEl.textContent = user.role || 'Sistema';
-    if (roleEl2) roleEl2.textContent = user.role || 'Usuario';
-    if (avatarEl) avatarEl.textContent = (user.name || 'A').charAt(0).toUpperCase();
+    if (nameEl) nameEl.textContent = name;
+    if (roleEl) roleEl.textContent = role === 'Administrador' ? 'Administradora' : role;
+    if (avatarEl) avatarEl.textContent = initial;
+
+    // Topbar
+    const topNameEl = document.getElementById('topbar-user-name');
+    const topRoleEl = document.getElementById('topbar-role-badge');
+    const topAvatarEl = document.getElementById('topbar-avatar');
+    if (topNameEl) topNameEl.textContent = name;
+    if (topRoleEl) topRoleEl.textContent = role === 'Administrador' ? 'Admin' : role;
+    if (topAvatarEl) topAvatarEl.textContent = initial;
+  }
+
+  // ─── User Profile Modal ────────────────────────────────────────────────────
+  function openProfileModal() {
+    const user = Auth.getUser();
+    const initial = (user.name || 'A').charAt(0).toUpperCase();
+
+    const bodyHtml = `
+      <div class="profile-card-header">
+        <div class="profile-avatar-large">${initial}</div>
+        <div class="profile-header-info">
+          <div class="profile-name-display">${escHtml(user.name || 'Angela Ussa')}</div>
+          <span class="profile-role-pill">${escHtml(user.role || 'Administrador')}</span>
+          <p style="font-size:var(--text-xs);color:var(--text-muted);margin-top:4px;">Gobernación de Boyacá · Talento Humano</p>
+        </div>
+      </div>
+
+      <form id="profile-form" onsubmit="return false;" style="display:flex;flex-direction:column;gap:var(--space-4);">
+        <div class="form-group">
+          <label class="form-label">Correo Institucional (No modificable)</label>
+          <input type="text" class="form-input form-input--no-icon" value="${escHtml(user.username || '')}" readonly disabled style="opacity:0.75;background:rgba(255,255,255,0.04);cursor:not-allowed;border-color:var(--color-border);" />
+          <div class="profile-readonly-notice">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>El correo institucional es asignado por el sistema y no puede ser alterado.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="prof-name" class="form-label">Nombre Completo *</label>
+          <input type="text" id="prof-name" class="form-input form-input--no-icon" value="${escHtml(user.name || '')}" placeholder="Tu nombre y apellidos" required />
+        </div>
+
+        <div class="profile-password-section">
+          <div class="profile-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Cambiar Contraseña (Opcional)</span>
+          </div>
+          <p style="font-size:var(--text-xs);color:var(--text-muted);margin-bottom:var(--space-3);">Si deseas mantener tu contraseña actual, deja estos campos en blanco.</p>
+
+          <div style="display:flex;flex-direction:column;gap:var(--space-3);">
+            <div class="form-group">
+              <label for="prof-cur-pass" class="form-label">Contraseña Actual</label>
+              <input type="password" id="prof-cur-pass" class="form-input form-input--no-icon" placeholder="Ingresa tu contraseña actual" autocomplete="current-password" />
+            </div>
+            <div class="form-group">
+              <label for="prof-new-pass" class="form-label">Nueva Contraseña</label>
+              <input type="password" id="prof-new-pass" class="form-input form-input--no-icon" placeholder="Mínimo 4 caracteres" autocomplete="new-password" />
+            </div>
+            <div class="form-group">
+              <label for="prof-conf-pass" class="form-label">Confirmar Nueva Contraseña</label>
+              <input type="password" id="prof-conf-pass" class="form-input form-input--no-icon" placeholder="Repite la nueva contraseña" autocomplete="new-password" />
+            </div>
+          </div>
+        </div>
+      </form>`;
+
+    openModal('Mi Perfil', bodyHtml, [
+      { text: 'Cancelar', cls: 'btn-secondary', action: () => closeModal() },
+      { text: 'Guardar Cambios', cls: 'btn-primary', id: 'prof-save-btn', action: saveProfile },
+    ]);
+  }
+
+  async function saveProfile() {
+    const nombre = document.getElementById('prof-name')?.value.trim();
+    const curPass = document.getElementById('prof-cur-pass')?.value.trim();
+    const newPass = document.getElementById('prof-new-pass')?.value.trim();
+    const confPass = document.getElementById('prof-conf-pass')?.value.trim();
+
+    if (!nombre) {
+      showToast('El nombre es requerido.', 'warning');
+      return;
+    }
+
+    if (newPass || confPass || curPass) {
+      if (!curPass) {
+        showToast('Debes ingresar tu contraseña actual para cambiarla.', 'warning');
+        return;
+      }
+      if (newPass.length < 4) {
+        showToast('La nueva contraseña debe tener al menos 4 caracteres.', 'warning');
+        return;
+      }
+      if (newPass !== confPass) {
+        showToast('La nueva contraseña y su confirmación no coinciden.', 'warning');
+        return;
+      }
+    }
+
+    const btn = document.getElementById('prof-save-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+
+    try {
+      const payload = { nombre };
+      if (newPass) {
+        payload.currentPassword = curPass;
+        payload.newPassword = newPass;
+      }
+
+      const res = await API.updateProfile(payload);
+      Auth.save(res.token, res.user);
+      updateUserDisplay(res.user);
+      closeModal();
+      showToast('Perfil actualizado exitosamente.', 'success');
+    } catch (err) {
+      showToast(err.message || 'Error al actualizar perfil.', 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Guardar Cambios'; }
+    }
   }
 
   // ─── Init ──────────────────────────────────────────────────────────────────
   function init() {
+    // Restore sidebar preference
+    const isCollapsed = localStorage.getItem('humano360_sidebar_collapsed') === 'true';
+    if (isCollapsed) {
+      document.getElementById('app')?.classList.add('sidebar-collapsed');
+    }
+
     // Topbar date
     const dateEl = document.getElementById('topbar-date');
     if (dateEl) {
@@ -208,16 +336,36 @@ const App = (() => {
     }
 
     // Logout
-    document.getElementById('logout-btn')?.addEventListener('click', () => {
+    document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
       Auth.clear();
       showLogin();
       showToast('Sesión cerrada correctamente.', 'info');
     });
 
-    // Sidebar toggle
-    document.getElementById('sidebar-toggle')?.addEventListener('click', () => {
-      document.getElementById('app').classList.toggle('sidebar-collapsed');
+    // Profile modal openers
+    document.getElementById('sidebar-user')?.addEventListener('click', (e) => {
+      if (e.target.closest('#logout-btn')) return;
+      openProfileModal();
     });
+    document.getElementById('profile-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openProfileModal();
+    });
+    document.getElementById('topbar-profile-btn')?.addEventListener('click', () => {
+      openProfileModal();
+    });
+
+    // Sidebar toggle (both sidebar and topbar buttons)
+    const toggleSidebar = () => {
+      const app = document.getElementById('app');
+      if (!app) return;
+      const collapsed = app.classList.toggle('sidebar-collapsed');
+      localStorage.setItem('humano360_sidebar_collapsed', String(collapsed));
+    };
+
+    document.getElementById('sidebar-toggle')?.addEventListener('click', toggleSidebar);
+    document.getElementById('topbar-sidebar-toggle')?.addEventListener('click', toggleSidebar);
 
     // Mobile menu
     document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
@@ -267,7 +415,7 @@ const App = (() => {
     }
   }
 
-  return { init, navigate, showLogin, showApp, showToast, openModal, closeModal };
+  return { init, navigate, showLogin, showApp, showToast, openModal, closeModal, openProfileModal };
 })();
 
 // ─── Bootstrap ───────────────────────────────────────────────────────────────

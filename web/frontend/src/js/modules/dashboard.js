@@ -104,39 +104,71 @@ const DashboardModule = (() => {
 
       // ─── Stats Grid ─────────────────────────────────────────────────────
       const grid = document.getElementById('db-stats-grid');
+      const totalAdmin = (stats.solicitudesAdmin.permisos||0) + (stats.solicitudesAdmin.incapacidades||0) + (stats.solicitudesAdmin.licencias||0);
+      const totalAprobadas = (stats.vacaciones.aprobadas||0) + (chart.porEstado?.find(x=>x.estado==='Aprobada')?.cantidad||0);
+
       grid.innerHTML = `
         <div class="stat-card">
-          <div class="stat-icon stat-icon--blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-          <div class="stat-info"><span class="stat-value" id="sv-emp">0</span><span class="stat-label">Servidores Activos</span></div>
+          <div class="stat-icon stat-icon--blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Servidores Activos</span>
+            <span class="stat-value" id="sv-emp">0</span>
+            <span class="stat-badge stat-badge--success">Gobernación</span>
+          </div>
         </div>
+
         <div class="stat-card">
-          <div class="stat-icon stat-icon--green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-          <div class="stat-info"><span class="stat-value" id="sv-vac">0</span><span class="stat-label">Solicitudes Vacaciones</span><span class="stat-sublabel" id="sv-vac-pend"></span></div>
+          <div class="stat-icon stat-icon--green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Vacaciones</span>
+            <span class="stat-value" id="sv-vac">0</span>
+            <span class="stat-badge stat-badge--warn" id="sv-vac-pend">${stats.vacaciones.pendientes || 0} pendientes</span>
+          </div>
         </div>
+
         <div class="stat-card">
-          <div class="stat-icon stat-icon--orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
-          <div class="stat-info"><span class="stat-value" id="sv-adm">0</span><span class="stat-label">Solicitudes Administrativas</span><span class="stat-sublabel" id="sv-adm-pend"></span></div>
+          <div class="stat-icon stat-icon--orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Solicitudes Admin</span>
+            <span class="stat-value" id="sv-adm">0</span>
+            <span class="stat-badge stat-badge--warn" id="sv-adm-pend">${stats.solicitudesAdmin.pendientes || 0} pendientes</span>
+          </div>
         </div>
+
         <div class="stat-card">
-          <div class="stat-icon stat-icon--gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-          <div class="stat-info"><span class="stat-value" id="sv-vit">0</span><span class="stat-label">Viáticos Registrados</span></div>
+          <div class="stat-icon stat-icon--gold">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Viáticos Registrados</span>
+            <span class="stat-value" id="sv-vit">0</span>
+            <span class="stat-badge stat-badge--success">$${Math.round(stats.viaticos.valorTotalAprobado || 0).toLocaleString('es-CO')} aprobados</span>
+          </div>
         </div>
+
         <div class="stat-card">
-          <div class="stat-icon stat-icon--green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div class="stat-info"><span class="stat-value" id="sv-aprobadas">0</span><span class="stat-label">Solicitudes Aprobadas</span></div>
+          <div class="stat-icon stat-icon--purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Aprobadas Totales</span>
+            <span class="stat-value" id="sv-aprobadas">0</span>
+            <span class="stat-badge stat-badge--success">Gestionadas</span>
+          </div>
         </div>`;
 
       // Animate counters
       animateCount(document.getElementById('sv-emp'), stats.empleados.total);
       animateCount(document.getElementById('sv-vac'), stats.vacaciones.total);
-      animateCount(document.getElementById('sv-adm'), stats.solicitudesAdmin.permisos + stats.solicitudesAdmin.incapacidades + stats.solicitudesAdmin.licencias);
+      animateCount(document.getElementById('sv-adm'), totalAdmin);
       animateCount(document.getElementById('sv-vit'), stats.viaticos.total);
       animateCount(document.getElementById('sv-aprobadas'), stats.vacaciones.aprobadas);
-
-      const pendVac = document.getElementById('sv-vac-pend');
-      if (pendVac) pendVac.textContent = `${stats.vacaciones.pendientes} pendientes`;
-      const pendAdm = document.getElementById('sv-adm-pend');
-      if (pendAdm) pendAdm.textContent = `${stats.solicitudesAdmin.pendientes} pendientes`;
 
       // ─── Charts ──────────────────────────────────────────────────────────
       const ctxBar = document.getElementById('chart-by-type')?.getContext('2d');
@@ -150,19 +182,49 @@ const DashboardModule = (() => {
             datasets: [{
               label: 'Solicitudes',
               data: valores,
-              backgroundColor: TYPE_COLORS.map(c => c[0]),
-              borderColor: TYPE_COLORS.map(c => c[1]),
-              borderWidth: 2,
+              backgroundColor: [
+                'rgba(37,99,235,0.75)',
+                'rgba(16,185,129,0.75)',
+                'rgba(245,158,11,0.75)',
+                'rgba(200,166,61,0.75)',
+                'rgba(139,92,246,0.75)',
+              ],
+              borderColor: [
+                'rgba(59,130,246,1)',
+                'rgba(52,211,153,1)',
+                'rgba(251,191,36,1)',
+                'rgba(240,200,74,1)',
+                'rgba(167,139,250,1)',
+              ],
+              borderWidth: 1.5,
               borderRadius: 8,
               borderSkipped: false,
             }]
           },
           options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: 'rgba(15, 27, 45, 0.95)',
+                titleFont: { size: 13, weight: 'bold' },
+                bodyFont: { size: 12 },
+                padding: 12,
+                cornerRadius: 8,
+                borderColor: 'rgba(255,255,255,0.15)',
+                borderWidth: 1
+              }
+            },
             scales: {
-              x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 11 } } },
-              y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.6)', precision: 0, font: { size: 11 } } }
+              x: {
+                grid: { color: 'rgba(255,255,255,0.05)' },
+                ticks: { color: 'rgba(255,255,255,0.7)', font: { size: 12, weight: '500' } }
+              },
+              y: {
+                grid: { color: 'rgba(255,255,255,0.05)' },
+                ticks: { color: 'rgba(255,255,255,0.7)', precision: 0, font: { size: 12 } }
+              }
             }
           }
         });
@@ -178,14 +240,39 @@ const DashboardModule = (() => {
           type: 'doughnut',
           data: {
             labels,
-            datasets: [{ data: valores, backgroundColor: colors, borderColor: borders, borderWidth: 2, hoverOffset: 8 }]
+            datasets: [{
+              data: valores,
+              backgroundColor: colors,
+              borderColor: borders,
+              borderWidth: 2,
+              hoverOffset: 8
+            }]
           },
           options: {
-            responsive: true, maintainAspectRatio: false,
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: {
-              legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.7)', padding: 12, font: { size: 11 } } }
+              legend: {
+                position: 'bottom',
+                labels: {
+                  color: 'rgba(255,255,255,0.85)',
+                  padding: 16,
+                  font: { size: 12, weight: '500' },
+                  usePointStyle: true,
+                  pointStyle: 'circle'
+                }
+              },
+              tooltip: {
+                backgroundColor: 'rgba(15, 27, 45, 0.95)',
+                titleFont: { size: 13, weight: 'bold' },
+                bodyFont: { size: 12 },
+                padding: 12,
+                cornerRadius: 8,
+                borderColor: 'rgba(255,255,255,0.15)',
+                borderWidth: 1
+              }
             },
-            cutout: '65%'
+            cutout: '68%'
           }
         });
       }

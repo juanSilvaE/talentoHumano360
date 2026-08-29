@@ -45,6 +45,8 @@ const API = (() => {
     // Auth
     login: (username, password) =>
       request('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
+    updateProfile: (data) =>
+      request('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
 
     // Dashboard
     getDashboardStats: () => request('/dashboard/stats'),
