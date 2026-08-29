@@ -75,7 +75,12 @@ const AdminRequestsModule = (() => {
         <td><span class="badge ${tipoBadge(r.tipo)}">${r.tipo}</span></td>
         <td>${r.fechaInicio || '—'}</td>
         <td>${r.diasSolicitados ?? '—'}</td>
-        <td><span class="badge ${badgeClass(r.estado)}">${r.estado}</span></td>
+        <td>
+          <button type="button" class="badge badge--interactive ${badgeClass(r.estado)}" onclick="AdminRequestsModule.openStatusPicker(${r.id})" title="Clic para cambiar estado de esta solicitud" aria-label="Cambiar estado: ${r.estado}">
+            <span>${r.estado}</span>
+            <svg class="badge-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </td>
         <td class="td-actions">
           <button class="btn btn-secondary btn-sm btn-icon" onclick="AdminRequestsModule.openEdit(${r.id})" title="Editar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -323,5 +328,113 @@ const AdminRequestsModule = (() => {
     await load();
   }
 
-  return { render, openCreate, openEdit, confirmDelete, applyFilters, clearFilters, goPage, setTipo };
+  const STATUS_CONFIG = [
+    {
+      id: 'aprobada',
+      name: 'Aprobada',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
+      desc: 'Aprobar solicitud institucional',
+      cls: 'status-card-opt--aprobada',
+    },
+    {
+      id: 'rechazada',
+      name: 'Rechazada',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+      desc: 'Denegar o rechazar trámite',
+      cls: 'status-card-opt--rechazada',
+    },
+    {
+      id: 'revision',
+      name: 'En revisión',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+      desc: 'En verificación médica o validación jurídica de soportes',
+      cls: 'status-card-opt--revision',
+    },
+    {
+      id: 'pendiente',
+      name: 'Pendiente',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+      desc: 'En espera de visto bueno o turno de trámite',
+      cls: 'status-card-opt--pendiente',
+    },
+    {
+      id: 'finalizada',
+      name: 'Finalizada',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+      desc: 'Trámite culminado y archivado en hoja de vida',
+      cls: 'status-card-opt--finalizada',
+    },
+  ];
+
+  function openStatusPicker(id) {
+    if (!Auth.canEdit()) {
+      App.showToast('No tienes permisos de edición para cambiar estados.', 'warning');
+      return;
+    }
+    const r = state.data.find(x => x.id === id);
+    if (!r) return;
+
+    const cardsHtml = STATUS_CONFIG.map(opt => {
+      const isCurrent = r.estado === opt.name;
+      return `
+        <button type="button" class="status-card-opt ${opt.cls} ${isCurrent ? 'is-current' : ''}" onclick="AdminRequestsModule.selectQuickStatus(${r.id}, '${opt.name}')" title="Marcar como ${opt.name}">
+          <div class="status-opt-icon">${opt.icon}</div>
+          <div class="status-opt-info">
+            <div class="status-opt-title-row">
+              <span class="status-opt-name">${opt.name}</span>
+              ${isCurrent ? '<span class="status-current-badge">Estado actual</span>' : ''}
+            </div>
+            <span class="status-opt-desc">${opt.desc}</span>
+          </div>
+          <div class="status-opt-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </button>`;
+    }).join('');
+
+    const bodyHtml = `
+      <div class="status-picker-container">
+        <div class="status-picker-hero">
+          <div class="status-picker-rad">${escHtml(r.radicado)}</div>
+          <div class="status-picker-person">${escHtml(r.persona)}</div>
+          <div class="status-picker-tags">
+            <span class="status-picker-tag">📋 ${escHtml(r.tipo)}</span>
+            <span class="status-picker-tag">📅 ${escHtml(r.fechaInicio || '—')} (${r.diasSolicitados || 1} días)</span>
+            <span class="status-picker-tag">Estado actual: <strong class="badge ${badgeClass(r.estado)}" style="margin-left:4px">${r.estado}</strong></span>
+          </div>
+        </div>
+
+        <div class="status-picker-section-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <span>Selecciona el nuevo estado para esta solicitud:</span>
+        </div>
+
+        <div class="status-cards-grid">
+          ${cardsHtml}
+        </div>
+
+        <div class="form-group" style="margin-top:var(--space-2);">
+          <label class="form-label">Nota de Gestión / Concepto (Opcional)</label>
+          <input id="adm-quick-status-note" class="form-input form-input--no-icon" placeholder="Ej: Aprobado según soporte médico presentado..." value="${escHtml(r.observaciones || '')}" />
+        </div>
+      </div>`;
+
+    App.openModal('Gestión Rápida de Estado', bodyHtml, [
+      { text: 'Cancelar', cls: 'btn-secondary', action: () => App.closeModal() },
+    ]);
+  }
+
+  async function selectQuickStatus(id, newStatus) {
+    const note = document.getElementById('adm-quick-status-note')?.value.trim();
+    try {
+      await API.updateAdminRequestStatus(id, newStatus, note);
+      App.closeModal();
+      App.showToast(`Estado actualizado a "${newStatus}".`, 'success');
+      await load();
+    } catch (err) {
+      App.showToast(err.message || 'Error al cambiar estado.', 'error');
+    }
+  }
+
+  return { render, openCreate, openEdit, openStatusPicker, selectQuickStatus, confirmDelete, applyFilters, clearFilters, goPage, setTipo };
 })();

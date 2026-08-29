@@ -52,7 +52,12 @@ const ViaticosModule = (() => {
         <td>${r.fechaInicio || '—'}</td>
         <td>${r.dias ?? '—'} días</td>
         <td class="td-currency">${formatCOP(r.valorTotal)}</td>
-        <td><span class="badge ${badgeClass(r.estado)}">${r.estado}</span></td>
+        <td>
+          <button type="button" class="badge badge--interactive ${badgeClass(r.estado)}" onclick="ViaticosModule.openStatusPicker(${r.id})" title="Clic para cambiar estado de este viático" aria-label="Cambiar estado: ${r.estado}">
+            <span>${r.estado}</span>
+            <svg class="badge-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </td>
         <td class="td-actions">
           <button class="btn btn-secondary btn-sm btn-icon" onclick="ViaticosModule.openEdit(${r.id})" title="Editar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -216,11 +221,141 @@ const ViaticosModule = (() => {
     };
   }
 
+  const STATUS_CONFIG = [
+    {
+      id: 'aprobada',
+      name: 'Aprobada',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
+      desc: 'Aprobar viático para trámite y desembolso',
+      cls: 'status-card-opt--aprobada',
+    },
+    {
+      id: 'rechazada',
+      name: 'Rechazada',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+      desc: 'Denegar o no autorizar la comisión de servicios',
+      cls: 'status-card-opt--rechazada',
+    },
+    {
+      id: 'revision',
+      name: 'En revisión',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+      desc: 'En verificación de soportes y disponibilidad presupuestal',
+      cls: 'status-card-opt--revision',
+    },
+    {
+      id: 'pendiente',
+      name: 'Pendiente',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+      desc: 'Registrado en espera de gestión o turno',
+      cls: 'status-card-opt--pendiente',
+    },
+    {
+      id: 'finalizada',
+      name: 'Finalizada',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+      desc: 'Comisión cumplida y legalizada formalmente',
+      cls: 'status-card-opt--finalizada',
+    },
+  ];
+
+  function openStatusPicker(id) {
+    if (!Auth.canEdit()) {
+      App.showToast('No tienes permisos de edición para cambiar estados.', 'warning');
+      return;
+    }
+    const r = state.data.find(x => x.id === id);
+    if (!r) return;
+
+    const cardsHtml = STATUS_CONFIG.map(opt => {
+      const isCurrent = r.estado === opt.name;
+      return `
+        <button type="button" class="status-card-opt ${opt.cls} ${isCurrent ? 'is-current' : ''}" onclick="ViaticosModule.selectQuickStatus(${r.id}, '${opt.name}')" title="Marcar como ${opt.name}">
+          <div class="status-opt-icon">${opt.icon}</div>
+          <div class="status-opt-info">
+            <div class="status-opt-title-row">
+              <span class="status-opt-name">${opt.name}</span>
+              ${isCurrent ? '<span class="status-current-badge">Estado actual</span>' : ''}
+            </div>
+            <span class="status-opt-desc">${opt.desc}</span>
+          </div>
+          <div class="status-opt-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </button>`;
+    }).join('');
+
+    const bodyHtml = `
+      <div class="status-picker-container">
+        <div class="status-picker-hero">
+          <div class="status-picker-rad">${escHtml(r.radicado)}</div>
+          <div class="status-picker-person">${escHtml(r.persona)}</div>
+          <div class="status-picker-tags">
+            <span class="status-picker-tag">📍 ${escHtml(r.destino || 'Destino no especificado')}</span>
+            <span class="status-picker-tag">📅 ${escHtml(r.fechaInicio || '—')} (${r.dias || 1} días)</span>
+            <span class="status-picker-tag">💰 ${formatCOP(r.valorTotal)}</span>
+            <span class="status-picker-tag">Estado actual: <strong class="badge ${badgeClass(r.estado)}" style="margin-left:4px">${r.estado}</strong></span>
+          </div>
+        </div>
+
+        <div class="status-picker-section-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <span>Selecciona el nuevo estado para esta solicitud:</span>
+        </div>
+
+        <div class="status-cards-grid">
+          ${cardsHtml}
+        </div>
+
+        <div class="form-group" style="margin-top:var(--space-2);">
+          <label class="form-label">Observación / Nota de Gestión (Opcional)</label>
+          <input id="quick-status-obs" class="form-input form-input--no-icon" placeholder="Ej: Aprobado según soporte / resolución presentada..." value="${escHtml(r.observaciones || '')}" />
+        </div>
+      </div>`;
+
+    App.openModal('Gestión Rápida de Estado', bodyHtml, [
+      { text: 'Cancelar', cls: 'btn-secondary', action: () => App.closeModal() },
+    ]);
+  }
+
+  async function selectQuickStatus(id, newStatus) {
+    const obs = document.getElementById('quick-status-obs')?.value.trim();
+    try {
+      await API.updateViaticoStatus(id, newStatus, obs);
+      App.closeModal();
+      App.showToast(`Estado de viático actualizado a "${newStatus}".`, 'success');
+      await load();
+      loadStats();
+    } catch (err) {
+      App.showToast(err.message || 'Error al cambiar estado.', 'error');
+    }
+  }
+
+  function loadStats() {
+    API.getViaticosStats().then(s => {
+      const strip = document.getElementById('vit-stats-strip');
+      if (!strip) return;
+      strip.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <div class="stat-info"><span class="stat-value">${parseInt(s.total)||0}</span><span class="stat-label">Viáticos Totales</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="stat-info"><span class="stat-value">${parseInt(s.pendientes)||0}</span><span class="stat-label">Pendientes</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="stat-info"><span class="stat-value" style="font-size:var(--text-xl)">${formatCOP(s.valor_aprobado)}</span><span class="stat-label">Total Aprobado</span></div>
+        </div>`;
+    }).catch(() => {});
+  }
+
   function confirmDelete(id, nombre) {
     App.openModal('Confirmar Eliminación', `<p style="color:var(--text-secondary)">¿Eliminar el viático de <strong style="color:var(--text-primary)">${nombre}</strong>?</p>`, [
       { text: 'Cancelar', cls: 'btn-secondary', action: () => App.closeModal() },
       { text: 'Eliminar', cls: 'btn-danger', action: async () => {
-        try { await API.deleteViatico(id); App.closeModal(); App.showToast('Viático eliminado.','success'); await load(); }
+        try { await API.deleteViatico(id); App.closeModal(); App.showToast('Viático eliminado.','success'); await load(); loadStats(); }
         catch (err) { App.showToast(err.message,'error'); }
       }},
     ]);
@@ -299,28 +434,10 @@ const ViaticosModule = (() => {
 
     document.getElementById('vit-q')?.addEventListener('keypress', e => { if (e.key === 'Enter') applyFilters(); });
 
-    // Load stats strip async
-    API.getViaticosStats().then(s => {
-      const strip = document.getElementById('vit-stats-strip');
-      if (!strip) return;
-      strip.innerHTML = `
-        <div class="stat-card">
-          <div class="stat-icon stat-icon--gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-          <div class="stat-info"><span class="stat-value">${parseInt(s.total)||0}</span><span class="stat-label">Viáticos Totales</span></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon stat-icon--orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-          <div class="stat-info"><span class="stat-value">${parseInt(s.pendientes)||0}</span><span class="stat-label">Pendientes</span></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon stat-icon--green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div class="stat-info"><span class="stat-value" style="font-size:var(--text-xl)">${formatCOP(s.valor_aprobado)}</span><span class="stat-label">Total Aprobado</span></div>
-        </div>`;
-    }).catch(() => {});
-
+    loadStats();
     state.page = 1; state.filters = {};
     await load();
   }
 
-  return { render, openCreate, openEdit, confirmDelete, applyFilters, clearFilters, goPage, calcTotal };
+  return { render, openCreate, openEdit, openStatusPicker, selectQuickStatus, confirmDelete, applyFilters, clearFilters, goPage, calcTotal };
 })();

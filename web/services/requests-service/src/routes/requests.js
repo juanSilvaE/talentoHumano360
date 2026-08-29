@@ -171,6 +171,31 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
+// ─── PATCH /api/requests/:id/status ──────────────────────────────────────────
+router.patch('/:id/status', auth, async (req, res) => {
+  if (!canEdit(req.user.role)) return res.status(403).json({ error: 'Permisos insuficientes.' });
+  const { id } = req.params;
+  const { estado, notaGestion } = req.body;
+  if (!estado) return res.status(400).json({ error: 'El estado es requerido.' });
+  try {
+    const norm = normalizeStatus(estado);
+    const r = await pool.query(
+      `UPDATE vacaciones SET estado=$1, revision_planta = CASE WHEN $2 != '' THEN $2 ELSE revision_planta END
+       WHERE id_vacacion=$3 RETURNING id_vacacion, estado`,
+      [norm, (notaGestion || '').trim(), parseInt(id)]
+    );
+    if (r.rowCount === 0) return res.status(404).json({ error: 'Solicitud no encontrada.' });
+    await pool.query(
+      'INSERT INTO historial_solicitudes(id_vacacion,estado_nuevo,nota,actualizado_por) VALUES($1,$2,$3,$4)',
+      [parseInt(id), norm, (notaGestion || 'Cambio rápido de estado').trim(), req.user.username || 'web']
+    );
+    res.json({ message: 'Estado de solicitud actualizado.', estado: norm });
+  } catch (err) {
+    console.error('[requests] patch status error:', err.message);
+    res.status(500).json({ error: 'Error al actualizar estado.' });
+  }
+});
+
 // ─── DELETE /api/requests/:id ─────────────────────────────────────────────────
 router.delete('/:id', auth, async (req, res) => {
   if (!canEdit(req.user.role)) return res.status(403).json({ error: 'Permisos insuficientes.' });

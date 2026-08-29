@@ -64,6 +64,8 @@ const API = (() => {
     getRequestCatalogs: () => request('/requests/catalogs'),
     createRequest: (data) => request('/requests', { method: 'POST', body: JSON.stringify(data) }),
     updateRequest: (id, data) => request(`/requests/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    updateRequestStatus: (id, estado, notaGestion = '') =>
+      request(`/requests/${id}/status`, { method: 'PATCH', body: JSON.stringify({ estado, notaGestion }) }),
     deleteRequest: (id) => request(`/requests/${id}`, { method: 'DELETE' }),
 
     // Solicitudes Administrativas
@@ -71,6 +73,8 @@ const API = (() => {
     getAdminRequestsStats: () => request('/admin-requests/stats'),
     createAdminRequest: (data) => request('/admin-requests', { method: 'POST', body: JSON.stringify(data) }),
     updateAdminRequest: (id, data) => request(`/admin-requests/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    updateAdminRequestStatus: (id, estado, notaGestion = '') =>
+      request(`/admin-requests/${id}/status`, { method: 'PATCH', body: JSON.stringify({ estado, notaGestion }) }),
     deleteAdminRequest: (id) => request(`/admin-requests/${id}`, { method: 'DELETE' }),
 
     // Viáticos
@@ -78,6 +82,8 @@ const API = (() => {
     getViaticosStats: () => request('/viaticos/stats'),
     createViatico: (data) => request('/viaticos', { method: 'POST', body: JSON.stringify(data) }),
     updateViatico: (id, data) => request(`/viaticos/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    updateViaticoStatus: (id, estado, observaciones = '') =>
+      request(`/viaticos/${id}/status`, { method: 'PATCH', body: JSON.stringify({ estado, observaciones }) }),
     deleteViatico: (id) => request(`/viaticos/${id}`, { method: 'DELETE' }),
   };
 })();
