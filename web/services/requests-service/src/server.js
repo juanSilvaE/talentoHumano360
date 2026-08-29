@@ -1,0 +1,9 @@
+const express = require('express');
+const cors    = require('cors');
+const routes  = require('./routes/requests');
+const app     = express();
+const PORT    = process.env.PORT || 3003;
+app.use(cors()); app.use(express.json());
+app.use('/api/requests', routes);
+app.get('/health', (_, res) => res.json({ status: 'ok', service: 'requests-service' }));
+app.listen(PORT, () => console.log(`[requests-service] Listening on port ${PORT}`));

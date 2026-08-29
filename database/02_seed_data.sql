@@ -1,0 +1,248 @@
+-- Seed data for Talento 360 - Gobernación de Boyacá
+
+-- 3. Insertar el usuario administrador
+--    La contraseña se guarda hasheada con bcrypt (nunca en texto plano).
+INSERT INTO public.usuarios (username, password, nombre, rol, estado)
+VALUES (
+           'admin@boyaca.gov.co',
+           'admin123',
+           'Administrador',
+           'Administrador',
+           'ACTIVO'
+       )
+    ON CONFLICT (username) DO NOTHING;
+
+-- ============================================================
+-- DEPENDENCIAS
+-- ============================================================
+INSERT INTO dependencias (id_dependencia, dependencia, responsable, cargo_directivo, correo_responsable, extension_telefonica, funciones) VALUES
+('DEP001', 'DESPACHO DEL GOBERNADOR', 'ROJAS HERRERA ANDRÉS FELIPE', 'GOBERNADOR / JEFE DE DESPACHO', 'despacho.gobernador@boyaca.gov.co', '2214', 'DIRECCIÓN ESTRATÉGICA INSTITUCIONAL Y COORDINACIÓN DEL GABINETE DEPARTAMENTAL.'),
+('DEP002', 'SECRETARÍA DE PLANEACIÓN', 'MÉNDEZ ROJAS LAURA CAMILA', 'SECRETARIO DE PLANEACIÓN', 'planeacion@boyaca.gov.co', '2213', 'PLANEACIÓN TERRITORIAL, SEGUIMIENTO A PROYECTOS Y APOYO A LA TOMA DE DECISIONES.'),
+('DEP003', 'SECRETARÍA DE HACIENDA', 'AGUILAR MORENO CARLOS EDUARDO', 'SECRETARIO DE HACIENDA', 'hacienda@boyaca.gov.co', '2125', 'GESTIÓN PRESUPUESTAL, FINANCIERA Y TRIBUTARIA DEL DEPARTAMENTO.'),
+('DEP004', 'SECRETARÍA DE EDUCACIÓN', 'CASTRO DÍAZ MIGUEL ÁNGEL', 'SECRETARIO DE EDUCACIÓN', 'educacion@boyaca.gov.co', '3101', 'GESTIÓN DEL SISTEMA EDUCATIVO DEPARTAMENTAL Y TALENTO HUMANO DOCENTE.'),
+('DEP005', 'SECRETARÍA DE SALUD', 'GÓMEZ RUIZ PAULA ANDREA', 'SECRETARIO DE SALUD', 'salud@boyaca.gov.co', '4115', 'SALUD PÚBLICA, RED DE SERVICIOS Y PROGRAMAS DE PREVENCIÓN.'),
+('DEP006', 'SECRETARÍA DE INFRAESTRUCTURA PÚBLICA', 'CÁRDENAS LÓPEZ JORGE IVÁN', 'SECRETARIO DE INFRAESTRUCTURA', 'infraestructura@boyaca.gov.co', '2254', 'INFRAESTRUCTURA VIAL, OBRAS PÚBLICAS Y SEGUIMIENTO TÉCNICO.'),
+('DEP007', 'SECRETARÍA GENERAL', 'MORALES NIÑO JUAN PABLO', 'SECRETARIO GENERAL', 'secretaria.general@boyaca.gov.co', '2119', 'SOPORTE ADMINISTRATIVO TRANSVERSAL, GESTIÓN DOCUMENTAL Y SERVICIOS INTERNOS.'),
+('DEP008', 'SECRETARÍA DE GOBIERNO Y ACCIÓN COMUNAL', 'TORRES RIVERA DIANA MARCELA', 'SECRETARIO DE GOBIERNO', 'gobierno@boyaca.gov.co', '2155', 'GOBERNABILIDAD, ACCIÓN COMUNAL Y COORDINACIÓN CON MUNICIPIOS.'),
+('DEP009', 'SECRETARÍA DE CULTURA Y PATRIMONIO', 'PARDO RUIZ VALENTINA', 'SECRETARIO DE CULTURA', 'cultura@boyaca.gov.co', '2212', 'PROMOCIÓN CULTURAL, PATRIMONIO Y PROCESOS ARTÍSTICOS REGIONALES.'),
+('DEP010', 'DIRECCIÓN DE TALENTO HUMANO', 'TORRES RIVERA CARLOS ANDRÉS', 'DIRECTOR DE TALENTO HUMANO', 'talento.humano@boyaca.gov.co', '2275', 'GESTIÓN DEL TALENTO HUMANO, ADMINISTRACIÓN DE PERSONAL Y BIENESTAR LABORAL.'),
+('DEP011', 'OFICINA JURÍDICA', 'PRIETO GARCÍA MÓNICA ALEJANDRA', 'JEFE DE OFICINA JURÍDICA', 'juridica@boyaca.gov.co', '2112', 'ASISTENCIA LEGAL, CONCEPTOS JURÍDICOS Y REPRESENTACIÓN JUDICIAL.'),
+('DEP012', 'SECRETARÍA DE DESARROLLO EMPRESARIAL', 'SUÁREZ MEJÍA DANIEL ESTEBAN', 'SECRETARIO DE DESARROLLO EMPRESARIAL', 'desarrolloempresarial@boyaca.gov.co', '2132', 'EMPRENDIMIENTO, COMPETITIVIDAD, PRODUCTIVIDAD E INNOVACIÓN EMPRESARIAL.'),
+('DEP013', 'SECRETARÍA DE AGRICULTURA', 'RODRÍGUEZ NIÑO MARÍA CAMILA', 'SECRETARIO DE AGRICULTURA', 'agricultura@boyaca.gov.co', '2367', 'DESARROLLO AGROPECUARIO, ASISTENCIA TÉCNICA Y ARTICULACIÓN PRODUCTIVA.'),
+('DEP014', 'SECRETARÍA DE AMBIENTE Y DESARROLLO SOSTENIBLE', 'HERRERA LÓPEZ SANTIAGO', 'SECRETARIO DE AMBIENTE', 'ambiente@boyaca.gov.co', '2353', 'GESTIÓN AMBIENTAL, SOSTENIBILIDAD Y COORDINACIÓN CLIMÁTICA.'),
+('DEP015', 'SECRETARÍA DE TURISMO', 'RINCÓN DUARTE CAROLINA', 'SECRETARIO DE TURISMO', 'turismo@boyaca.gov.co', '2203', 'PROMOCIÓN TURÍSTICA, RUTAS Y FORTALECIMIENTO DE DESTINOS.');
+
+-- ============================================================
+-- CARGOS
+-- ============================================================
+INSERT INTO cargos (id_cargo, tipo_cargo, cargo, codigo, grado, asignacion_sueldo, nivel) VALUES
+('CAR001', 'PLANTA', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', 'PROFESIONAL'),
+('CAR002', 'PLANTA', 'PROFESIONAL ESPECIALIZADO', 'PE-001', 'G2', '$5.200.000', 'PROFESIONAL'),
+('CAR003', 'PLANTA', 'TÉCNICO ADMINISTRATIVO', 'TA-001', 'G1', '$2.800.000', 'TÉCNICO'),
+('CAR004', 'PLANTA', 'AUXILIAR ADMINISTRATIVO', 'AA-001', 'G1', '$1.800.000', 'AUXILIAR'),
+('CAR005', 'PLANTA', 'ASESOR JURÍDICO', 'AJ-001', 'G3', '$6.500.000', 'ASESOR'),
+('CAR006', 'PLANTA', 'COORDINADOR DE ÁREA', 'CA-001', 'G3', '$5.800.000', 'DIRECTIVO'),
+('CAR007', 'PLANTA', 'SECRETARIO DE DESPACHO', 'SD-001', 'G4', '$7.200.000', 'DIRECTIVO'),
+('CAR008', 'PLANTA', 'CONTRATISTA DE APOYO', 'CA-002', 'G1', '$2.200.000', 'CONTRATISTA'),
+('CAR009', 'PLANTA', 'ANALISTA DE SISTEMAS', 'AS-001', 'G2', '$4.100.000', 'PROFESIONAL'),
+('CAR010', 'PLANTA', 'INSPECTOR ADMINISTRATIVO', 'IA-001', 'G2', '$3.900.000', 'PROFESIONAL');
+
+-- ============================================================
+-- ESTADOS (situaciones laborales)
+-- ============================================================
+INSERT INTO estados (id_estado, clasificacion_empleo, situacion, funciones_pagadas, novedades, opec) VALUES
+('EST001', 'EMPLEADO PÚBLICO', 'ACTIVO', 'TOTAL', 'Sin novedades', 'SI'),
+('EST002', 'EMPLEADO PÚBLICO', 'ENCARGO', 'TOTAL', 'Encargo temporal', 'SI'),
+('EST003', 'EMPLEADO PÚBLICO', 'RETIRADO', 'NINGUNA', 'Retiro voluntario', 'NO'),
+('EST004', 'EMPLEADO PÚBLICO', 'PROVISIONAL', 'TOTAL', 'Nombramiento provisional', 'SI'),
+('EST005', 'EMPLEADO PÚBLICO', 'VACANTE DEFINITIVA', 'NINGUNA', 'Cargo vacante', 'NO');
+
+-- ============================================================
+-- PERSONAS
+-- ============================================================
+INSERT INTO personas (id_persona, cedula, primer_apellido, segundo_apellido, nombres, nombre_completo, expedida, tipo_sangre, fecha_nacimiento, edad, sexo) VALUES
+('PER0001', '1000000001', 'MARTÍNEZ', 'PÉREZ', 'LAURA', 'MARTÍNEZ PÉREZ LAURA', 'TUNJA', 'O+', '15/03/1988', '38', 'F'),
+('PER0002', '1000000002', 'TORRES', 'RIVERA', 'CARLOS ANDRÉS', 'TORRES RIVERA CARLOS ANDRÉS', 'TUNJA', 'A+', '22/07/1985', '40', 'M'),
+('PER0003', '1000000003', 'ROJAS', 'GÓMEZ', 'DIANA CAROLINA', 'ROJAS GÓMEZ DIANA CAROLINA', 'TUNJA', 'B+', '10/11/1991', '34', 'F'),
+('PER0004', '1000000004', 'MORENO', 'SUÁREZ', 'JUAN SEBASTIÁN', 'MORENO SUÁREZ JUAN SEBASTIÁN', 'TUNJA', 'O-', '05/04/1983', '43', 'M'),
+('PER0005', '1000000005', 'GÓMEZ', 'RUIZ', 'PAULA ANDREA', 'GÓMEZ RUIZ PAULA ANDREA', 'TUNJA', 'A-', '18/09/1992', '33', 'F'),
+('PER0006', '1000000006', 'CASTRO', 'DÍAZ', 'MIGUEL ÁNGEL', 'CASTRO DÍAZ MIGUEL ÁNGEL', 'TUNJA', 'O+', '30/01/1980', '46', 'M'),
+('PER0007', '1000000007', 'SILVA', 'PARRA', 'NATALIA FERNANDA', 'SILVA PARRA NATALIA FERNANDA', 'TUNJA', 'AB+', '12/06/1990', '36', 'F'),
+('PER0008', '1000000008', 'VARGAS', 'PEÑA', 'ANDRÉS FELIPE', 'VARGAS PEÑA ANDRÉS FELIPE', 'TUNJA', 'O+', '25/02/1987', '39', 'M'),
+('PER0009', '1000000009', 'RODRÍGUEZ', 'NIÑO', 'MARÍA CAMILA', 'RODRÍGUEZ NIÑO MARÍA CAMILA', 'TUNJA', 'A+', '08/08/1993', '32', 'F'),
+('PER0010', '1000000010', 'HERRERA', 'LÓPEZ', 'SANTIAGO', 'HERRERA LÓPEZ SANTIAGO', 'TUNJA', 'B-', '14/12/1984', '41', 'M'),
+('PER0011', '1000000011', 'PARDO', 'RUIZ', 'VALENTINA', 'PARDO RUIZ VALENTINA', 'TUNJA', 'O+', '03/05/1995', '31', 'F'),
+('PER0012', '1000000012', 'CÁRDENAS', 'LÓPEZ', 'JORGE IVÁN', 'CÁRDENAS LÓPEZ JORGE IVÁN', 'TUNJA', 'O+', '19/10/1982', '43', 'M'),
+('PER0013', '1000000013', 'PRIETO', 'GARCÍA', 'MÓNICA ALEJANDRA', 'PRIETO GARCÍA MÓNICA ALEJANDRA', 'TUNJA', 'A+', '27/07/1989', '36', 'F'),
+('PER0014', '1000000014', 'SUÁREZ', 'MEJÍA', 'DANIEL ESTEBAN', 'SUÁREZ MEJÍA DANIEL ESTEBAN', 'TUNJA', 'AB-', '11/03/1986', '40', 'M'),
+('PER0015', '1000000015', 'NIÑO', 'CORTÉS', 'CLAUDIA PATRICIA', 'NIÑO CORTÉS CLAUDIA PATRICIA', 'TUNJA', 'O-', '22/11/1991', '34', 'F'),
+('PER0016', '1000000016', 'RINCÓN', 'DUARTE', 'CAROLINA', 'RINCÓN DUARTE CAROLINA', 'TUNJA', 'B+', '09/06/1988', '38', 'F'),
+('PER0017', '1000000017', 'MORENO', 'CASTRO', 'FELIPE ANDRÉS', 'MORENO CASTRO FELIPE ANDRÉS', 'TUNJA', 'A+', '17/01/1984', '42', 'M'),
+('PER0018', '1000000018', 'TORRES', 'CÁRDENAS', 'ISABELLA', 'TORRES CÁRDENAS ISABELLA', 'TUNJA', 'O+', '04/09/1994', '31', 'F'),
+('PER0019', '1000000019', 'PÁEZ', 'SOTO', 'CAMILO ANDRÉS', 'PÁEZ SOTO CAMILO ANDRÉS', 'TUNJA', 'A-', '28/02/1987', '39', 'M'),
+('PER0020', '1000000020', 'BERNAL', 'REYES', 'LUCÍA FERNANDA', 'BERNAL REYES LUCÍA FERNANDA', 'TUNJA', 'AB+', '16/10/1993', '32', 'F'),
+('PER0021', '1000000021', 'AGUILAR', 'MORENO', 'CARLOS EDUARDO', 'AGUILAR MORENO CARLOS EDUARDO', 'TUNJA', 'O+', '05/05/1981', '45', 'M'),
+('PER0022', '1000000022', 'MORALES', 'NIÑO', 'JUAN PABLO', 'MORALES NIÑO JUAN PABLO', 'TUNJA', 'B+', '20/12/1985', '40', 'M'),
+('PER0023', '1000000023', 'ROJAS', 'HERRERA', 'ANDRÉS FELIPE', 'ROJAS HERRERA ANDRÉS FELIPE', 'TUNJA', 'O+', '13/04/1982', '44', 'M'),
+('PER0024', '1000000024', 'MÉNDEZ', 'ROJAS', 'LAURA CAMILA', 'MÉNDEZ ROJAS LAURA CAMILA', 'TUNJA', 'A+', '07/08/1990', '35', 'F'),
+('PER0025', '1000000025', 'TORRES', 'RIVERA', 'DIANA MARCELA', 'TORRES RIVERA DIANA MARCELA', 'TUNJA', 'O-', '21/03/1987', '39', 'F'),
+('PER0026', '1000000026', 'ROBAYO', 'SÁNCHEZ', 'SANDRA MILENA', 'ROBAYO SÁNCHEZ SANDRA MILENA', 'TUNJA', 'AB-', '14/07/1989', '36', 'F'),
+('PER0027', '1000000027', 'GARCÍA', 'RAMOS', 'FERNANDO JOSÉ', 'GARCÍA RAMOS FERNANDO JOSÉ', 'TUNJA', 'O+', '02/11/1986', '39', 'M'),
+('PER0028', '1000000028', 'LÓPEZ', 'PINEDA', 'ANA MARÍA', 'LÓPEZ PINEDA ANA MARÍA', 'TUNJA', 'A+', '19/05/1992', '34', 'F'),
+('PER0029', '1000000029', 'RAMÍREZ', 'QUINTERO', 'PEDRO ANTONIO', 'RAMÍREZ QUINTERO PEDRO ANTONIO', 'TUNJA', 'B+', '08/09/1983', '42', 'M'),
+('PER0030', '1000000030', 'DUARTE', 'CIFUENTES', 'LILIANA PATRICIA', 'DUARTE CIFUENTES LILIANA PATRICIA', 'TUNJA', 'O+', '25/12/1991', '34', 'F');
+
+-- ============================================================
+-- CONTACTOS
+-- ============================================================
+INSERT INTO contactos (id_contacto, direccion, ciudad, telefono_fijo, celular, correo_personal, correo_institucional) VALUES
+('CON001', 'Cra 9 # 15-30', 'TUNJA, BOYACA', '7421510', '3102000001', 'laura.martinez@email.com', 'laura.martinez@boyaca.gov.co'),
+('CON002', 'Calle 12 # 5-40', 'TUNJA, BOYACA', '7421511', '3102000002', 'carlos.torres@email.com', 'carlos.torres@boyaca.gov.co'),
+('CON003', 'Av Norte # 20-15', 'TUNJA, BOYACA', '7421512', '3102000003', 'diana.rojas@email.com', 'diana.rojas@boyaca.gov.co'),
+('CON004', 'Cra 5 # 8-22', 'TUNJA, BOYACA', '7421513', '3102000004', 'juan.moreno@email.com', 'juan.moreno@boyaca.gov.co'),
+('CON005', 'Calle 20 # 3-18', 'TUNJA, BOYACA', '7421514', '3102000005', 'paula.gomez@email.com', 'paula.gomez@boyaca.gov.co'),
+('CON006', 'Av Circunvalar # 10-05', 'TUNJA, BOYACA', '7421515', '3102000006', 'miguel.castro@email.com', 'miguel.castro@boyaca.gov.co'),
+('CON007', 'Cra 11 # 4-60', 'TUNJA, BOYACA', '7421516', '3102000007', 'natalia.silva@email.com', 'natalia.silva@boyaca.gov.co'),
+('CON008', 'Calle 7 # 12-30', 'TUNJA, BOYACA', '7421517', '3102000008', 'andres.vargas@email.com', 'andres.vargas@boyaca.gov.co'),
+('CON009', 'Cra 14 # 6-12', 'TUNJA, BOYACA', '7421518', '3102000009', 'maria.rodriguez@email.com', 'maria.rodriguez@boyaca.gov.co'),
+('CON010', 'Av América # 25-40', 'TUNJA, BOYACA', '7421519', '3102000010', 'santiago.herrera@email.com', 'santiago.herrera@boyaca.gov.co'),
+('CON011', 'Calle 10 # 8-33', 'TUNJA, BOYACA', '7421520', '3102000011', 'valentina.pardo@email.com', 'valentina.pardo@boyaca.gov.co'),
+('CON012', 'Cra 6 # 15-25', 'TUNJA, BOYACA', '7421521', '3102000012', 'jorge.cardenas@email.com', 'jorge.cardenas@boyaca.gov.co'),
+('CON013', 'Calle 3 # 10-40', 'TUNJA, BOYACA', '7421522', '3102000013', 'monica.prieto@email.com', 'monica.prieto@boyaca.gov.co'),
+('CON014', 'Av Oriental # 18-20', 'TUNJA, BOYACA', '7421523', '3102000014', 'daniel.suarez@email.com', 'daniel.suarez@boyaca.gov.co'),
+('CON015', 'Cra 13 # 5-55', 'TUNJA, BOYACA', '7421524', '3102000015', 'claudia.nino@email.com', 'claudia.nino@boyaca.gov.co'),
+('CON016', 'Calle 15 # 7-28', 'TUNJA, BOYACA', '7421525', '3102000016', 'carolina.rincon@email.com', 'carolina.rincon@boyaca.gov.co'),
+('CON017', 'Cra 8 # 12-35', 'TUNJA, BOYACA', '7421526', '3102000017', 'felipe.moreno@email.com', 'felipe.moreno@boyaca.gov.co'),
+('CON018', 'Av Norte # 30-12', 'TUNJA, BOYACA', '7421527', '3102000018', 'isabella.torres@email.com', 'isabella.torres@boyaca.gov.co'),
+('CON019', 'Calle 22 # 4-48', 'TUNJA, BOYACA', '7421528', '3102000019', 'camilo.paez@email.com', 'camilo.paez@boyaca.gov.co'),
+('CON020', 'Cra 3 # 9-60', 'TUNJA, BOYACA', '7421529', '3102000020', 'lucia.bernal@email.com', 'lucia.bernal@boyaca.gov.co'),
+('CON021', 'Calle 18 # 6-22', 'TUNJA, BOYACA', '7421530', '3102000021', 'carlos.aguilar@email.com', 'carlos.aguilar@boyaca.gov.co'),
+('CON022', 'Av Colón # 14-30', 'TUNJA, BOYACA', '7421531', '3102000022', 'juan.morales@email.com', 'juan.morales@boyaca.gov.co'),
+('CON023', 'Cra 7 # 11-45', 'TUNJA, BOYACA', '7421532', '3102000023', 'andres.rojas@email.com', 'andres.rojas@boyaca.gov.co'),
+('CON024', 'Calle 5 # 16-18', 'TUNJA, BOYACA', '7421533', '3102000024', 'laura.mendez@email.com', 'laura.mendez@boyaca.gov.co'),
+('CON025', 'Cra 10 # 3-50', 'TUNJA, BOYACA', '7421534', '3102000025', 'diana.torres@email.com', 'diana.torres@boyaca.gov.co'),
+('CON026', 'Av Las Américas # 8-15', 'TUNJA, BOYACA', '7421535', '3102000026', 'sandra.robayo@email.com', 'sandra.robayo@boyaca.gov.co'),
+('CON027', 'Calle 25 # 5-30', 'TUNJA, BOYACA', '7421536', '3102000027', 'fernando.garcia@email.com', 'fernando.garcia@boyaca.gov.co'),
+('CON028', 'Cra 4 # 10-12', 'TUNJA, BOYACA', '7421537', '3102000028', 'ana.lopez@email.com', 'ana.lopez@boyaca.gov.co'),
+('CON029', 'Av Universitaria # 20-08', 'TUNJA, BOYACA', '7421538', '3102000029', 'pedro.ramirez@email.com', 'pedro.ramirez@boyaca.gov.co'),
+('CON030', 'Calle 8 # 13-42', 'TUNJA, BOYACA', '7421539', '3102000030', 'liliana.duarte@email.com', 'liliana.duarte@boyaca.gov.co');
+
+-- ============================================================
+-- EDUCACION
+-- ============================================================
+INSERT INTO educacion (id_educacion, estudios, matricula_profesional, institucion_estudios, postgrado, institucion_postgrado, diplomado_cap_sena, correo_institucional) VALUES
+('EDU001', 'ADMINISTRACIÓN DE EMPRESAS', 'MP-100001', 'UNIVERSIDAD PEDAGÓGICA Y TECNOLÓGICA DE COLOMBIA', 'ESPECIALIZACIÓN EN GERENCIA PÚBLICA', 'UNIVERSIDAD NACIONAL', 'SI', 'laura.martinez@boyaca.gov.co'),
+('EDU002', 'INGENIERÍA DE SISTEMAS', 'MP-100002', 'UNIVERSIDAD DE BOYACÁ', 'MAESTRÍA EN GESTIÓN DE TI', 'UNIVERSIDAD DE LOS ANDES', 'SI', 'carlos.torres@boyaca.gov.co'),
+('EDU003', 'CONTADURÍA PÚBLICA', 'MP-100003', 'UNIVERSIDAD SANTO TOMÁS', 'ESPECIALIZACIÓN EN REVISORÍA FISCAL', 'UNIVERSIDAD JAVERIANA', 'NO', 'diana.rojas@boyaca.gov.co'),
+('EDU004', 'DERECHO', 'MP-100004', 'UNIVERSIDAD EXTERNADO DE COLOMBIA', 'ESPECIALIZACIÓN EN DERECHO ADMINISTRATIVO', 'UNIVERSIDAD DEL ROSARIO', 'SI', 'juan.moreno@boyaca.gov.co'),
+('EDU005', 'TRABAJO SOCIAL', 'MP-100005', 'UNIVERSIDAD NACIONAL DE COLOMBIA', 'MAESTRÍA EN INTERVENCIÓN SOCIAL', 'UNIVERSIDAD DE ANTIOQUIA', 'NO', 'paula.gomez@boyaca.gov.co'),
+('EDU006', 'MEDICINA', 'MP-100006', 'UNIVERSIDAD NACIONAL DE COLOMBIA', 'ESPECIALIZACIÓN EN SALUD PÚBLICA', 'UNIVERSIDAD DE LOS ANDES', 'SI', 'miguel.castro@boyaca.gov.co'),
+('EDU007', 'PSICOLOGÍA', 'MP-100007', 'UNIVERSIDAD DE BOYACÁ', 'MAESTRÍA EN GESTIÓN HUMANA', 'UNIVERSIDAD JAVERIANA', 'SI', 'natalia.silva@boyaca.gov.co'),
+('EDU008', 'INGENIERÍA CIVIL', 'MP-100008', 'UNIVERSIDAD PEDAGÓGICA Y TECNOLÓGICA DE COLOMBIA', 'ESPECIALIZACIÓN EN INFRAESTRUCTURA VIAL', 'UNIVERSIDAD NACIONAL', 'NO', 'andres.vargas@boyaca.gov.co'),
+('EDU009', 'ADMINISTRACIÓN PÚBLICA', 'MP-100009', 'ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA', 'MAESTRÍA EN GOBIERNO', 'UNIVERSIDAD EXTERNADO', 'SI', 'maria.rodriguez@boyaca.gov.co'),
+('EDU010', 'ECONOMÍA', 'MP-100010', 'UNIVERSIDAD DE LOS ANDES', 'ESPECIALIZACIÓN EN FINANZAS PÚBLICAS', 'UNIVERSIDAD NACIONAL', 'SI', 'santiago.herrera@boyaca.gov.co'),
+('EDU011', 'ARQUITECTURA', 'MP-100011', 'UNIVERSIDAD DE BOYACÁ', 'ESPECIALIZACIÓN EN PLANEACIÓN TERRITORIAL', 'UNIVERSIDAD PEDAGÓGICA Y TECNOLÓGICA', 'NO', 'valentina.pardo@boyaca.gov.co'),
+('EDU012', 'INGENIERÍA INDUSTRIAL', 'MP-100012', 'UNIVERSIDAD PEDAGÓGICA Y TECNOLÓGICA DE COLOMBIA', 'MAESTRÍA EN ADMINISTRACIÓN', 'UNIVERSIDAD DE LOS ANDES', 'SI', 'jorge.cardenas@boyaca.gov.co'),
+('EDU013', 'DERECHO', 'MP-100013', 'UNIVERSIDAD DEL ROSARIO', 'ESPECIALIZACIÓN EN CONTRATACIÓN ESTATAL', 'UNIVERSIDAD EXTERNADO', 'SI', 'monica.prieto@boyaca.gov.co'),
+('EDU014', 'INGENIERÍA DE ALIMENTOS', 'MP-100014', 'UNIVERSIDAD NACIONAL DE COLOMBIA', 'MAESTRÍA EN CIENCIA DE ALIMENTOS', 'UNIVERSIDAD DE ANTIOQUIA', 'NO', 'daniel.suarez@boyaca.gov.co'),
+('EDU015', 'ADMINISTRACIÓN DE EMPRESAS', 'MP-100015', 'UNIVERSIDAD DE BOYACÁ', 'ESPECIALIZACIÓN EN GERENCIA DE PROYECTOS', 'UNIVERSIDAD JAVERIANA', 'SI', 'claudia.nino@boyaca.gov.co'),
+('EDU016', 'ADMINISTRACIÓN TURÍSTICA', 'MP-100016', 'UNIVERSIDAD EXTERNADO DE COLOMBIA', 'MAESTRÍA EN GESTIÓN DE DESTINOS', 'UNIVERSIDAD DE LOS ANDES', 'NO', 'carolina.rincon@boyaca.gov.co'),
+('EDU017', 'INGENIERÍA AMBIENTAL', 'MP-100017', 'UNIVERSIDAD PEDAGÓGICA Y TECNOLÓGICA DE COLOMBIA', 'ESPECIALIZACIÓN EN GESTIÓN AMBIENTAL', 'UNIVERSIDAD NACIONAL', 'SI', 'felipe.moreno@boyaca.gov.co'),
+('EDU018', 'COMUNICACIÓN SOCIAL', 'MP-100018', 'UNIVERSIDAD JAVERIANA', 'MAESTRÍA EN COMUNICACIÓN DIGITAL', 'UNIVERSIDAD DE LOS ANDES', 'SI', 'isabella.torres@boyaca.gov.co'),
+('EDU019', 'INGENIERÍA AGRONÓMICA', 'MP-100019', 'UNIVERSIDAD PEDAGÓGICA Y TECNOLÓGICA DE COLOMBIA', 'ESPECIALIZACIÓN EN DESARROLLO RURAL', 'UNIVERSIDAD NACIONAL', 'NO', 'camilo.paez@boyaca.gov.co'),
+('EDU020', 'TRABAJO SOCIAL', 'MP-100020', 'UNIVERSIDAD NACIONAL DE COLOMBIA', 'MAESTRÍA EN DESARROLLO SOCIAL', 'UNIVERSIDAD DE ANTIOQUIA', 'SI', 'lucia.bernal@boyaca.gov.co'),
+('EDU021', 'CONTADURÍA PÚBLICA', 'MP-100021', 'UNIVERSIDAD SANTO TOMÁS', 'MAESTRÍA EN CONTABILIDAD', 'UNIVERSIDAD NACIONAL', 'SI', 'carlos.aguilar@boyaca.gov.co'),
+('EDU022', 'DERECHO', 'MP-100022', 'UNIVERSIDAD EXTERNADO DE COLOMBIA', 'ESPECIALIZACIÓN EN DERECHO PÚBLICO', 'UNIVERSIDAD DEL ROSARIO', 'SI', 'juan.morales@boyaca.gov.co'),
+('EDU023', 'INGENIERÍA CIVIL', 'MP-100023', 'UNIVERSIDAD PEDAGÓGICA Y TECNOLÓGICA DE COLOMBIA', 'MAESTRÍA EN INFRAESTRUCTURA', 'UNIVERSIDAD NACIONAL', 'NO', 'andres.rojas@boyaca.gov.co'),
+('EDU024', 'ECONOMÍA', 'MP-100024', 'UNIVERSIDAD DE LOS ANDES', 'ESPECIALIZACIÓN EN PLANEACIÓN', 'UNIVERSIDAD NACIONAL', 'SI', 'laura.mendez@boyaca.gov.co'),
+('EDU025', 'ADMINISTRACIÓN DE EMPRESAS', 'MP-100025', 'UNIVERSIDAD DE BOYACÁ', 'ESPECIALIZACIÓN EN GOBIERNO', 'ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA', 'SI', 'diana.torres@boyaca.gov.co'),
+('EDU026', 'INGENIERÍA DE SISTEMAS', 'MP-100026', 'UNIVERSIDAD DE BOYACÁ', 'MAESTRÍA EN GOBIERNO DIGITAL', 'UNIVERSIDAD DE LOS ANDES', 'SI', 'sandra.robayo@boyaca.gov.co'),
+('EDU027', 'ADMINISTRACIÓN PÚBLICA', 'MP-100027', 'ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA', 'ESPECIALIZACIÓN EN GESTIÓN PÚBLICA', 'UNIVERSIDAD NACIONAL', 'SI', 'fernando.garcia@boyaca.gov.co'),
+('EDU028', 'DERECHO', 'MP-100028', 'UNIVERSIDAD DEL ROSARIO', 'MAESTRÍA EN DERECHO ADMINISTRATIVO', 'UNIVERSIDAD EXTERNADO', 'SI', 'ana.lopez@boyaca.gov.co'),
+('EDU029', 'INGENIERÍA AGRONÓMICA', 'MP-100029', 'UNIVERSIDAD PEDAGÓGICA Y TECNOLÓGICA DE COLOMBIA', 'MAESTRÍA EN DESARROLLO AGRÍCOLA', 'UNIVERSIDAD NACIONAL', 'NO', 'pedro.ramirez@boyaca.gov.co'),
+('EDU030', 'CONTADURÍA PÚBLICA', 'MP-100030', 'UNIVERSIDAD SANTO TOMÁS', 'ESPECIALIZACIÓN EN FINANZAS', 'UNIVERSIDAD JAVERIANA', 'SI', 'liliana.duarte@boyaca.gov.co');
+
+-- ============================================================
+-- REL_PRINCIPAL (vinculación de personas a dependencias y cargos)
+-- ============================================================
+INSERT INTO rel_principal (id_registro, id_persona, id_cargo_base, id_cargo_actual, id_dependencia, id_educacion, id_contacto, id_estado, otro_tiempo_gobernacion, fecha_ingreso, tiempo_servicio, fecha_encargo) VALUES
+('REL001', 'PER0001', 'CAR001', 'CAR001', 'DEP001', 'EDU001', 'CON001', 'EST001', 'NO REGISTRADO', '15/06/2015', '10 ANOS 0 MESES', 'NO REGISTRADO'),
+('REL002', 'PER0002', 'CAR009', 'CAR006', 'DEP010', 'EDU002', 'CON002', 'EST001', 'NO REGISTRADO', '03/02/2018', '8 ANOS 4 MESES', 'NO REGISTRADO'),
+('REL003', 'PER0003', 'CAR003', 'CAR003', 'DEP003', 'EDU003', 'CON003', 'EST001', 'NO REGISTRADO', '20/11/2019', '6 ANOS 7 MESES', 'NO REGISTRADO'),
+('REL004', 'PER0004', 'CAR005', 'CAR005', 'DEP011', 'EDU004', 'CON004', 'EST001', 'NO REGISTRADO', '10/01/2014', '12 ANOS 5 MESES', 'NO REGISTRADO'),
+('REL005', 'PER0005', 'CAR001', 'CAR001', 'DEP005', 'EDU005', 'CON005', 'EST001', 'NO REGISTRADO', '25/08/2020', '5 ANOS 10 MESES', 'NO REGISTRADO'),
+('REL006', 'PER0006', 'CAR006', 'CAR006', 'DEP004', 'EDU006', 'CON006', 'EST001', 'NO REGISTRADO', '12/04/2012', '14 ANOS 2 MESES', 'NO REGISTRADO'),
+('REL007', 'PER0007', 'CAR001', 'CAR001', 'DEP010', 'EDU007', 'CON007', 'EST001', 'NO REGISTRADO', '05/09/2017', '8 ANOS 9 MESES', 'NO REGISTRADO'),
+('REL008', 'PER0008', 'CAR002', 'CAR002', 'DEP006', 'EDU008', 'CON008', 'EST001', 'NO REGISTRADO', '18/03/2016', '10 ANOS 3 MESES', 'NO REGISTRADO'),
+('REL009', 'PER0009', 'CAR001', 'CAR001', 'DEP007', 'EDU009', 'CON009', 'EST001', 'NO REGISTRADO', '30/06/2021', '5 ANOS 0 MESES', 'NO REGISTRADO'),
+('REL010', 'PER0010', 'CAR002', 'CAR002', 'DEP003', 'EDU010', 'CON010', 'EST001', 'NO REGISTRADO', '08/02/2013', '13 ANOS 4 MESES', 'NO REGISTRADO'),
+('REL011', 'PER0011', 'CAR001', 'CAR001', 'DEP009', 'EDU011', 'CON011', 'EST004', 'NO REGISTRADO', '22/11/2023', '2 ANOS 7 MESES', 'NO REGISTRADO'),
+('REL012', 'PER0012', 'CAR002', 'CAR006', 'DEP006', 'EDU012', 'CON012', 'EST001', 'NO REGISTRADO', '14/05/2011', '15 ANOS 1 MES', 'NO REGISTRADO'),
+('REL013', 'PER0013', 'CAR005', 'CAR005', 'DEP011', 'EDU013', 'CON013', 'EST001', 'NO REGISTRADO', '07/10/2016', '9 ANOS 8 MESES', 'NO REGISTRADO'),
+('REL014', 'PER0014', 'CAR003', 'CAR003', 'DEP012', 'EDU014', 'CON014', 'EST001', 'NO REGISTRADO', '19/04/2019', '7 ANOS 2 MESES', 'NO REGISTRADO'),
+('REL015', 'PER0015', 'CAR001', 'CAR001', 'DEP015', 'EDU015', 'CON015', 'EST001', 'NO REGISTRADO', '02/12/2020', '5 ANOS 6 MESES', 'NO REGISTRADO'),
+('REL016', 'PER0016', 'CAR003', 'CAR003', 'DEP015', 'EDU016', 'CON016', 'EST004', 'NO REGISTRADO', '11/07/2024', '1 ANOS 11 MESES', 'NO REGISTRADO'),
+('REL017', 'PER0017', 'CAR002', 'CAR002', 'DEP014', 'EDU017', 'CON017', 'EST001', 'NO REGISTRADO', '28/01/2015', '11 ANOS 5 MESES', 'NO REGISTRADO'),
+('REL018', 'PER0018', 'CAR001', 'CAR001', 'DEP009', 'EDU018', 'CON018', 'EST001', 'NO REGISTRADO', '16/08/2022', '3 ANOS 10 MESES', 'NO REGISTRADO'),
+('REL019', 'PER0019', 'CAR002', 'CAR002', 'DEP013', 'EDU019', 'CON019', 'EST002', 'NO REGISTRADO', '05/05/2017', '9 ANOS 1 MES', '01/03/2024'),
+('REL020', 'PER0020', 'CAR001', 'CAR001', 'DEP008', 'EDU020', 'CON020', 'EST001', 'NO REGISTRADO', '23/09/2021', '4 ANOS 9 MESES', 'NO REGISTRADO'),
+('REL021', 'PER0021', 'CAR002', 'CAR007', 'DEP003', 'EDU021', 'CON021', 'EST001', 'NO REGISTRADO', '10/07/2010', '15 ANOS 11 MESES', 'NO REGISTRADO'),
+('REL022', 'PER0022', 'CAR005', 'CAR007', 'DEP007', 'EDU022', 'CON022', 'EST001', 'NO REGISTRADO', '01/04/2013', '13 ANOS 2 MESES', 'NO REGISTRADO'),
+('REL023', 'PER0023', 'CAR002', 'CAR007', 'DEP001', 'EDU023', 'CON023', 'EST001', 'NO REGISTRADO', '20/02/2011', '15 ANOS 4 MESES', 'NO REGISTRADO'),
+('REL024', 'PER0024', 'CAR002', 'CAR007', 'DEP002', 'EDU024', 'CON024', 'EST001', 'NO REGISTRADO', '15/09/2014', '11 ANOS 9 MESES', 'NO REGISTRADO'),
+('REL025', 'PER0025', 'CAR001', 'CAR006', 'DEP008', 'EDU025', 'CON025', 'EST001', 'NO REGISTRADO', '03/12/2016', '9 ANOS 6 MESES', 'NO REGISTRADO'),
+('REL026', 'PER0026', 'CAR009', 'CAR006', 'DEP010', 'EDU026', 'CON026', 'EST001', 'NO REGISTRADO', '14/04/2019', '7 ANOS 2 MESES', 'NO REGISTRADO'),
+('REL027', 'PER0027', 'CAR003', 'CAR003', 'DEP007', 'EDU027', 'CON027', 'EST001', 'NO REGISTRADO', '21/08/2020', '5 ANOS 10 MESES', 'NO REGISTRADO'),
+('REL028', 'PER0028', 'CAR005', 'CAR005', 'DEP011', 'EDU028', 'CON028', 'EST001', 'NO REGISTRADO', '09/03/2018', '8 ANOS 3 MESES', 'NO REGISTRADO'),
+('REL029', 'PER0029', 'CAR010', 'CAR003', 'DEP013', 'EDU029', 'CON029', 'EST002', 'NO REGISTRADO', '17/06/2023', '3 ANOS 0 MESES', '15/01/2025'),
+('REL030', 'PER0030', 'CAR003', 'CAR003', 'DEP003', 'EDU030', 'CON030', 'EST001', 'NO REGISTRADO', '25/10/2022', '3 ANOS 8 MESES', 'NO REGISTRADO');
+
+-- ============================================================
+-- VACACIONES (solicitudes de vacaciones, incapacidades, permisos, licencias)
+-- ============================================================
+INSERT INTO vacaciones (dependencia, numero, apellidos_nombres, titular_cargo, genero, documento, fecha_ingreso, cargo, codigo, grado, sueldo, gastos_rep, fecha_corte, hoy, dias_totales, anos, meses, periodos, tipo_vinculacion, estado, revision_planta) VALUES
+('DESPACHO DEL GOBERNADOR', 'SOL-APP-2026001', 'MARTÍNEZ PÉREZ LAURA', 'PROFESIONAL UNIVERSITARIO', 'F', '1000000001', '15/06/2015', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', '$0', '15/05/2026', '01/06/2026', '15', '1', '0', 'Periodo 2025-2026', 'Vacaciones', 'Aprobada', 'Creado desde interfaz'),
+('DIRECCIÓN DE TALENTO HUMANO', 'SOL-APP-2026002', 'TORRES RIVERA CARLOS ANDRÉS', 'COORDINADOR DE ÁREA', 'M', '1000000002', '03/02/2018', 'COORDINADOR DE ÁREA', 'CA-001', 'G3', '$5.800.000', '$0', '15/05/2026', '03/06/2026', '10', '0', '0', 'Periodo 2025-2026', 'Vacaciones', 'Aprobada', 'Creado desde interfaz'),
+('SECRETARÍA DE HACIENDA', 'SOL-APP-2026003', 'ROJAS GÓMEZ DIANA CAROLINA', 'TÉCNICO ADMINISTRATIVO', 'F', '1000000003', '20/11/2019', 'TÉCNICO ADMINISTRATIVO', 'TA-001', 'G1', '$2.800.000', '$0', '20/05/2026', '05/06/2026', '8', '0', '0', 'Periodo 2025-2026', 'Vacaciones', 'Pendiente', 'Creado desde interfaz'),
+('OFICINA JURÍDICA', 'SOL-APP-2026004', 'MORENO SUÁREZ JUAN SEBASTIÁN', 'ASESOR JURÍDICO', 'M', '1000000004', '10/01/2014', 'ASESOR JURÍDICO', 'AJ-001', 'G3', '$6.500.000', '$0', '10/05/2026', '02/06/2026', '12', '1', '0', 'Periodo 2025-2026', 'Vacaciones', 'Finalizada', 'Creado desde interfaz'),
+('SECRETARÍA DE SALUD', 'SOL-APP-2026005', 'GÓMEZ RUIZ PAULA ANDREA', 'PROFESIONAL UNIVERSITARIO', 'F', '1000000005', '25/08/2020', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', '$0', '25/05/2026', '06/06/2026', '7', '0', '0', 'Periodo 2025-2026', 'Incapacidad', 'Pendiente', 'Creado desde interfaz'),
+('SECRETARÍA DE EDUCACIÓN', 'SOL-APP-2026006', 'CASTRO DÍAZ MIGUEL ÁNGEL', 'SECRETARIO DE EDUCACIÓN', 'M', '1000000006', '12/04/2012', 'COORDINADOR DE ÁREA', 'CA-001', 'G3', '$5.800.000', '$0', '12/05/2026', '01/06/2026', '5', '0', '0', 'Periodo 2025-2026', 'Permiso', 'Aprobada', 'Creado desde interfaz'),
+('DIRECCIÓN DE TALENTO HUMANO', 'SOL-APP-2026007', 'SILVA PARRA NATALIA FERNANDA', 'PROFESIONAL UNIVERSITARIO', 'F', '1000000007', '05/09/2017', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', '$0', '05/06/2026', '10/06/2026', '126', '0', '0', 'Periodo 2025-2026', 'Licencia maternidad', 'Aprobada', 'Creado desde interfaz'),
+('SECRETARÍA DE INFRAESTRUCTURA PÚBLICA', 'SOL-APP-2026008', 'VARGAS PEÑA ANDRÉS FELIPE', 'PROFESIONAL ESPECIALIZADO', 'M', '1000000008', '18/03/2016', 'PROFESIONAL ESPECIALIZADO', 'PE-001', 'G2', '$5.200.000', '$0', '18/05/2026', '04/06/2026', '20', '1', '0', 'Periodo 2025-2026', 'Vacaciones', 'Rechazada', 'Creado desde interfaz'),
+('SECRETARÍA GENERAL', 'SOL-APP-2026009', 'RODRÍGUEZ NIÑO MARÍA CAMILA', 'PROFESIONAL UNIVERSITARIO', 'F', '1000000009', '30/06/2021', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', '$0', '30/05/2026', '07/06/2026', '4', '0', '0', 'Periodo 2025-2026', 'Permiso', 'Finalizada', 'Creado desde interfaz'),
+('SECRETARÍA DE HACIENDA', 'SOL-APP-2026010', 'HERRERA LÓPEZ SANTIAGO', 'PROFESIONAL ESPECIALIZADO', 'M', '1000000010', '08/02/2013', 'PROFESIONAL ESPECIALIZADO', 'PE-001', 'G2', '$5.200.000', '$0', '08/06/2026', '12/06/2026', '10', '0', '0', 'Periodo 2025-2026', 'Incapacidad', 'En revisión', 'Creado desde interfaz'),
+('SECRETARÍA DE CULTURA Y PATRIMONIO', 'SOL-APP-2026011', 'PARDO RUIZ VALENTINA', 'PROFESIONAL UNIVERSITARIO', 'F', '1000000011', '22/11/2023', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', '$0', '22/05/2026', '08/06/2026', '15', '0', '0', 'Periodo 2025-2026', 'Vacaciones', 'Aprobada', 'Creado desde interfaz'),
+('SECRETARÍA DE INFRAESTRUCTURA PÚBLICA', 'SOL-APP-2026012', 'CÁRDENAS LÓPEZ JORGE IVÁN', 'SECRETARIO DE INFRAESTRUCTURA', 'M', '1000000012', '14/05/2011', 'COORDINADOR DE ÁREA', 'CA-001', 'G3', '$5.800.000', '$0', '14/05/2026', '01/06/2026', '3', '0', '0', 'Periodo 2025-2026', 'Permiso', 'Pendiente', 'Creado desde interfaz'),
+('OFICINA JURÍDICA', 'SOL-APP-2026013', 'PRIETO GARCÍA MÓNICA ALEJANDRA', 'ASESOR JURÍDICO', 'F', '1000000013', '07/10/2016', 'ASESOR JURÍDICO', 'AJ-001', 'G3', '$6.500.000', '$0', '07/06/2026', '11/06/2026', '126', '0', '0', 'Periodo 2025-2026', 'Licencia maternidad', 'Aprobada', 'Creado desde interfaz'),
+('SECRETARÍA DE DESARROLLO EMPRESARIAL', 'SOL-APP-2026014', 'SUÁREZ MEJÍA DANIEL ESTEBAN', 'TÉCNICO ADMINISTRATIVO', 'M', '1000000014', '19/04/2019', 'TÉCNICO ADMINISTRATIVO', 'TA-001', 'G1', '$2.800.000', '$0', '19/05/2026', '02/06/2026', '8', '0', '0', 'Periodo 2025-2026', 'Incapacidad', 'Pendiente', 'Creado desde interfaz'),
+('SECRETARÍA DE TURISMO', 'SOL-APP-2026015', 'NIÑO CORTÉS CLAUDIA PATRICIA', 'PROFESIONAL UNIVERSITARIO', 'F', '1000000015', '02/12/2020', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', '$0', '02/06/2026', '09/06/2026', '6', '0', '0', 'Periodo 2025-2026', 'Permiso', 'Finalizada', 'Creado desde interfaz'),
+('SECRETARÍA DE TURISMO', 'SOL-APP-2026016', 'RINCÓN DUARTE CAROLINA', 'TÉCNICO ADMINISTRATIVO', 'F', '1000000016', '11/07/2024', 'TÉCNICO ADMINISTRATIVO', 'TA-001', 'G1', '$2.800.000', '$0', '11/05/2026', '03/06/2026', '10', '0', '0', 'Periodo 2025-2026', 'Vacaciones', 'Pendiente', 'Creado desde interfaz'),
+('SECRETARÍA DE AMBIENTE Y DESARROLLO SOSTENIBLE', 'SOL-APP-2026017', 'MORENO CASTRO FELIPE ANDRÉS', 'PROFESIONAL ESPECIALIZADO', 'M', '1000000017', '28/01/2015', 'PROFESIONAL ESPECIALIZADO', 'PE-001', 'G2', '$5.200.000', '$0', '28/05/2026', '05/06/2026', '15', '0', '0', 'Periodo 2025-2026', 'Vacaciones', 'Aprobada', 'Creado desde interfaz'),
+('SECRETARÍA DE CULTURA Y PATRIMONIO', 'SOL-APP-2026018', 'TORRES CÁRDENAS ISABELLA', 'PROFESIONAL UNIVERSITARIO', 'F', '1000000018', '16/08/2022', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', '$0', '16/05/2026', '01/06/2026', '2', '0', '0', 'Periodo 2025-2026', 'Permiso', 'En revisión', 'Creado desde interfaz'),
+('SECRETARÍA DE AGRICULTURA', 'SOL-APP-2026019', 'PÁEZ SOTO CAMILO ANDRÉS', 'PROFESIONAL ESPECIALIZADO', 'M', '1000000019', '05/05/2017', 'PROFESIONAL ESPECIALIZADO', 'PE-001', 'G2', '$5.200.000', '$0', '05/06/2026', '10/06/2026', '20', '1', '0', 'Periodo 2025-2026', 'Vacaciones', 'Pendiente', 'Creado desde interfaz'),
+('SECRETARÍA DE GOBIERNO Y ACCIÓN COMUNAL', 'SOL-APP-2026020', 'BERNAL REYES LUCÍA FERNANDA', 'PROFESIONAL UNIVERSITARIO', 'F', '1000000020', '23/09/2021', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', '$0', '23/05/2026', '04/06/2026', '5', '0', '0', 'Periodo 2025-2026', 'Incapacidad', 'Aprobada', 'Creado desde interfaz'),
+('SECRETARÍA DE HACIENDA', 'SOL-APP-2026021', 'AGUILAR MORENO CARLOS EDUARDO', 'SECRETARIO DE HACIENDA', 'M', '1000000021', '10/07/2010', 'SECRETARIO DE HACIENDA', 'SD-001', 'G4', '$7.200.000', '$0', '10/05/2026', '01/06/2026', '15', '0', '0', 'Periodo 2025-2026', 'Vacaciones', 'Aprobada', 'Creado desde interfaz'),
+('SECRETARÍA GENERAL', 'SOL-APP-2026022', 'MORALES NIÑO JUAN PABLO', 'SECRETARIO GENERAL', 'M', '1000000022', '01/04/2013', 'SECRETARIO GENERAL', 'SD-001', 'G4', '$7.200.000', '$0', '01/06/2026', '08/06/2026', '10', '0', '0', 'Periodo 2025-2026', 'Vacaciones', 'Finalizada', 'Creado desde interfaz'),
+('DESPACHO DEL GOBERNADOR', 'SOL-APP-2026023', 'ROJAS HERRERA ANDRÉS FELIPE', 'GOBERNADOR / JEFE DE DESPACHO', 'M', '1000000023', '20/02/2011', 'GOBERNADOR / JEFE DE DESPACHO', 'SD-001', 'G4', '$7.200.000', '$0', '20/05/2026', '03/06/2026', '5', '0', '0', 'Periodo 2025-2026', 'Permiso', 'Pendiente', 'Creado desde interfaz'),
+('SECRETARÍA DE PLANEACIÓN', 'SOL-APP-2026024', 'MÉNDEZ ROJAS LAURA CAMILA', 'SECRETARIO DE PLANEACIÓN', 'F', '1000000024', '15/09/2014', 'SECRETARIO DE PLANEACIÓN', 'SD-001', 'G4', '$7.200.000', '$0', '15/05/2026', '05/06/2026', '12', '0', '0', 'Periodo 2025-2026', 'Vacaciones', 'Aprobada', 'Creado desde interfaz'),
+('SECRETARÍA DE GOBIERNO Y ACCIÓN COMUNAL', 'SOL-APP-2026025', 'TORRES RIVERA DIANA MARCELA', 'SECRETARIO DE GOBIERNO', 'F', '1000000025', '03/12/2016', 'SECRETARIO DE GOBIERNO', 'CA-001', 'G3', '$5.800.000', '$0', '03/06/2026', '10/06/2026', '8', '0', '0', 'Periodo 2025-2026', 'Incapacidad', 'En revisión', 'Creado desde interfaz'),
+('DIRECCIÓN DE TALENTO HUMANO', 'SOL-APP-2026026', 'ROBAYO SÁNCHEZ SANDRA MILENA', 'COORDINADOR DE ÁREA', 'F', '1000000026', '14/04/2019', 'COORDINADOR DE ÁREA', 'CA-001', 'G3', '$5.800.000', '$0', '14/06/2026', '01/06/2026', '3', '0', '0', 'Periodo 2025-2026', 'Permiso', 'Aprobada', 'Creado desde interfaz'),
+('SECRETARÍA GENERAL', 'SOL-APP-2026027', 'GARCÍA RAMOS FERNANDO JOSÉ', 'TÉCNICO ADMINISTRATIVO', 'M', '1000000027', '21/08/2020', 'TÉCNICO ADMINISTRATIVO', 'TA-001', 'G1', '$2.800.000', '$0', '21/05/2026', '06/06/2026', '15', '0', '0', 'Periodo 2025-2026', 'Vacaciones', 'Pendiente', 'Creado desde interfaz'),
+('OFICINA JURÍDICA', 'SOL-APP-2026028', 'LÓPEZ PINEDA ANA MARÍA', 'ASESOR JURÍDICO', 'F', '1000000028', '09/03/2018', 'ASESOR JURÍDICO', 'AJ-001', 'G3', '$6.500.000', '$0', '09/06/2026', '12/06/2026', '126', '0', '0', 'Periodo 2025-2026', 'Licencia maternidad', 'Pendiente', 'Creado desde interfaz'),
+('SECRETARÍA DE AGRICULTURA', 'SOL-APP-2026029', 'RAMÍREZ QUINTERO PEDRO ANTONIO', 'TÉCNICO ADMINISTRATIVO', 'M', '1000000029', '17/06/2023', 'TÉCNICO ADMINISTRATIVO', 'TA-001', 'G1', '$2.800.000', '$0', '17/05/2026', '01/06/2026', '4', '0', '0', 'Periodo 2025-2026', 'Permiso', 'Rechazada', 'Creado desde interfaz'),
+('SECRETARÍA DE HACIENDA', 'SOL-APP-2026030', 'DUARTE CIFUENTES LILIANA PATRICIA', 'TÉCNICO ADMINISTRATIVO', 'F', '1000000030', '25/10/2022', 'TÉCNICO ADMINISTRATIVO', 'TA-001', 'G1', '$2.800.000', '$0', '25/05/2026', '02/06/2026', '6', '0', '0', 'Periodo 2025-2026', 'Incapacidad', 'Finalizada', 'Creado desde interfaz'),
+('SECRETARÍA DE EDUCACIÓN', 'SOL-APP-2026031', 'GÓMEZ RUIZ PAULA ANDREA', 'PROFESIONAL UNIVERSITARIO', 'F', '1000000005', '25/08/2020', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', '$0', '25/06/2026', '10/06/2026', '10', '0', '0', 'Periodo 2025-2026', 'Vacaciones', 'Aprobada', 'Creado desde interfaz'),
+('SECRETARÍA DE SALUD', 'SOL-APP-2026032', 'MARTÍNEZ PÉREZ LAURA', 'PROFESIONAL UNIVERSITARIO', 'F', '1000000001', '15/06/2015', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', '$0', '15/06/2026', '11/06/2026', '8', '0', '0', 'Periodo 2025-2026', 'Incapacidad', 'En revisión', 'Creado desde interfaz'),
+('DIRECCIÓN DE TALENTO HUMANO', 'SOL-APP-2026033', 'SILVA PARRA NATALIA FERNANDA', 'PROFESIONAL UNIVERSITARIO', 'F', '1000000007', '05/09/2017', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', '$0', '05/06/2026', '09/06/2026', '5', '0', '0', 'Periodo 2025-2026', 'Permiso', 'Finalizada', 'Creado desde interfaz'),
+('SECRETARÍA DE INFRAESTRUCTURA PÚBLICA', 'SOL-APP-2026034', 'VARGAS PEÑA ANDRÉS FELIPE', 'PROFESIONAL ESPECIALIZADO', 'M', '1000000008', '18/03/2016', 'PROFESIONAL ESPECIALIZADO', 'PE-001', 'G2', '$5.200.000', '$0', '18/06/2026', '12/06/2026', '15', '0', '0', 'Periodo 2025-2026', 'Vacaciones', 'Pendiente', 'Creado desde interfaz'),
+('SECRETARÍA DE DESARROLLO EMPRESARIAL', 'SOL-APP-2026035', 'SUÁREZ MEJÍA DANIEL ESTEBAN', 'TÉCNICO ADMINISTRATIVO', 'M', '1000000014', '19/04/2019', 'TÉCNICO ADMINISTRATIVO', 'TA-001', 'G1', '$2.800.000', '$0', '19/06/2026', '10/06/2026', '3', '0', '0', 'Periodo 2025-2026', 'Permiso', 'Aprobada', 'Creado desde interfaz'),
+('SECRETARÍA DE CULTURA Y PATRIMONIO', 'SOL-APP-2026036', 'PARDO RUIZ VALENTINA', 'PROFESIONAL UNIVERSITARIO', 'F', '1000000011', '22/11/2023', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', '$0', '22/06/2026', '08/06/2026', '20', '0', '0', 'Periodo 2025-2026', 'Vacaciones', 'Pendiente', 'Creado desde interfaz'),
+('SECRETARÍA DE EDUCACIÓN', 'SOL-APP-2026037', 'CASTRO DÍAZ MIGUEL ÁNGEL', 'SECRETARIO DE EDUCACIÓN', 'M', '1000000006', '12/04/2012', 'COORDINADOR DE ÁREA', 'CA-001', 'G3', '$5.800.000', '$0', '12/06/2026', '11/06/2026', '10', '0', '0', 'Periodo 2025-2026', 'Vacaciones', 'Aprobada', 'Creado desde interfaz'),
+('SECRETARÍA DE SALUD', 'SOL-APP-2026038', 'GÓMEZ RUIZ PAULA ANDREA', 'PROFESIONAL UNIVERSITARIO', 'F', '1000000005', '25/08/2020', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', '$0', '25/06/2026', '05/06/2026', '4', '0', '0', 'Periodo 2025-2026', 'Permiso', 'Rechazada', 'Creado desde interfaz'),
+('SECRETARÍA DE PLANEACIÓN', 'SOL-APP-2026039', 'MÉNDEZ ROJAS LAURA CAMILA', 'SECRETARIO DE PLANEACIÓN', 'F', '1000000024', '15/09/2014', 'SECRETARIO DE PLANEACIÓN', 'SD-001', 'G4', '$7.200.000', '$0', '15/06/2026', '12/06/2026', '7', '0', '0', 'Periodo 2025-2026', 'Incapacidad', 'Pendiente', 'Creado desde interfaz'),
+('SECRETARÍA DE GOBIERNO Y ACCIÓN COMUNAL', 'SOL-APP-2026040', 'BERNAL REYES LUCÍA FERNANDA', 'PROFESIONAL UNIVERSITARIO', 'F', '1000000020', '23/09/2021', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', '$0', '23/06/2026', '09/06/2026', '126', '0', '0', 'Periodo 2025-2026', 'Licencia maternidad', 'Pendiente', 'Creado desde interfaz'),
+('SECRETARÍA DE TURISMO', 'SOL-APP-2026041', 'NIÑO CORTÉS CLAUDIA PATRICIA', 'PROFESIONAL UNIVERSITARIO', 'F', '1000000015', '02/12/2020', 'PROFESIONAL UNIVERSITARIO', 'PU-001', 'G1', '$3.500.000', '$0', '02/06/2026', '01/06/2026', '12', '0', '0', 'Periodo 2025-2026', 'Vacaciones', 'Aprobada', 'Creado desde interfaz'),
+('DESPACHO DEL GOBERNADOR', 'SOL-APP-2026042', 'ROJAS HERRERA ANDRÉS FELIPE', 'GOBERNADOR / JEFE DE DESPACHO', 'M', '1000000023', '20/02/2011', 'GOBERNADOR / JEFE DE DESPACHO', 'SD-001', 'G4', '$7.200.000', '$0', '20/06/2026', '06/06/2026', '10', '0', '0', 'Periodo 2025-2026', 'Vacaciones', 'Finalizada', 'Creado desde interfaz'),
+('SECRETARÍA DE AMBIENTE Y DESARROLLO SOSTENIBLE', 'SOL-APP-2026043', 'MORENO CASTRO FELIPE ANDRÉS', 'PROFESIONAL ESPECIALIZADO', 'M', '1000000017', '28/01/2015', 'PROFESIONAL ESPECIALIZADO', 'PE-001', 'G2', '$5.200.000', '$0', '28/06/2026', '07/06/2026', '5', '0', '0', 'Periodo 2025-2026', 'Permiso', 'Pendiente', 'Creado desde interfaz'),
+('SECRETARÍA DE AGRICULTURA', 'SOL-APP-2026044', 'PÁEZ SOTO CAMILO ANDRÉS', 'PROFESIONAL ESPECIALIZADO', 'M', '1000000019', '05/05/2017', 'PROFESIONAL ESPECIALIZADO', 'PE-001', 'G2', '$5.200.000', '$0', '05/06/2026', '08/06/2026', '15', '0', '0', 'Periodo 2025-2026', 'Incapacidad', 'Aprobada', 'Creado desde interfaz'),
+('OFICINA JURÍDICA', 'SOL-APP-2026045', 'LÓPEZ PINEDA ANA MARÍA', 'ASESOR JURÍDICO', 'F', '1000000028', '09/03/2018', 'ASESOR JURÍDICO', 'AJ-001', 'G3', '$6.500.000', '$0', '09/06/2026', '11/06/2026', '8', '0', '0', 'Periodo 2025-2026', 'Permiso', 'Aprobada', 'Creado desde interfaz');
