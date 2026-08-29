@@ -1,7 +1,7 @@
 {
   "name": "dashboard-service",
   "version": "1.0.0",
-  "description": "Humano 360 — Servicio de Dashboard",
+  "description": "Talento 360 — Servicio de Dashboard",
   "main": "src/server.js",
   "scripts": { "start": "node src/server.js" },
   "dependencies": { "cors": "^2.8.5", "express": "^4.18.2", "jsonwebtoken": "^9.0.2", "pg": "^8.11.3" }

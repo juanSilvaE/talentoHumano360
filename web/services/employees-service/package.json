@@ -1,7 +1,7 @@
 {
   "name": "employees-service",
   "version": "1.0.0",
-  "description": "Humano 360 — Servicio de Servidores/Perfiles",
+  "description": "Talento 360 — Servicio de Servidores/Perfiles",
   "main": "src/server.js",
   "scripts": { "start": "node src/server.js" },
   "dependencies": {

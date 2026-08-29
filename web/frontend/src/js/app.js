@@ -10,9 +10,9 @@ const App = (() => {
     if (!container) return;
     const icons = {
       success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
-      error:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+      error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
       warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
-      info:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+      info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
     };
     const toast = document.createElement('div');
     toast.className = `toast toast--${type}`;
@@ -28,7 +28,7 @@ const App = (() => {
   function openModal(title, bodyHtml, footerButtons = []) {
     const overlay = document.getElementById('modal-overlay');
     const titleEl = document.getElementById('modal-title');
-    const bodyEl  = document.getElementById('modal-body');
+    const bodyEl = document.getElementById('modal-body');
     const footerEl = document.getElementById('modal-footer');
     if (!overlay || !titleEl || !bodyEl || !footerEl) return;
 
@@ -56,11 +56,11 @@ const App = (() => {
 
   // ─── Navigation ────────────────────────────────────────────────────────────
   const MODULE_TITLES = {
-    dashboard:      'Dashboard',
-    employees:      'Servidores Públicos',
-    requests:       'Solicitudes de Vacaciones',
+    dashboard: 'Dashboard',
+    employees: 'Servidores Públicos',
+    requests: 'Solicitudes de Vacaciones',
     'admin-requests': 'Gestión de Solicitudes Administrativas',
-    viaticos:       'Viáticos',
+    viaticos: 'Viáticos',
   };
 
   async function navigate(module, options = {}) {
@@ -78,7 +78,7 @@ const App = (() => {
     }
 
     if (pageTitle) pageTitle.textContent = MODULE_TITLES[module] || module;
-    document.title = `${MODULE_TITLES[module] || module} — Humano 360`;
+    document.title = `${MODULE_TITLES[module] || module} — Talento 360`;
 
     // Render module
     switch (module) {
@@ -115,7 +115,7 @@ const App = (() => {
 
   function expandAdminGroup() {
     const toggle = document.getElementById('nav-admin-group');
-    const menu   = document.getElementById('admin-submenu');
+    const menu = document.getElementById('admin-submenu');
     if (toggle && menu) {
       toggle.setAttribute('aria-expanded', 'true');
       menu.setAttribute('aria-hidden', 'false');
@@ -130,25 +130,26 @@ const App = (() => {
 
   // ─── Avatar Palettes ────────────────────────────────────────────────────────
   const AVATAR_PALETTES = [
-    { id: 'boyaca',   name: 'Gobernación (Azul & Oro)',       bg: 'linear-gradient(135deg, #1d4ed8, #eab308)' },
-    { id: 'emerald',  name: 'Esmeralda Andina (Verde)',       bg: 'linear-gradient(135deg, #059669, #10b981)' },
-    { id: 'sunset',   name: 'Atardecer Boyacá (Naranja/Rosa)', bg: 'linear-gradient(135deg, #ea580c, #ec4899)' },
-    { id: 'royal',    name: 'Púrpura Real (Violeta/Indigo)',  bg: 'linear-gradient(135deg, #7c3aed, #3b82f6)' },
-    { id: 'ruby',     name: 'Rubí Imperial (Rojo Carmesí)',   bg: 'linear-gradient(135deg, #dc2626, #f43f5e)' },
-    { id: 'ocean',    name: 'Océano Turquesa (Cian & Azul)',  bg: 'linear-gradient(135deg, #0891b2, #0284c7)' },
+    { id: 'boyaca', name: 'Gobernación (Azul & Oro)', bg: 'linear-gradient(135deg, #1d4ed8, #eab308)' },
+    { id: 'emerald', name: 'Esmeralda Andina (Verde)', bg: 'linear-gradient(135deg, #059669, #10b981)' },
+    { id: 'sunset', name: 'Atardecer Boyacá (Naranja/Rosa)', bg: 'linear-gradient(135deg, #ea580c, #ec4899)' },
+    { id: 'royal', name: 'Púrpura Real (Violeta/Indigo)', bg: 'linear-gradient(135deg, #7c3aed, #3b82f6)' },
+    { id: 'ruby', name: 'Rubí Imperial (Rojo Carmesí)', bg: 'linear-gradient(135deg, #dc2626, #f43f5e)' },
+    { id: 'ocean', name: 'Océano Turquesa (Cian & Azul)', bg: 'linear-gradient(135deg, #0891b2, #0284c7)' },
     { id: 'midnight', name: 'Medianoche (Gris & Azul Eléc.)', bg: 'linear-gradient(135deg, #1e293b, #3b82f6)' },
-    { id: 'gold',     name: 'Oro Colonial (Dorado Puro)',     bg: 'linear-gradient(135deg, #d97706, #fbbf24)' },
+    { id: 'gold', name: 'Oro Colonial (Dorado Puro)', bg: 'linear-gradient(135deg, #d97706, #fbbf24)' },
   ];
 
   let currentAvatarColor = null;
 
   function getAvatarColor(username) {
-    const key = `humano360_avatar_color_${username || 'default'}`;
-    return localStorage.getItem(key) || AVATAR_PALETTES[0].bg;
+    const key = `talento360_avatar_color_${username || 'default'}`;
+    const legacyKey = `humano360_avatar_color_${username || 'default'}`;
+    return localStorage.getItem(key) || localStorage.getItem(legacyKey) || AVATAR_PALETTES[0].bg;
   }
 
   function setAvatarColor(username, color) {
-    const key = `humano360_avatar_color_${username || 'default'}`;
+    const key = `talento360_avatar_color_${username || 'default'}`;
     localStorage.setItem(key, color);
   }
 
@@ -218,7 +219,7 @@ const App = (() => {
         <div class="avatar-color-section">
           <div class="profile-section-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/></svg>
-            <span>Color de la Pelotita (Avatar)</span>
+            <span>Color del Avatar</span>
           </div>
           <p class="avatar-color-subtitle">Selecciona tu combinación de colores favorita o elige un tono personalizado:</p>
           <div class="avatar-swatches-grid" id="avatar-swatches-container">
@@ -370,7 +371,7 @@ const App = (() => {
   // ─── Init ──────────────────────────────────────────────────────────────────
   function init() {
     // Restore sidebar preference
-    const isCollapsed = localStorage.getItem('humano360_sidebar_collapsed') === 'true';
+    const isCollapsed = (localStorage.getItem('talento360_sidebar_collapsed') ?? localStorage.getItem('humano360_sidebar_collapsed')) === 'true';
     if (isCollapsed) {
       document.getElementById('app')?.classList.add('sidebar-collapsed');
     }
@@ -386,14 +387,14 @@ const App = (() => {
     // Password toggle
     const toggleBtn = document.getElementById('toggle-password');
     const passInput = document.getElementById('login-password');
-    const eyeOpen   = document.getElementById('eye-open');
+    const eyeOpen = document.getElementById('eye-open');
     const eyeClosed = document.getElementById('eye-closed');
     if (toggleBtn && passInput) {
       toggleBtn.addEventListener('click', () => {
         const isText = passInput.type === 'text';
         passInput.type = isText ? 'password' : 'text';
-        eyeOpen.style.display   = isText ? 'block' : 'none';
-        eyeClosed.style.display = isText ? 'none'  : 'block';
+        eyeOpen.style.display = isText ? 'block' : 'none';
+        eyeClosed.style.display = isText ? 'none' : 'block';
       });
     }
 
@@ -404,10 +405,10 @@ const App = (() => {
         e.preventDefault();
         const username = document.getElementById('login-username').value.trim();
         const password = document.getElementById('login-password').value.trim();
-        const errorEl  = document.getElementById('login-error');
-        const btnText  = document.querySelector('#login-btn .btn-text');
-        const btnLoader= document.querySelector('#login-btn .btn-loader');
-        const btn      = document.getElementById('login-btn');
+        const errorEl = document.getElementById('login-error');
+        const btnText = document.querySelector('#login-btn .btn-text');
+        const btnLoader = document.querySelector('#login-btn .btn-loader');
+        const btn = document.getElementById('login-btn');
 
         if (!username || !password) {
           errorEl.textContent = 'Por favor ingresa usuario y contraseña.';
@@ -430,7 +431,7 @@ const App = (() => {
           errorEl.classList.add('visible');
         } finally {
           btn.disabled = false;
-          if (btnText)  btnText.style.display = 'inline';
+          if (btnText) btnText.style.display = 'inline';
           if (btnLoader) btnLoader.style.display = 'none';
         }
       });
@@ -462,7 +463,7 @@ const App = (() => {
       const app = document.getElementById('app');
       if (!app) return;
       const collapsed = app.classList.toggle('sidebar-collapsed');
-      localStorage.setItem('humano360_sidebar_collapsed', String(collapsed));
+      localStorage.setItem('talento360_sidebar_collapsed', String(collapsed));
     };
 
     document.getElementById('sidebar-toggle')?.addEventListener('click', toggleSidebar);
@@ -486,7 +487,7 @@ const App = (() => {
     document.querySelectorAll('.nav-item[data-module]:not(.nav-group-toggle)').forEach(btn => {
       btn.addEventListener('click', () => {
         const module = btn.dataset.module;
-        const tipo   = btn.dataset.tipo;
+        const tipo = btn.dataset.tipo;
         if (module === 'admin-requests') {
           const tipoKey = { 'Permiso Laboral': 'permisos', 'Incapacidad': 'incapacidades', 'Licencia': 'licencias' }[tipo] || 'permisos';
           navigate('admin-requests', { tipo: tipoKey });
@@ -501,7 +502,7 @@ const App = (() => {
     // Admin group toggle
     document.getElementById('nav-admin-group')?.addEventListener('click', () => {
       const toggle = document.getElementById('nav-admin-group');
-      const menu   = document.getElementById('admin-submenu');
+      const menu = document.getElementById('admin-submenu');
       const expanded = toggle.getAttribute('aria-expanded') === 'true';
       toggle.setAttribute('aria-expanded', String(!expanded));
       menu.setAttribute('aria-hidden', String(expanded));

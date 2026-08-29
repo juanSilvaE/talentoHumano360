@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- Humano 360 — Módulos Nuevos
+-- Talento 360 — Módulos Nuevos
 -- Script: 03_new_modules.sql
 -- Descripción: Tablas para los módulos Viáticos y Gestión de Solicitudes
 --              Administrativas (Permisos, Incapacidades, Licencias)

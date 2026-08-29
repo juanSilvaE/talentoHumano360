@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   Humano 360 — Components
+   Talento 360 — Components
    Cards, Tables, Badges, Filters, Pagination, Stats, Form Grid
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -30,9 +30,10 @@
 /* ─── Stats Grid ─────────────────────────────────────────────────────────── */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--space-5);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
   margin-bottom: var(--space-6);
+  min-width: 0;
 }
 
 .stat-card {
@@ -127,9 +128,10 @@
 /* ─── Charts ─────────────────────────────────────────────────────────────── */
 .charts-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   gap: var(--space-5);
   margin-bottom: var(--space-6);
+  min-width: 0;
 }
 
 .chart-card {
@@ -140,6 +142,8 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .chart-title {
@@ -157,6 +161,7 @@
   position: relative;
   height: 300px;
   width: 100%;
+  min-width: 0;
 }
 
 /* ─── Filters Card ───────────────────────────────────────────────────────── */

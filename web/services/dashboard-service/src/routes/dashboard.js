@@ -7,7 +7,7 @@ const pool = new Pool({
   database: process.env.DB_NAME || 'talento360', user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'admin123',
 });
-const JWT_SECRET = process.env.JWT_SECRET || 'humano360_secret_2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'talento360_secret_2026';
 
 function auth(req, res, next) {
   const token = (req.headers.authorization || '').replace('Bearer ', '');

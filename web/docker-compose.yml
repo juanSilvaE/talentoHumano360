@@ -4,7 +4,7 @@ services:
   # ─────────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
-    container_name: humano360_db
+    container_name: talento360_db
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-talento360}
@@ -18,7 +18,7 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - humano360_net
+      - talento360_net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
@@ -30,7 +30,7 @@ services:
   # ─────────────────────────────────────────────────
   auth-service:
     build: ./services/auth-service
-    container_name: humano360_auth
+    container_name: talento360_auth
     restart: unless-stopped
     environment:
       PORT: 3001
@@ -39,20 +39,20 @@ services:
       DB_NAME: ${POSTGRES_DB:-talento360}
       DB_USER: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
-      JWT_SECRET: ${JWT_SECRET:-humano360_secret_2026}
+      JWT_SECRET: ${JWT_SECRET:-talento360_secret_2026}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - humano360_net
+      - talento360_net
 
   # ─────────────────────────────────────────────────
   # MICROSERVICE 3 — Employees Service
   # ─────────────────────────────────────────────────
   employees-service:
     build: ./services/employees-service
-    container_name: humano360_employees
+    container_name: talento360_employees
     restart: unless-stopped
     environment:
       PORT: 3002
@@ -61,19 +61,19 @@ services:
       DB_NAME: ${POSTGRES_DB:-talento360}
       DB_USER: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
-      JWT_SECRET: ${JWT_SECRET:-humano360_secret_2026}
+      JWT_SECRET: ${JWT_SECRET:-talento360_secret_2026}
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - humano360_net
+      - talento360_net
 
   # ─────────────────────────────────────────────────
   # MICROSERVICE 4 — Requests Service (Vacaciones)
   # ─────────────────────────────────────────────────
   requests-service:
     build: ./services/requests-service
-    container_name: humano360_requests
+    container_name: talento360_requests
     restart: unless-stopped
     environment:
       PORT: 3003
@@ -82,19 +82,19 @@ services:
       DB_NAME: ${POSTGRES_DB:-talento360}
       DB_USER: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
-      JWT_SECRET: ${JWT_SECRET:-humano360_secret_2026}
+      JWT_SECRET: ${JWT_SECRET:-talento360_secret_2026}
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - humano360_net
+      - talento360_net
 
   # ─────────────────────────────────────────────────
   # MICROSERVICE 5 — Admin Requests Service
   # ─────────────────────────────────────────────────
   admin-requests-service:
     build: ./services/admin-requests-service
-    container_name: humano360_admin_requests
+    container_name: talento360_admin_requests
     restart: unless-stopped
     environment:
       PORT: 3004
@@ -103,19 +103,19 @@ services:
       DB_NAME: ${POSTGRES_DB:-talento360}
       DB_USER: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
-      JWT_SECRET: ${JWT_SECRET:-humano360_secret_2026}
+      JWT_SECRET: ${JWT_SECRET:-talento360_secret_2026}
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - humano360_net
+      - talento360_net
 
   # ─────────────────────────────────────────────────
   # MICROSERVICE 6 — Viáticos Service
   # ─────────────────────────────────────────────────
   viaticos-service:
     build: ./services/viaticos-service
-    container_name: humano360_viaticos
+    container_name: talento360_viaticos
     restart: unless-stopped
     environment:
       PORT: 3005
@@ -124,19 +124,19 @@ services:
       DB_NAME: ${POSTGRES_DB:-talento360}
       DB_USER: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
-      JWT_SECRET: ${JWT_SECRET:-humano360_secret_2026}
+      JWT_SECRET: ${JWT_SECRET:-talento360_secret_2026}
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - humano360_net
+      - talento360_net
 
   # ─────────────────────────────────────────────────
   # MICROSERVICE 7 — Dashboard Service
   # ─────────────────────────────────────────────────
   dashboard-service:
     build: ./services/dashboard-service
-    container_name: humano360_dashboard
+    container_name: talento360_dashboard
     restart: unless-stopped
     environment:
       PORT: 3006
@@ -145,19 +145,19 @@ services:
       DB_NAME: ${POSTGRES_DB:-talento360}
       DB_USER: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
-      JWT_SECRET: ${JWT_SECRET:-humano360_secret_2026}
+      JWT_SECRET: ${JWT_SECRET:-talento360_secret_2026}
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - humano360_net
+      - talento360_net
 
   # ─────────────────────────────────────────────────
   # FRONTEND + GATEWAY (Nginx)
   # ─────────────────────────────────────────────────
   frontend:
     build: ./frontend
-    container_name: humano360_frontend
+    container_name: talento360_frontend
     restart: unless-stopped
     ports:
       - "80:80"
@@ -169,11 +169,11 @@ services:
       - viaticos-service
       - dashboard-service
     networks:
-      - humano360_net
+      - talento360_net
 
 volumes:
   postgres_data:
 
 networks:
-  humano360_net:
+  talento360_net:
     driver: bridge

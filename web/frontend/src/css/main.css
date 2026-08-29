@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   Humano 360 — Design System & Tokens
+   Talento 360 — Design System & Tokens
    Gobernación de Boyacá — Paleta Institucional
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -374,13 +374,15 @@ body {
 /* ─── App Layout ─────────────────────────────────────────────────────────── */
 .app {
   display: grid;
-  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
   transition: grid-template-columns var(--transition-base);
 }
 
 .app.sidebar-collapsed {
-  grid-template-columns: var(--sidebar-collapsed) 1fr;
+  grid-template-columns: var(--sidebar-collapsed) minmax(0, 1fr);
 }
 
 /* ─── Sidebar ────────────────────────────────────────────────────────────── */
@@ -597,10 +599,10 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  margin-left: var(--sidebar-width);
-  transition: margin-left var(--transition-base);
+  min-width: 0;
+  width: 100%;
+  overflow-x: hidden;
 }
-.app.sidebar-collapsed .main-content { margin-left: var(--sidebar-collapsed); }
 
 /* ─── Topbar ─────────────────────────────────────────────────────────────── */
 .topbar {

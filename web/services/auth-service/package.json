@@ -1,7 +1,7 @@
 {
   "name": "auth-service",
   "version": "1.0.0",
-  "description": "Humano 360 — Servicio de Autenticación",
+  "description": "Talento 360 — Servicio de Autenticación",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
