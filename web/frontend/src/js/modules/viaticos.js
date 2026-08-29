@@ -1,10 +1,75 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   viaticos.js — Viáticos module (NEW)
+   viaticos.js — Módulo de Viáticos (Talento 360)
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const ViaticosModule = (() => {
   const ESTADOS = ['Todos', 'Pendiente', 'En revisión', 'Aprobada', 'Finalizada', 'Rechazada'];
   let state = { data: [], total: 0, page: 1, totalPages: 1, filters: {} };
+  let currentUploadedFile = null;
+  let employeeSearchTimeout = null;
+
+  // ─── Diccionario Geográfico de Colombia ──────────────────────────────────────
+  const COLOMBIA_GEO = {
+    'Boyacá': [
+      'Tunja', 'Duitama', 'Sogamoso', 'Paipa', 'Chiquinquirá', 'Villa de Leyva',
+      'Moniquirá', 'Puerto Boyacá', 'Garagoa', 'Guateque', 'Soatá', 'Samacá',
+      'Nobsa', 'Tibasosa', 'Santa Rosa de Viterbo', 'Ventaquemada', 'Aquitania',
+      'Belén', 'Chita', 'Cómbita', 'Miraflores', 'Muzo', 'Ramiriquí', 'Saboyá',
+      'San Luis de Gaceno', 'Socha', 'Tenza', 'Toca', 'Turmequé', 'Umbita', 'Zetaquira', 'Otro municipio'
+    ],
+    'Bogotá D.C.': ['Bogotá D.C.'],
+    'Cundinamarca': [
+      'Bogotá D.C.', 'Soacha', 'Girardot', 'Zipaquirá', 'Facatativá', 'Chía',
+      'Fusagasugá', 'Mosquera', 'Madrid', 'Funza', 'Cajicá', 'Ubaté', 'Tocancipá',
+      'Sopó', 'Tabio', 'Tenjo', 'Cota', 'Villeta', 'La Mesa', 'Gachancipá', 'Otro municipio'
+    ],
+    'Antioquia': [
+      'Medellín', 'Bello', 'Itagüí', 'Envigado', 'Rionegro', 'Apartadó', 'Turbo',
+      'Caucasia', 'Sabaneta', 'La Estrella', 'Caldas', 'Guarne', 'Marinilla', 'Santa Fe de Antioquia', 'Otro municipio'
+    ],
+    'Santander': [
+      'Bucaramanga', 'Floridablanca', 'Girón', 'Piedecuesta', 'Barrancabermeja',
+      'San Gil', 'Socorro', 'Barbosa', 'Vélez', 'Málaga', 'Zapatoca', 'Barichara', 'Otro municipio'
+    ],
+    'Norte de Santander': [
+      'Cúcuta', 'Ocaña', 'Pamplona', 'Villa del Rosario', 'Los Patios', 'Tibú', 'Chinácota', 'Otro municipio'
+    ],
+    'Valle del Cauca': [
+      'Cali', 'Buenaventura', 'Palmira', 'Tuluá', 'Cartago', 'Buga', 'Jamundí', 'Yumbo', 'Sevilla', 'Otro municipio'
+    ],
+    'Atlántico': ['Barranquilla', 'Soledad', 'Malambo', 'Sabanalarga', 'Baranoa', 'Puerto Colombia', 'Otro municipio'],
+    'Bolívar': ['Cartagena', 'Magangué', 'El Carmen de Bolívar', 'Turbaco', 'Arjona', 'Mompox', 'Otro municipio'],
+    'Caldas': ['Manizales', 'La Dorada', 'Chinchiná', 'Villamaría', 'Riosucio', 'Anserma', 'Salamina', 'Otro municipio'],
+    'Risaralda': ['Pereira', 'Dosquebradas', 'Santa Rosa de Cabal', 'La Virginia', 'Belén de Umbría', 'Otro municipio'],
+    'Quindío': ['Armenia', 'Calarcá', 'La Tebaida', 'Montenegro', 'Quimbaya', 'Salento', 'Circasia', 'Filandia', 'Otro municipio'],
+    'Tolima': ['Ibagué', 'Espinal', 'Melgar', 'Chaparral', 'Líbano', 'Mariquita', 'Honda', 'Flandes', 'Otro municipio'],
+    'Huila': ['Neiva', 'Pitalito', 'Garzón', 'La Plata', 'Campoalegre', 'San Agustín', 'Otro municipio'],
+    'Meta': ['Villavicencio', 'Acacías', 'Granada', 'Puerto López', 'San Martín', 'Puerto Gaitán', 'Otro municipio'],
+    'Casanare': ['Yopal', 'Aguazul', 'Villanueva', 'Tauramena', 'Paz de Ariporo', 'Maní', 'Monterrey', 'Otro municipio'],
+    'Arauca': ['Arauca', 'Tame', 'Saravena', 'Arauquita', 'Fortul', 'Otro municipio'],
+    'Nariño': ['Pasto', 'Tumaco', 'Ipiales', 'Túquerres', 'La Unión', 'Sandoná', 'Otro municipio'],
+    'Cauca': ['Popayán', 'Santander de Quilichao', 'Puerto Tejada', 'Patía', 'Piendamó', 'Guapi', 'Otro municipio'],
+    'Cesar': ['Valledupar', 'Aguachica', 'Agustín Codazzi', 'Bosconia', 'Curumaní', 'Otro municipio'],
+    'Córdoba': ['Montería', 'Lorica', 'Cereté', 'Sahagún', 'Montelíbano', 'Tierralta', 'Otro municipio'],
+    'Magdalena': ['Santa Marta', 'Ciénaga', 'Fundación', 'Plato', 'El Banco', 'Aracataca', 'Otro municipio'],
+    'La Guajira': ['Riohacha', 'Maicao', 'Uribia', 'Manaure', 'San Juan del Cesar', 'Fonseca', 'Otro municipio'],
+    'Sucre': ['Sincelejo', 'Corozal', 'San Marcos', 'Tolú', 'Sampués', 'Coveñas', 'Otro municipio'],
+    'Chocó': ['Quibdó', 'Istmina', 'Tadó', 'Condoto', 'Bahía Solano', 'Acandí', 'Otro municipio'],
+    'Caquetá': ['Florencia', 'San Vicente del Caguán', 'Cartagena del Chairá', 'Puerto Rico', 'Belén de los Andaquíes', 'Otro municipio'],
+    'Putumayo': ['Mocoa', 'Puerto Asís', 'Orito', 'Valle del Guamuez', 'Villagarzón', 'Sibundoy', 'Otro municipio'],
+    'Amazonas': ['Leticia', 'Puerto Nariño', 'Otro municipio'],
+    'Guainía': ['Inírida', 'Otro municipio'],
+    'Guaviare': ['San José del Guaviare', 'Calamar', 'El Retorno', 'Miraflores', 'Otro municipio'],
+    'Vaupés': ['Mitú', 'Carurú', 'Taraira', 'Otro municipio'],
+    'Vichada': ['Puerto Carreño', 'La Primavera', 'Santa Rosalía', 'Cumaribo', 'Otro municipio'],
+    'San Andrés y Providencia': ['San Andrés', 'Providencia']
+  };
+
+  const PAISES_INTERNACIONAL = [
+    'Estados Unidos', 'España', 'México', 'Panamá', 'Brasil', 'Argentina',
+    'Chile', 'Perú', 'Ecuador', 'Francia', 'Alemania', 'Reino Unido',
+    'Canadá', 'Italia', 'Suiza', 'Costa Rica', 'Uruguay', 'Otro País'
+  ];
 
   function badgeClass(estado) {
     const e = (estado || '').toLowerCase();
@@ -17,6 +82,17 @@ const ViaticosModule = (() => {
 
   function formatCOP(n) {
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n || 0);
+  }
+
+  function toIsoDate(dStr) {
+    if (!dStr) return '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dStr)) return dStr;
+    const parts = dStr.split('/');
+    if (parts.length === 3) {
+      const [d, m, y] = parts;
+      return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+    }
+    return dStr;
   }
 
   async function load() {
@@ -59,6 +135,10 @@ const ViaticosModule = (() => {
           </button>
         </td>
         <td class="td-actions">
+          ${r.soporte ? `
+            <button class="btn btn-secondary btn-sm btn-icon" onclick="ViaticosModule.viewSoporte(${r.id})" title="Ver Soporte / Factura Adjunta" style="color:var(--color-primary-400)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </button>` : ''}
           <button class="btn btn-secondary btn-sm btn-icon" onclick="ViaticosModule.openEdit(${r.id})" title="Editar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
@@ -84,69 +164,298 @@ const ViaticosModule = (() => {
       </div>`;
   }
 
+  // ─── Construcción de Formulario Inteligente ──────────────────────────────────
   function buildForm(r = {}) {
     const dis = Auth.canEdit() ? '' : 'disabled';
+    currentUploadedFile = r.soporte || null;
+
+    const isIntl = r.tipoDestino === 'Internacional' || (r.destino && PAISES_INTERNACIONAL.some(p => r.destino.includes(p)));
+    const defaultDepto = 'Boyacá';
+
     return `
       <div class="form-grid">
-        <div class="form-group span-2">
-          <label class="form-label">Nombre Completo *</label>
-          <input id="vf-nombre" class="form-input" placeholder="APELLIDO APELLIDO NOMBRE..." value="${escHtml(r.persona||'')}" ${dis} required />
+        <!-- Servidor con Autocompletado -->
+        <div class="form-group span-2 autocomplete-wrapper">
+          <label class="form-label">Nombre Completo del Servidor * <span style="font-size:11px;color:var(--color-primary-400);font-weight:400;">(Escribe para autocompletar cédula, cargo y dependencia)</span></label>
+          <input id="vf-nombre" class="form-input" placeholder="Escribe el nombre o cédula del funcionario..." value="${escHtml(r.persona||'')}" oninput="ViaticosModule.onNombreInput(this.value)" autocomplete="off" ${dis} required />
+          <div id="vf-autocomplete-list" class="autocomplete-dropdown" style="display:none;"></div>
         </div>
+
         <div class="form-group">
-          <label class="form-label">Documento</label>
+          <label class="form-label">Documento de Identidad (C.C.)</label>
           <input id="vf-doc" class="form-input" placeholder="Número de cédula" value="${escHtml(r.documento||'')}" ${dis} />
         </div>
+
         <div class="form-group">
-          <label class="form-label">Cargo</label>
+          <label class="form-label">Cargo Actual</label>
           <input id="vf-cargo" class="form-input" placeholder="Cargo del servidor..." value="${escHtml(r.cargo||'')}" ${dis} />
         </div>
+
         <div class="form-group span-2">
-          <label class="form-label">Dependencia</label>
-          <input id="vf-dep" class="form-input" placeholder="Secretaría / Dependencia..." value="${escHtml(r.dependencia||'')}" ${dis} />
+          <label class="form-label">Dependencia / Secretaría</label>
+          <input id="vf-dep" class="form-input" placeholder="Secretaría o Dependencia institucional..." value="${escHtml(r.dependencia||'')}" ${dis} />
         </div>
+
+        <!-- Selector de Destino: Nacional vs Internacional -->
         <div class="form-group span-2">
-          <label class="form-label">Destino *</label>
-          <input id="vf-destino" class="form-input" placeholder="Ciudad, Departamento del desplazamiento..." value="${escHtml(r.destino||'')}" ${dis} required />
+          <label class="form-label">Tipo de Desplazamiento *</label>
+          <div class="dest-toggle-group">
+            <label class="dest-toggle-opt">
+              <input type="radio" name="vf-tipo-dest" value="Nacional" ${!isIntl ? 'checked' : ''} onchange="ViaticosModule.onTipoDestinoChange('Nacional')" ${dis}>
+              <span class="dest-toggle-pill">🇨🇴 Destino Nacional (Colombia)</span>
+            </label>
+            <label class="dest-toggle-opt">
+              <input type="radio" name="vf-tipo-dest" value="Internacional" ${isIntl ? 'checked' : ''} onchange="ViaticosModule.onTipoDestinoChange('Internacional')" ${dis}>
+              <span class="dest-toggle-pill">🌐 Destino Internacional</span>
+            </label>
+          </div>
         </div>
+
+        <!-- Destino Nacional -->
+        <div id="vf-dest-nacional" class="form-subgrid span-2" style="display:${!isIntl ? 'grid' : 'none'}; grid-template-columns:1fr 1fr; gap:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label">Departamento *</label>
+            <select id="vf-depto" class="filter-select" onchange="ViaticosModule.onDeptoChange()" ${dis}>
+              ${Object.keys(COLOMBIA_GEO).map(d => `<option value="${d}" ${d === defaultDepto ? 'selected' : ''}>${d}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Municipio / Ciudad *</label>
+            <select id="vf-muni" class="filter-select" onchange="ViaticosModule.updateDestinoFinal()" ${dis}>
+              <!-- Poblado dinámicamente -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Destino Internacional -->
+        <div id="vf-dest-internacional" class="form-subgrid span-2" style="display:${isIntl ? 'grid' : 'none'}; grid-template-columns:1fr 1fr; gap:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label">País de Destino *</label>
+            <select id="vf-pais" class="filter-select" onchange="ViaticosModule.updateDestinoFinal()" ${dis}>
+              ${PAISES_INTERNACIONAL.map(p => `<option value="${p}">${p}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ciudad Internacional *</label>
+            <input id="vf-ciudad-int" class="form-input" placeholder="Ej: Washington D.C., Madrid..." oninput="ViaticosModule.updateDestinoFinal()" ${dis} />
+          </div>
+        </div>
+
+        <input type="hidden" id="vf-destino" value="${escHtml(r.destino || 'Tunja, Boyacá')}" />
+
         <div class="form-group span-2">
-          <label class="form-label">Motivo del Viático</label>
-          <input id="vf-motivo" class="form-input" placeholder="Descripción del objetivo del viaje..." value="${escHtml(r.motivo||'')}" ${dis} />
+          <div class="dest-preview-box">
+            <span class="dest-preview-icon">📍</span>
+            <span class="dest-preview-label">Destino Consolidado:</span>
+            <strong id="vf-dest-preview-text" class="dest-preview-val">${escHtml(r.destino || 'Tunja, Boyacá')}</strong>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Fecha Inicio</label>
-          <input id="vf-fi" class="form-input" placeholder="DD/MM/AAAA" value="${escHtml(r.fechaInicio||'')}" ${dis} />
+
+        <div class="form-group span-2">
+          <label class="form-label">Motivo o Justificación del Desplazamiento</label>
+          <input id="vf-motivo" class="form-input" placeholder="Ej: Comisión oficial para inspección técnica en territorio..." value="${escHtml(r.motivo||'')}" ${dis} />
         </div>
+
+        <!-- Fechas y Cálculo de Días -->
         <div class="form-group">
-          <label class="form-label">Fecha Fin</label>
-          <input id="vf-ff" class="form-input" placeholder="DD/MM/AAAA" value="${escHtml(r.fechaFin||'')}" ${dis} />
+          <label class="form-label">Fecha de Inicio *</label>
+          <input id="vf-fi" type="date" class="form-input" value="${toIsoDate(r.fechaInicio)}" onchange="ViaticosModule.onDatesChange()" ${dis} required />
         </div>
+
         <div class="form-group">
-          <label class="form-label">Número de Días</label>
+          <label class="form-label">Fecha de Finalización *</label>
+          <input id="vf-ff" type="date" class="form-input" value="${toIsoDate(r.fechaFin)}" onchange="ViaticosModule.onDatesChange()" ${dis} required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Número de Días (calculado automáticamente)</label>
           <input id="vf-dias" class="form-input" type="number" min="1" value="${escHtml(r.dias||'1')}" oninput="ViaticosModule.calcTotal()" ${dis} />
         </div>
+
         <div class="form-group">
-          <label class="form-label">Valor Diario ($)</label>
-          <input id="vf-vdiario" class="form-input" type="number" min="0" step="1000" placeholder="0" value="${escHtml(r.valorDiario||'0')}" oninput="ViaticosModule.calcTotal()" ${dis} />
+          <label class="form-label">Valor Diario ($ COP)</label>
+          <input id="vf-vdiario" class="form-input" type="number" min="0" step="1000" placeholder="Ej: 150000" value="${escHtml(r.valorDiario||'0')}" oninput="ViaticosModule.calcTotal()" ${dis} />
         </div>
+
         <div class="form-group span-2">
-          <label class="form-label">Valor Total (calculado automáticamente)</label>
-          <input id="vf-vtotal" class="form-input" placeholder="Calculado automáticamente" readonly style="background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.3);color:#34d399;font-weight:700;" value="${formatCOP(r.valorTotal||0)}" />
+          <label class="form-label">Valor Total del Viático</label>
+          <input id="vf-vtotal" class="form-input" placeholder="Calculado automáticamente" readonly style="background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.3);color:#34d399;font-weight:700;font-size:1.05rem;" value="${formatCOP(r.valorTotal||0)}" />
         </div>
+
         <div class="form-group">
-          <label class="form-label">Estado</label>
-          <select id="vf-estado" class="filter-select" ${dis}>
-            ${ESTADOS.filter(s=>s!=='Todos').map(s=>`<option ${r.estado===s?'selected':''}>${s}</option>`).join('')}
+          <label class="form-label">Estado de la Solicitud</label>
+          <select id="vf-estado" class="filter-select" onchange="ViaticosModule.onEstadoChange()" ${dis}>
+            ${ESTADOS.filter(s => s !== 'Todos').map(s => `<option ${r.estado === s ? 'selected' : ''}>${s}</option>`).join('')}
           </select>
         </div>
+
         <div class="form-group">
           <label class="form-label">Aprobado Por</label>
           <input id="vf-aprobado" class="form-input" placeholder="Nombre del aprobador..." value="${escHtml(r.aprobadoPor||'')}" ${dis} />
         </div>
+
+        <!-- Carga de Soportes / Facturas -->
         <div class="form-group span-2">
-          <label class="form-label">Observaciones</label>
-          <input id="vf-obs" class="form-input" placeholder="Observaciones adicionales..." value="${escHtml(r.observaciones||'')}" ${dis} />
+          <label class="form-label">Soporte, Factura o Documento de Comisión (Opcional)</label>
+          <div class="file-upload-zone" onclick="document.getElementById('vf-file-input')?.click()">
+            <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <div class="file-upload-title">Haz clic o arrastra aquí la factura / soporte</div>
+            <div class="file-upload-desc">Formatos permitidos: PDF, PNG, JPG (Máx. 5MB)</div>
+            <input id="vf-file-input" type="file" accept=".pdf,image/png,image/jpeg" onchange="ViaticosModule.onFileSelected(event)" ${dis} />
+          </div>
+          <div id="vf-file-preview-area">
+            ${r.soporte ? `
+              <div class="file-chip">
+                <span>📄 Soporte adjunto cargado</span>
+                <button type="button" class="file-chip-remove" onclick="ViaticosModule.removeUploadedFile()" title="Remover soporte">✕</button>
+              </div>` : ''}
+          </div>
+        </div>
+
+        <div class="form-group span-2">
+          <label class="form-label">Observaciones Adicionales</label>
+          <input id="vf-obs" class="form-input" placeholder="Anotaciones de gestión o trámite..." value="${escHtml(r.observaciones||'')}" ${dis} />
         </div>
       </div>`;
+  }
+
+  // ─── Inicialización de Campos de Destino y Autocompletado ──────────────────
+  function initFormHelpers(r = {}) {
+    const deptoSelect = document.getElementById('vf-depto');
+    if (deptoSelect) {
+      if (r.destino && r.destino.includes(',')) {
+        const parts = r.destino.split(',').map(p => p.trim());
+        if (parts.length >= 2) {
+          const deptoFound = Object.keys(COLOMBIA_GEO).find(d => d.toLowerCase() === parts[1].toLowerCase());
+          if (deptoFound) {
+            deptoSelect.value = deptoFound;
+            onDeptoChange(parts[0]);
+            calcTotal();
+            onEstadoChange();
+            return;
+          }
+        }
+      }
+      onDeptoChange();
+    }
+    calcTotal();
+    onEstadoChange();
+  }
+
+  // ─── Autocompletado de Servidores ──────────────────────────────────────────
+  function onNombreInput(val) {
+    clearTimeout(employeeSearchTimeout);
+    const drop = document.getElementById('vf-autocomplete-list');
+    if (!drop) return;
+    const query = val.trim();
+    if (query.length < 2) {
+      drop.style.display = 'none';
+      drop.innerHTML = '';
+      return;
+    }
+    employeeSearchTimeout = setTimeout(async () => {
+      try {
+        const res = await API.getEmployees({ q: query, limit: 6 });
+        const list = res.data || [];
+        if (!list.length) {
+          drop.innerHTML = `<div class="autocomplete-item"><span class="autocomplete-item-meta">No se encontraron funcionarios</span></div>`;
+          drop.style.display = 'block';
+          return;
+        }
+        drop.innerHTML = list.map(emp => `
+          <div class="autocomplete-item" onclick="ViaticosModule.selectEmployee(${JSON.stringify(emp).replace(/"/g, '&quot;')})">
+            <span class="autocomplete-item-name">${escHtml(emp.nombre_completo)}</span>
+            <span class="autocomplete-item-meta">C.C. ${escHtml(emp.cedula || '—')} • ${escHtml(emp.cargo_actual || emp.cargo_base || 'Cargo no asignado')} • ${escHtml(emp.dependencia || 'Sin dependencia')}</span>
+          </div>
+        `).join('');
+        drop.style.display = 'block';
+      } catch {
+        drop.style.display = 'none';
+      }
+    }, 200);
+  }
+
+  function selectEmployee(emp) {
+    if (!emp) return;
+    const nombreInput = document.getElementById('vf-nombre');
+    const docInput = document.getElementById('vf-doc');
+    const cargoInput = document.getElementById('vf-cargo');
+    const depInput = document.getElementById('vf-dep');
+    const drop = document.getElementById('vf-autocomplete-list');
+
+    if (nombreInput) nombreInput.value = emp.nombre_completo || '';
+    if (docInput) docInput.value = emp.cedula || '';
+    if (cargoInput) cargoInput.value = emp.cargo_actual || emp.cargo_base || '';
+    if (depInput) depInput.value = emp.dependencia || '';
+    if (drop) { drop.style.display = 'none'; drop.innerHTML = ''; }
+
+    App.showToast(`Datos autocompletados para ${emp.nombre_completo}.`, 'info');
+  }
+
+  // ─── Gestión de Destinos ──────────────────────────────────────────────────
+  function onTipoDestinoChange(tipo) {
+    const nac = document.getElementById('vf-dest-nacional');
+    const intl = document.getElementById('vf-dest-internacional');
+    if (tipo === 'Nacional') {
+      if (nac) nac.style.display = 'grid';
+      if (intl) intl.style.display = 'none';
+      onDeptoChange();
+    } else {
+      if (nac) nac.style.display = 'none';
+      if (intl) intl.style.display = 'grid';
+      updateDestinoFinal();
+    }
+  }
+
+  function onDeptoChange(selectedMuni = '') {
+    const depto = document.getElementById('vf-depto')?.value || 'Boyacá';
+    const muniSelect = document.getElementById('vf-muni');
+    if (!muniSelect) return;
+    const munis = COLOMBIA_GEO[depto] || ['Capital / Ciudad Principal', 'Otro municipio'];
+    muniSelect.innerHTML = munis.map(m => `<option value="${m}" ${m === selectedMuni ? 'selected' : ''}>${m}</option>`).join('');
+    updateDestinoFinal();
+  }
+
+  function updateDestinoFinal() {
+    const tipo = document.querySelector('input[name="vf-tipo-dest"]:checked')?.value || 'Nacional';
+    let destText = '';
+    if (tipo === 'Nacional') {
+      const depto = document.getElementById('vf-depto')?.value || 'Boyacá';
+      const muni = document.getElementById('vf-muni')?.value || 'Tunja';
+      destText = `${muni}, ${depto}`;
+    } else {
+      const pais = document.getElementById('vf-pais')?.value || 'Estados Unidos';
+      const ciudad = document.getElementById('vf-ciudad-int')?.value.trim() || 'Ciudad Principal';
+      destText = `${ciudad}, ${pais}`;
+    }
+    const hiddenDest = document.getElementById('vf-destino');
+    const previewText = document.getElementById('vf-dest-preview-text');
+    if (hiddenDest) hiddenDest.value = destText;
+    if (previewText) previewText.textContent = destText;
+  }
+
+  // ─── Cálculo de Días y Valores ────────────────────────────────────────────
+  function onDatesChange() {
+    const fiVal = document.getElementById('vf-fi')?.value;
+    const ffVal = document.getElementById('vf-ff')?.value;
+    if (fiVal && ffVal) {
+      const d1 = new Date(fiVal + 'T00:00:00');
+      const d2 = new Date(ffVal + 'T00:00:00');
+      const diffTime = d2 - d1;
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      const diasInput = document.getElementById('vf-dias');
+      if (diasInput) {
+        if (diffDays >= 1) {
+          diasInput.value = diffDays;
+        } else {
+          diasInput.value = 1;
+          App.showToast('La fecha final debe ser igual o posterior a la fecha de inicio.', 'warning');
+        }
+      }
+    }
+    calcTotal();
   }
 
   function calcTotal() {
@@ -157,20 +466,100 @@ const ViaticosModule = (() => {
     if (el) el.value = formatCOP(total);
   }
 
+  function onEstadoChange() {
+    const est = document.getElementById('vf-estado')?.value;
+    const aprInput = document.getElementById('vf-aprobado');
+    if (!aprInput) return;
+    if (est === 'Aprobada') {
+      const user = Auth.getUser();
+      const adminName = user?.fullName || (user?.username === 'admin' ? 'Ángela Usán (Administrador)' : (user?.username || 'Administrador'));
+      if (!aprInput.value || aprInput.value === '—' || aprInput.value.toLowerCase().includes('pendiente')) {
+        aprInput.value = adminName;
+      }
+    }
+  }
+
+  // ─── Manejo de Archivos y Soportes ────────────────────────────────────────
+  function onFileSelected(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      App.showToast('El archivo supera el tamaño máximo permitido (5MB).', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      currentUploadedFile = e.target.result;
+      const previewArea = document.getElementById('vf-file-preview-area');
+      if (previewArea) {
+        previewArea.innerHTML = `
+          <div class="file-chip">
+            <span>📄 ${escHtml(file.name)} (${(file.size / 1024).toFixed(1)} KB)</span>
+            <button type="button" class="file-chip-remove" onclick="ViaticosModule.removeUploadedFile()" title="Remover archivo">✕</button>
+          </div>`;
+      }
+      App.showToast(`Archivo "${file.name}" cargado como soporte.`, 'success');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeUploadedFile() {
+    currentUploadedFile = null;
+    const previewArea = document.getElementById('vf-file-preview-area');
+    if (previewArea) previewArea.innerHTML = '';
+    const fileInput = document.getElementById('vf-file-input');
+    if (fileInput) fileInput.value = '';
+    App.showToast('Soporte removido.', 'info');
+  }
+
+  function viewSoporte(id) {
+    const r = state.data.find(x => x.id === id);
+    if (!r || !r.soporte) {
+      App.showToast('Este registro no tiene soporte adjunto.', 'info');
+      return;
+    }
+    if (r.soporte.startsWith('data:image/')) {
+      App.openModal(`Soporte de Viático - ${r.radicado}`, `
+        <div style="text-align:center;padding:var(--space-2);">
+          <img src="${r.soporte}" alt="Soporte" style="max-width:100%;max-height:70vh;border-radius:var(--radius-md);box-shadow:0 8px 24px rgba(0,0,0,0.5);" />
+          <div style="margin-top:var(--space-4);">
+            <a href="${r.soporte}" download="soporte_${r.radicado}.png" class="btn btn-primary btn-sm">Descargar Imagen</a>
+          </div>
+        </div>
+      `, [{ text: 'Cerrar', cls: 'btn-secondary', action: () => App.closeModal() }]);
+    } else if (r.soporte.startsWith('data:application/pdf')) {
+      App.openModal(`Soporte de Viático - ${r.radicado}`, `
+        <div style="width:100%;height:70vh;">
+          <iframe src="${r.soporte}" style="width:100%;height:100%;border:none;border-radius:var(--radius-md);"></iframe>
+        </div>
+      `, [{ text: 'Cerrar', cls: 'btn-secondary', action: () => App.closeModal() }]);
+    } else {
+      App.openModal(`Soporte de Viático - ${r.radicado}`, `
+        <div style="padding:var(--space-4);text-align:center;">
+          <p style="color:var(--text-secondary);margin-bottom:var(--space-3);">Documento adjunto registrado:</p>
+          <a href="${r.soporte}" download="soporte_${r.radicado}" class="btn btn-primary">Descargar Documento</a>
+        </div>
+      `, [{ text: 'Cerrar', cls: 'btn-secondary', action: () => App.closeModal() }]);
+    }
+  }
+
+  // ─── Acciones de Creación y Edición ───────────────────────────────────────
   function openCreate() {
-    App.openModal('Nuevo Viático', buildForm(), [
+    App.openModal('Nuevo Viático Institucional', buildForm(), [
       { text: 'Cancelar', cls: 'btn-secondary', action: () => App.closeModal() },
       { text: 'Crear Viático', cls: 'btn-primary', id: 'vit-save-btn', action: saveCreate },
     ]);
+    setTimeout(() => initFormHelpers(), 50);
   }
 
   function openEdit(id) {
     const r = state.data.find(x => x.id === id);
     if (!r) return;
-    App.openModal('Editar Viático', buildForm(r), [
+    App.openModal(`Editar Viático ${r.radicado}`, buildForm(r), [
       { text: 'Cancelar', cls: 'btn-secondary', action: () => App.closeModal() },
-      { text: 'Actualizar', cls: 'btn-gold', id: 'vit-save-btn', action: () => saveEdit(id) },
+      { text: 'Actualizar Viático', cls: 'btn-gold', id: 'vit-save-btn', action: () => saveEdit(id) },
     ]);
+    setTimeout(() => initFormHelpers(r), 50);
   }
 
   async function saveCreate() {
@@ -181,8 +570,9 @@ const ViaticosModule = (() => {
     try {
       const res = await API.createViatico(body);
       App.closeModal();
-      App.showToast(`Viático creado. Radicado: ${res.radicado || ''}`, 'success');
+      App.showToast(`Viático creado exitosamente. Radicado: ${res.radicado || ''}`, 'success');
       await load();
+      loadStats();
     } catch (err) { App.showToast(err.message, 'error'); }
     finally { if (btn) { btn.disabled = false; btn.textContent = 'Crear Viático'; } }
   }
@@ -195,32 +585,44 @@ const ViaticosModule = (() => {
     try {
       await API.updateViatico(id, body);
       App.closeModal();
-      App.showToast('Viático actualizado.', 'success');
+      App.showToast('Viático actualizado exitosamente.', 'success');
       await load();
+      loadStats();
     } catch (err) { App.showToast(err.message, 'error'); }
-    finally { if (btn) { btn.disabled = false; btn.textContent = 'Actualizar'; } }
+    finally { if (btn) { btn.disabled = false; btn.textContent = 'Actualizar Viático'; } }
   }
 
   function readForm() {
-    const nombre  = document.getElementById('vf-nombre')?.value.trim();
+    const nombre = document.getElementById('vf-nombre')?.value.trim();
     const destino = document.getElementById('vf-destino')?.value.trim();
-    if (!nombre || !destino) { App.showToast('Nombre y destino son requeridos.', 'warning'); return null; }
+    const fi = document.getElementById('vf-fi')?.value;
+    const ff = document.getElementById('vf-ff')?.value;
+
+    if (!nombre) { App.showToast('El nombre del funcionario es requerido.', 'warning'); return null; }
+    if (!destino) { App.showToast('El destino del viático es requerido.', 'warning'); return null; }
+
+    const tipoDestino = document.querySelector('input[name="vf-tipo-dest"]:checked')?.value || 'Nacional';
+
     return {
-      persona: nombre, documento: document.getElementById('vf-doc')?.value.trim(),
-      dependencia: document.getElementById('vf-dep')?.value.trim(),
-      cargo: document.getElementById('vf-cargo')?.value.trim(),
+      persona: nombre,
+      documento: document.getElementById('vf-doc')?.value.trim() || '',
+      dependencia: document.getElementById('vf-dep')?.value.trim() || '',
+      cargo: document.getElementById('vf-cargo')?.value.trim() || '',
+      tipoDestino,
       destino,
-      motivo: document.getElementById('vf-motivo')?.value.trim(),
-      fechaInicio: document.getElementById('vf-fi')?.value.trim(),
-      fechaFin: document.getElementById('vf-ff')?.value.trim(),
+      motivo: document.getElementById('vf-motivo')?.value.trim() || '',
+      fechaInicio: fi || '',
+      fechaFin: ff || '',
       dias: parseInt(document.getElementById('vf-dias')?.value) || 1,
       valorDiario: parseFloat(document.getElementById('vf-vdiario')?.value) || 0,
       estado: document.getElementById('vf-estado')?.value || 'Pendiente',
-      observaciones: document.getElementById('vf-obs')?.value.trim(),
-      aprobadoPor: document.getElementById('vf-aprobado')?.value.trim(),
+      observaciones: document.getElementById('vf-obs')?.value.trim() || '',
+      aprobadoPor: document.getElementById('vf-aprobado')?.value.trim() || '',
+      soporte: currentUploadedFile || null,
     };
   }
 
+  // ─── Modal de Cambio Rápido de Estado (1 Clic) ──────────────────────────────
   const STATUS_CONFIG = [
     {
       id: 'aprobada',
@@ -308,7 +710,7 @@ const ViaticosModule = (() => {
         </div>
 
         <div class="form-group" style="margin-top:var(--space-2);">
-          <label class="form-label">Observación / Nota de Gestión (Opcional)</label>
+          <label class="form-label">Observación / Justificación (Opcional)</label>
           <input id="quick-status-obs" class="form-input form-input--no-icon" placeholder="Ej: Aprobado según soporte / resolución presentada..." value="${escHtml(r.observaciones || '')}" />
         </div>
       </div>`;
@@ -355,8 +757,8 @@ const ViaticosModule = (() => {
     App.openModal('Confirmar Eliminación', `<p style="color:var(--text-secondary)">¿Eliminar el viático de <strong style="color:var(--text-primary)">${nombre}</strong>?</p>`, [
       { text: 'Cancelar', cls: 'btn-secondary', action: () => App.closeModal() },
       { text: 'Eliminar', cls: 'btn-danger', action: async () => {
-        try { await API.deleteViatico(id); App.closeModal(); App.showToast('Viático eliminado.','success'); await load(); loadStats(); }
-        catch (err) { App.showToast(err.message,'error'); }
+        try { await API.deleteViatico(id); App.closeModal(); App.showToast('Viático eliminado.', 'success'); await load(); loadStats(); }
+        catch (err) { App.showToast(err.message, 'error'); }
       }},
     ]);
   }
@@ -370,7 +772,7 @@ const ViaticosModule = (() => {
     load();
   }
   function clearFilters() {
-    ['vit-q','vit-estado'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    ['vit-q', 'vit-estado'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     state.filters = {}; state.page = 1; load();
   }
   function goPage(p) { if (p < 1 || p > state.totalPages) return; state.page = p; load(); }
@@ -381,7 +783,7 @@ const ViaticosModule = (() => {
         <div class="page-header">
           <div class="page-header-info">
             <h1 class="page-heading">Viáticos</h1>
-            <p class="page-desc">Gestión de solicitudes y aprobaciones de viáticos del personal institucional</p>
+            <p class="page-desc">Gestión de solicitudes, comisiones y aprobaciones de viáticos del personal institucional</p>
           </div>
           <div class="page-actions">
             ${Auth.canEdit() ? `<button class="btn btn-primary" onclick="ViaticosModule.openCreate()">
@@ -439,5 +841,26 @@ const ViaticosModule = (() => {
     await load();
   }
 
-  return { render, openCreate, openEdit, openStatusPicker, selectQuickStatus, confirmDelete, applyFilters, clearFilters, goPage, calcTotal };
+  return {
+    render,
+    openCreate,
+    openEdit,
+    openStatusPicker,
+    selectQuickStatus,
+    confirmDelete,
+    applyFilters,
+    clearFilters,
+    goPage,
+    calcTotal,
+    onNombreInput,
+    selectEmployee,
+    onTipoDestinoChange,
+    onDeptoChange,
+    updateDestinoFinal,
+    onDatesChange,
+    onEstadoChange,
+    onFileSelected,
+    removeUploadedFile,
+    viewSoporte,
+  };
 })();

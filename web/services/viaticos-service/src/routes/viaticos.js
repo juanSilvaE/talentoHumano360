@@ -64,6 +64,7 @@ router.get('/', auth, async (req, res) => {
         valorTotalFormatted: formatCurrency(r.valor_total),
         estado: normalizeStatus(r.estado), observaciones: r.observaciones,
         fechaSolicitud: r.fecha_solicitud, aprobadoPor: r.aprobado_por,
+        tipoDestino: r.tipo_destino || 'Nacional', soporte: r.soporte || null,
       })),
       total, page: parseInt(page), totalPages: Math.ceil(total / parseInt(limit))
     });
@@ -89,18 +90,18 @@ router.get('/stats', auth, async (_, res) => {
 // ─── POST /api/viaticos ───────────────────────────────────────────────────────
 router.post('/', auth, async (req, res) => {
   if (!canEdit(req.user.role)) return res.status(403).json({ error: 'Permisos insuficientes.' });
-  const { persona, documento, dependencia, cargo, destino, motivo, fechaInicio, fechaFin, dias, valorDiario, estado, observaciones } = req.body;
+  const { persona, documento, dependencia, cargo, destino, motivo, fechaInicio, fechaFin, dias, valorDiario, estado, observaciones, aprobadoPor, tipoDestino, soporte } = req.body;
   if (!persona || !documento || !destino) return res.status(400).json({ error: 'Persona, documento y destino son requeridos.' });
 
   const d = new Date();
   const today = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
   try {
     const r = await pool.query(
-      `INSERT INTO viaticos(dependencia,apellidos_nombres,documento,cargo,destino,motivo,fecha_inicio,fecha_fin,dias,valor_diario,estado,observaciones,fecha_solicitud)
-       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id_viatico`,
+      `INSERT INTO viaticos(dependencia,apellidos_nombres,documento,cargo,destino,motivo,fecha_inicio,fecha_fin,dias,valor_diario,estado,observaciones,fecha_solicitud,aprobado_por,tipo_destino,soporte)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING id_viatico`,
       [upper(dependencia), upper(persona), documento, upper(cargo), upper(destino), motivo||'',
        fechaInicio||'', fechaFin||'', parseInt(dias)||1, parseFloat(valorDiario)||0,
-       normalizeStatus(estado), observaciones||'', today]);
+       normalizeStatus(estado), observaciones||'', today, aprobadoPor||'', tipoDestino||'Nacional', soporte||null]);
 
     const newId = r.rows[0].id_viatico;
     await pool.query(
@@ -118,15 +119,16 @@ router.post('/', auth, async (req, res) => {
 router.put('/:id', auth, async (req, res) => {
   if (!canEdit(req.user.role)) return res.status(403).json({ error: 'Permisos insuficientes.' });
   const { id } = req.params;
-  const { persona, documento, dependencia, cargo, destino, motivo, fechaInicio, fechaFin, dias, valorDiario, estado, observaciones, aprobadoPor } = req.body;
+  const { persona, documento, dependencia, cargo, destino, motivo, fechaInicio, fechaFin, dias, valorDiario, estado, observaciones, aprobadoPor, tipoDestino, soporte } = req.body;
   try {
     const r = await pool.query(
       `UPDATE viaticos SET dependencia=$1,apellidos_nombres=$2,documento=$3,cargo=$4,destino=$5,motivo=$6,
-        fecha_inicio=$7,fecha_fin=$8,dias=$9,valor_diario=$10,estado=$11,observaciones=$12,aprobado_por=$13
-       WHERE id_viatico=$14 RETURNING id_viatico`,
+        fecha_inicio=$7,fecha_fin=$8,dias=$9,valor_diario=$10,estado=$11,observaciones=$12,aprobado_por=$13,
+        tipo_destino=COALESCE($14,tipo_destino), soporte=COALESCE($15,soporte)
+       WHERE id_viatico=$16 RETURNING id_viatico`,
       [upper(dependencia), upper(persona), documento, upper(cargo), upper(destino), motivo||'',
        fechaInicio||'', fechaFin||'', parseInt(dias)||1, parseFloat(valorDiario)||0,
-       normalizeStatus(estado), observaciones||'', aprobadoPor||'', parseInt(id)]);
+       normalizeStatus(estado), observaciones||'', aprobadoPor||'', tipoDestino||'Nacional', soporte||null, parseInt(id)]);
     if (r.rowCount === 0) return res.status(404).json({ error: 'Viático no encontrado.' });
     await pool.query(
       'INSERT INTO historial_viaticos(id_viatico,estado_nuevo,nota,actualizado_por) VALUES($1,$2,$3,$4)',

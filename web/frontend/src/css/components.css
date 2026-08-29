@@ -872,6 +872,195 @@ tbody tr:last-child td { border-bottom: none; }
   cursor: pointer;
 }
 
+/* ─── Viáticos Form Enhancements ────────────────────────────────────────── */
+.autocomplete-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border-2);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 1000;
+  padding: var(--space-1);
+}
+
+.autocomplete-item {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: all var(--transition-fast);
+}
+
+.autocomplete-item:hover, .autocomplete-item.is-selected {
+  background: rgba(37, 99, 235, 0.18);
+  border-left: 3px solid var(--color-primary-400);
+}
+
+.autocomplete-item-name {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.autocomplete-item-meta {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* Destination Toggle */
+.dest-toggle-group {
+  display: flex;
+  gap: var(--space-2);
+  background: var(--color-surface);
+  padding: 4px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+.dest-toggle-opt {
+  flex: 1;
+  cursor: pointer;
+  margin: 0;
+}
+
+.dest-toggle-opt input[type="radio"] {
+  display: none;
+}
+
+.dest-toggle-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.dest-toggle-opt input[type="radio"]:checked + .dest-toggle-pill {
+  background: var(--color-primary-600);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+}
+
+/* Destination Preview */
+.dest-preview-box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(200, 166, 61, 0.08) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+}
+
+.dest-preview-icon {
+  font-size: 1.1rem;
+}
+
+.dest-preview-label {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dest-preview-val {
+  color: var(--color-primary-400);
+  font-weight: 700;
+}
+
+/* File Upload Zone */
+.file-upload-zone {
+  border: 2px dashed var(--color-border-2);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.file-upload-zone:hover {
+  border-color: var(--color-primary-400);
+  background: rgba(37, 99, 235, 0.04);
+}
+
+.file-upload-zone input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.file-upload-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--color-primary-400);
+  margin-bottom: var(--space-2);
+}
+
+.file-upload-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.file-upload-desc {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  margin-top: var(--space-2);
+}
+
+.file-chip-remove {
+  background: transparent;
+  border: none;
+  color: #f87171;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+}
+
+.file-chip-remove:hover {
+  color: #ef4444;
+  transform: scale(1.15);
+}
+
 /* ─── Responsive Charts ──────────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .charts-grid { grid-template-columns: 1fr; }
