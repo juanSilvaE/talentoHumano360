@@ -128,6 +128,30 @@ const App = (() => {
     document.getElementById('app').style.display = 'none';
   }
 
+  // ─── Avatar Palettes ────────────────────────────────────────────────────────
+  const AVATAR_PALETTES = [
+    { id: 'boyaca',   name: 'Gobernación (Azul & Oro)',       bg: 'linear-gradient(135deg, #1d4ed8, #eab308)' },
+    { id: 'emerald',  name: 'Esmeralda Andina (Verde)',       bg: 'linear-gradient(135deg, #059669, #10b981)' },
+    { id: 'sunset',   name: 'Atardecer Boyacá (Naranja/Rosa)', bg: 'linear-gradient(135deg, #ea580c, #ec4899)' },
+    { id: 'royal',    name: 'Púrpura Real (Violeta/Indigo)',  bg: 'linear-gradient(135deg, #7c3aed, #3b82f6)' },
+    { id: 'ruby',     name: 'Rubí Imperial (Rojo Carmesí)',   bg: 'linear-gradient(135deg, #dc2626, #f43f5e)' },
+    { id: 'ocean',    name: 'Océano Turquesa (Cian & Azul)',  bg: 'linear-gradient(135deg, #0891b2, #0284c7)' },
+    { id: 'midnight', name: 'Medianoche (Gris & Azul Eléc.)', bg: 'linear-gradient(135deg, #1e293b, #3b82f6)' },
+    { id: 'gold',     name: 'Oro Colonial (Dorado Puro)',     bg: 'linear-gradient(135deg, #d97706, #fbbf24)' },
+  ];
+
+  let currentAvatarColor = null;
+
+  function getAvatarColor(username) {
+    const key = `humano360_avatar_color_${username || 'default'}`;
+    return localStorage.getItem(key) || AVATAR_PALETTES[0].bg;
+  }
+
+  function setAvatarColor(username, color) {
+    const key = `humano360_avatar_color_${username || 'default'}`;
+    localStorage.setItem(key, color);
+  }
+
   function showApp() {
     const user = Auth.getUser();
     document.getElementById('login-screen').style.display = 'none';
@@ -140,6 +164,7 @@ const App = (() => {
     const name = user.name || 'Angela Ussa';
     const role = user.role || 'Administrador';
     const initial = name.charAt(0).toUpperCase();
+    const avatarColor = getAvatarColor(user.username);
 
     // Sidebar
     const nameEl = document.getElementById('user-name');
@@ -147,7 +172,10 @@ const App = (() => {
     const avatarEl = document.getElementById('user-avatar');
     if (nameEl) nameEl.textContent = name;
     if (roleEl) roleEl.textContent = role === 'Administrador' ? 'Administradora' : role;
-    if (avatarEl) avatarEl.textContent = initial;
+    if (avatarEl) {
+      avatarEl.textContent = initial;
+      avatarEl.style.background = avatarColor;
+    }
 
     // Topbar
     const topNameEl = document.getElementById('topbar-user-name');
@@ -155,17 +183,29 @@ const App = (() => {
     const topAvatarEl = document.getElementById('topbar-avatar');
     if (topNameEl) topNameEl.textContent = name;
     if (topRoleEl) topRoleEl.textContent = role === 'Administrador' ? 'Admin' : role;
-    if (topAvatarEl) topAvatarEl.textContent = initial;
+    if (topAvatarEl) {
+      topAvatarEl.textContent = initial;
+      topAvatarEl.style.background = avatarColor;
+    }
   }
 
   // ─── User Profile Modal ────────────────────────────────────────────────────
   function openProfileModal() {
     const user = Auth.getUser();
     const initial = (user.name || 'A').charAt(0).toUpperCase();
+    currentAvatarColor = getAvatarColor(user.username);
+
+    const swatchesHtml = AVATAR_PALETTES.map(p => {
+      const isSelected = p.bg === currentAvatarColor;
+      return `
+        <button type="button" class="avatar-swatch ${isSelected ? 'active' : ''}" style="background:${p.bg};" data-bg="${p.bg}" title="${p.name}" aria-label="${p.name}">
+          ${isSelected ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+        </button>`;
+    }).join('');
 
     const bodyHtml = `
       <div class="profile-card-header">
-        <div class="profile-avatar-large">${initial}</div>
+        <div class="profile-avatar-large" id="prof-avatar-preview" style="background:${currentAvatarColor};">${initial}</div>
         <div class="profile-header-info">
           <div class="profile-name-display">${escHtml(user.name || 'Angela Ussa')}</div>
           <span class="profile-role-pill">${escHtml(user.role || 'Administrador')}</span>
@@ -174,6 +214,22 @@ const App = (() => {
       </div>
 
       <form id="profile-form" onsubmit="return false;" style="display:flex;flex-direction:column;gap:var(--space-4);">
+        <!-- Avatar Color Customization -->
+        <div class="avatar-color-section">
+          <div class="profile-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/></svg>
+            <span>Color de la Pelotita (Avatar)</span>
+          </div>
+          <p class="avatar-color-subtitle">Selecciona tu combinación de colores favorita o elige un tono personalizado:</p>
+          <div class="avatar-swatches-grid" id="avatar-swatches-container">
+            ${swatchesHtml}
+            <div class="avatar-color-custom-btn" title="Elegir color personalizado">
+              <input type="color" id="prof-custom-color" value="#1d4ed8" aria-label="Color personalizado" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </div>
+          </div>
+        </div>
+
         <div class="form-group">
           <label class="form-label">Correo Institucional (No modificable)</label>
           <input type="text" class="form-input form-input--no-icon" value="${escHtml(user.username || '')}" readonly disabled style="opacity:0.75;background:rgba(255,255,255,0.04);cursor:not-allowed;border-color:var(--color-border);" />
@@ -216,9 +272,48 @@ const App = (() => {
       { text: 'Cancelar', cls: 'btn-secondary', action: () => closeModal() },
       { text: 'Guardar Cambios', cls: 'btn-primary', id: 'prof-save-btn', action: saveProfile },
     ]);
+
+    // Swatch click handlers
+    const swatchesContainer = document.getElementById('avatar-swatches-container');
+    const previewAvatar = document.getElementById('prof-avatar-preview');
+
+    if (swatchesContainer && previewAvatar) {
+      swatchesContainer.querySelectorAll('.avatar-swatch').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const bg = btn.dataset.bg;
+          currentAvatarColor = bg;
+          previewAvatar.style.background = bg;
+
+          // Update active swatch state
+          swatchesContainer.querySelectorAll('.avatar-swatch').forEach(s => {
+            s.classList.remove('active');
+            s.innerHTML = '';
+          });
+          btn.classList.add('active');
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+        });
+      });
+
+      // Custom color picker handler
+      const customColorInput = document.getElementById('prof-custom-color');
+      if (customColorInput) {
+        customColorInput.addEventListener('input', (e) => {
+          const hex = e.target.value;
+          const bg = `linear-gradient(135deg, ${hex}, #0f1b2d)`;
+          currentAvatarColor = bg;
+          previewAvatar.style.background = bg;
+
+          swatchesContainer.querySelectorAll('.avatar-swatch').forEach(s => {
+            s.classList.remove('active');
+            s.innerHTML = '';
+          });
+        });
+      }
+    }
   }
 
   async function saveProfile() {
+    const user = Auth.getUser();
     const nombre = document.getElementById('prof-name')?.value.trim();
     const curPass = document.getElementById('prof-cur-pass')?.value.trim();
     const newPass = document.getElementById('prof-new-pass')?.value.trim();
@@ -256,6 +351,12 @@ const App = (() => {
 
       const res = await API.updateProfile(payload);
       Auth.save(res.token, res.user);
+
+      // Save custom avatar color
+      if (currentAvatarColor) {
+        setAvatarColor(res.user.username, currentAvatarColor);
+      }
+
       updateUserDisplay(res.user);
       closeModal();
       showToast('Perfil actualizado exitosamente.', 'success');
