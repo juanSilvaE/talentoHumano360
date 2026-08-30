@@ -130,13 +130,13 @@ const App = (() => {
 
   // ─── Avatar Palettes ────────────────────────────────────────────────────────
   const AVATAR_PALETTES = [
-    { id: 'boyaca', name: 'Gobernación (Azul & Oro)', bg: 'linear-gradient(135deg, #1d4ed8, #eab308)' },
+    { id: 'boyaca', name: 'Talento 360 (Verde & Oro)', bg: 'linear-gradient(135deg, #1b5e20, #c8a63d)' },
     { id: 'emerald', name: 'Esmeralda Andina (Verde)', bg: 'linear-gradient(135deg, #059669, #10b981)' },
+    { id: 'boyaca-blue', name: 'Gobernación (Azul & Oro)', bg: 'linear-gradient(135deg, #1d4ed8, #eab308)' },
     { id: 'sunset', name: 'Atardecer Boyacá (Naranja/Rosa)', bg: 'linear-gradient(135deg, #ea580c, #ec4899)' },
     { id: 'royal', name: 'Púrpura Real (Violeta/Indigo)', bg: 'linear-gradient(135deg, #7c3aed, #3b82f6)' },
     { id: 'ruby', name: 'Rubí Imperial (Rojo Carmesí)', bg: 'linear-gradient(135deg, #dc2626, #f43f5e)' },
     { id: 'ocean', name: 'Océano Turquesa (Cian & Azul)', bg: 'linear-gradient(135deg, #0891b2, #0284c7)' },
-    { id: 'midnight', name: 'Medianoche (Gris & Azul Eléc.)', bg: 'linear-gradient(135deg, #1e293b, #3b82f6)' },
     { id: 'gold', name: 'Oro Colonial (Dorado Puro)', bg: 'linear-gradient(135deg, #d97706, #fbbf24)' },
   ];
 
@@ -225,7 +225,7 @@ const App = (() => {
           <div class="avatar-swatches-grid" id="avatar-swatches-container">
             ${swatchesHtml}
             <div class="avatar-color-custom-btn" title="Elegir color personalizado">
-              <input type="color" id="prof-custom-color" value="#1d4ed8" aria-label="Color personalizado" />
+              <input type="color" id="prof-custom-color" value="#1b5e20" aria-label="Color personalizado" />
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
             </div>
           </div>
@@ -233,7 +233,7 @@ const App = (() => {
 
         <div class="form-group">
           <label class="form-label">Correo Institucional (No modificable)</label>
-          <input type="text" class="form-input form-input--no-icon" value="${escHtml(user.username || '')}" readonly disabled style="opacity:0.75;background:rgba(255,255,255,0.04);cursor:not-allowed;border-color:var(--color-border);" />
+          <input type="text" class="form-input form-input--no-icon" value="${escHtml(user.username || '')}" readonly disabled style="background:#f1f5f9;color:#64748b;cursor:not-allowed;border:1.5px solid #cbd5e1;" />
           <div class="profile-readonly-notice">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             <span>El correo institucional es asignado por el sistema y no puede ser alterado.</span>
@@ -300,7 +300,7 @@ const App = (() => {
       if (customColorInput) {
         customColorInput.addEventListener('input', (e) => {
           const hex = e.target.value;
-          const bg = `linear-gradient(135deg, ${hex}, #0f1b2d)`;
+          const bg = `linear-gradient(135deg, ${hex}, #1b5e20)`;
           currentAvatarColor = bg;
           previewAvatar.style.background = bg;
 

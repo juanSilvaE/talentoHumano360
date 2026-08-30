@@ -207,23 +207,25 @@ const DashboardModule = (() => {
             plugins: {
               legend: { display: false },
               tooltip: {
-                backgroundColor: 'rgba(15, 27, 45, 0.95)',
+                backgroundColor: '#0f172a',
+                titleColor: '#ffffff',
+                bodyColor: '#ffffff',
                 titleFont: { size: 13, weight: 'bold' },
                 bodyFont: { size: 12 },
                 padding: 12,
                 cornerRadius: 8,
-                borderColor: 'rgba(255,255,255,0.15)',
+                borderColor: '#334155',
                 borderWidth: 1
               }
             },
             scales: {
               x: {
-                grid: { color: 'rgba(255,255,255,0.05)' },
-                ticks: { color: 'rgba(255,255,255,0.7)', font: { size: 12, weight: '500' } }
+                grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                ticks: { color: '#475569', font: { size: 12, weight: '600' } }
               },
               y: {
-                grid: { color: 'rgba(255,255,255,0.05)' },
-                ticks: { color: 'rgba(255,255,255,0.7)', precision: 0, font: { size: 12 } }
+                grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                ticks: { color: '#475569', precision: 0, font: { size: 12 } }
               }
             }
           }
@@ -255,20 +257,22 @@ const DashboardModule = (() => {
               legend: {
                 position: 'bottom',
                 labels: {
-                  color: 'rgba(255,255,255,0.85)',
+                  color: '#334155',
                   padding: 16,
-                  font: { size: 12, weight: '500' },
+                  font: { size: 12, weight: '600' },
                   usePointStyle: true,
                   pointStyle: 'circle'
                 }
               },
               tooltip: {
-                backgroundColor: 'rgba(15, 27, 45, 0.95)',
+                backgroundColor: '#0f172a',
+                titleColor: '#ffffff',
+                bodyColor: '#ffffff',
                 titleFont: { size: 13, weight: 'bold' },
                 bodyFont: { size: 12 },
                 padding: 12,
                 cornerRadius: 8,
-                borderColor: 'rgba(255,255,255,0.15)',
+                borderColor: '#334155',
                 borderWidth: 1
               }
             },
