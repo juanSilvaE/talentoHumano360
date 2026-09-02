@@ -23,13 +23,22 @@ const AdminRequestsModule = (() => {
     return 'badge--licencia';
   }
 
+  function tipoPlural(tipo) {
+    if (tipo === 'Permiso Laboral' || tipo === 'permisos') return 'Permisos Laborales';
+    if (tipo === 'Incapacidad' || tipo === 'incapacidades') return 'Incapacidades';
+    if (tipo === 'Licencia' || tipo === 'licencias') return 'Licencias';
+    return tipo || 'Permisos Laborales';
+  }
+
   function setTipo(tipo, activeBtn) {
     state.tipo = tipo; state.page = 1; state.filters = {};
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     if (activeBtn) activeBtn.classList.add('active');
-    // Update section heading
+    // Update section heading and table title correctly with plural forms
     const heading = document.getElementById('adm-heading');
-    if (heading) heading.textContent = tipo + 's';
+    if (heading) heading.textContent = tipoPlural(tipo);
+    const tableTitle = document.getElementById('adm-table-title');
+    if (tableTitle) tableTitle.textContent = tipoPlural(tipo);
     // Sync sidebar
     const sideMap = {
       'Permiso Laboral': 'nav-permisos',
@@ -261,7 +270,7 @@ const AdminRequestsModule = (() => {
       <div class="module-enter">
         <div class="page-header">
           <div class="page-header-info">
-            <h1 class="page-heading" id="adm-heading">Gestión de Solicitudes Administrativas</h1>
+            <h1 class="page-heading" id="adm-heading">${tipoPlural(tipoLabel)}</h1>
             <p class="page-desc">Administre permisos laborales, incapacidades y licencias del personal</p>
           </div>
           <div class="page-actions">
@@ -306,7 +315,7 @@ const AdminRequestsModule = (() => {
 
         <div class="table-card">
           <div class="table-header">
-            <span class="table-title" id="adm-table-title">${tipoLabel}s</span>
+            <span class="table-title" id="adm-table-title">${tipoPlural(tipoLabel)}</span>
             <span class="table-count" id="adm-count">Cargando...</span>
           </div>
           <div class="table-wrap">

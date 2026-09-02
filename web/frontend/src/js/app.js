@@ -6,6 +6,9 @@ const App = (() => {
 
   // ─── Toast System ──────────────────────────────────────────────────────────
   function showToast(message, type = 'info') {
+    if (typeof Settings !== 'undefined' && !Settings.isNotificationTypeEnabled(type)) {
+      return;
+    }
     const container = document.getElementById('toast-container');
     if (!container) return;
     const icons = {
@@ -88,6 +91,7 @@ const App = (() => {
     requests: 'Solicitudes de Vacaciones',
     'admin-requests': 'Gestión de Solicitudes Administrativas',
     viaticos: 'Viáticos',
+    settings: 'Configuración',
   };
 
   async function navigate(module, options = {}) {
@@ -96,8 +100,14 @@ const App = (() => {
     if (!container) return;
 
     // Update active nav
-    document.querySelectorAll('.nav-item:not(.nav-subitem)').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.nav-subitem').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.nav-item:not(.nav-subitem), .sidebar-settings-btn').forEach(b => {
+      b.classList.remove('active');
+      b.removeAttribute('aria-current');
+    });
+    document.querySelectorAll('.nav-subitem').forEach(b => {
+      b.classList.remove('active');
+      b.removeAttribute('aria-current');
+    });
     const navBtn = document.getElementById(`nav-${module}`);
     if (navBtn) {
       navBtn.classList.add('active');
@@ -124,6 +134,9 @@ const App = (() => {
             break;
           }
           case 'viaticos':      await ViaticosModule.render(container); break;
+          case 'settings':
+            if (typeof SettingsModule !== 'undefined') await SettingsModule.render(container);
+            break;
           default:
             container.innerHTML = `<div class="module-enter"><p style="color:var(--text-muted)">Módulo no encontrado.</p></div>`;
         }
@@ -146,6 +159,9 @@ const App = (() => {
           break;
         }
         case 'viaticos':      await ViaticosModule.render(container); break;
+        case 'settings':
+          if (typeof SettingsModule !== 'undefined') await SettingsModule.render(container);
+          break;
         default:
           container.innerHTML = `<div class="module-enter"><p style="color:var(--text-muted)">Módulo no encontrado.</p></div>`;
       }
@@ -164,6 +180,21 @@ const App = (() => {
 
   // ─── Login & App Views ──────────────────────────────────────────────────────
   function showLogin() {
+    const uInput = document.getElementById('login-username');
+    const pInput = document.getElementById('login-password');
+    const err = document.getElementById('login-error');
+    if (uInput) uInput.value = '';
+    if (pInput) pInput.value = '';
+    if (err) {
+      err.textContent = '';
+      err.classList.remove('visible');
+    }
+
+    // Clean neutral theme on the public login page
+    if (typeof Settings !== 'undefined') {
+      Settings.resetToDefaults();
+    }
+
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
     // Re-trigger login animation when returning to login
@@ -226,6 +257,10 @@ const App = (() => {
 
   function showApp() {
     const user = Auth.getUser();
+    // Load per-user personalized preferences (theme, font, sound, etc.)
+    if (typeof Settings !== 'undefined' && user && user.username) {
+      Settings.loadForUser(user.username);
+    }
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'grid';
     updateUserDisplay(user);
@@ -297,9 +332,9 @@ const App = (() => {
         <div class="profile-avatar-large" id="prof-avatar-preview" style="background:${currentAvatarColor};">${initial}</div>
         <div class="profile-header-info">
           <div class="profile-name-display">${escHtml(user.name || 'Angela Ussa')}</div>
-          <div style="font-size:var(--text-xs);font-weight:600;color:var(--color-primary-800);margin-bottom:4px;">${escHtml(resolveJobTitle(user))}</div>
+          <div class="profile-job-title">${escHtml(resolveJobTitle(user))}</div>
           <span class="profile-role-pill">${escHtml(sanitizeRole(user.role || 'Administrador'))}</span>
-          <p style="font-size:var(--text-xs);color:var(--text-muted);margin-top:4px;">Gobernación de Boyacá · Talento Humano</p>
+          <p class="profile-dept-subtitle">Gobernación de Boyacá · Talento Humano</p>
         </div>
       </div>
 
@@ -322,7 +357,7 @@ const App = (() => {
 
         <div class="form-group">
           <label class="form-label">Correo Institucional (No modificable)</label>
-          <input type="text" class="form-input form-input--no-icon" value="${escHtml(user.username || '')}" readonly disabled tabindex="-1" autocomplete="off" style="background:#f1f5f9;color:#64748b;cursor:not-allowed;border:1.5px solid #cbd5e1;" />
+          <input type="text" class="form-input form-input--no-icon profile-readonly-input" value="${escHtml(user.username || '')}" readonly disabled tabindex="-1" autocomplete="off" />
           <div class="profile-readonly-notice">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             <span>El correo institucional es asignado por el sistema y no puede ser alterado.</span>
@@ -336,16 +371,16 @@ const App = (() => {
 
         <div class="profile-password-section">
           <label class="profile-password-toggle-card" for="prof-change-pass-toggle">
-            <div style="display:flex;align-items:center;gap:12px;">
-              <div style="width:34px;height:34px;border-radius:8px;background:rgba(27,94,32,0.1);display:flex;align-items:center;justify-content:center;color:#1b5e20;flex-shrink:0;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <div class="profile-password-toggle-left">
+              <div class="profile-password-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
               </div>
               <div>
-                <div style="font-size:var(--text-sm);font-weight:600;color:#0f172a;">Cambiar Contraseña</div>
-                <div style="font-size:var(--text-xs);color:#64748b;">Activa esta opción únicamente si deseas renovar tu clave de acceso</div>
+                <div class="profile-password-toggle-title">Cambiar Contraseña</div>
+                <div class="profile-password-toggle-desc">Activa esta opción únicamente si deseas renovar tu clave de acceso</div>
               </div>
             </div>
-            <input type="checkbox" id="prof-change-pass-toggle" style="width:18px;height:18px;cursor:pointer;accent-color:#1b5e20;" />
+            <input type="checkbox" id="prof-change-pass-toggle" class="profile-password-checkbox" />
           </label>
 
           <div id="prof-password-fields" class="profile-password-fields-container" style="display:none;">
@@ -367,6 +402,7 @@ const App = (() => {
       </form>`;
 
     openModal('Mi Perfil', bodyHtml, [
+      { text: 'Configuración', cls: 'btn-secondary', id: 'prof-settings-btn', action: () => { closeModal(); navigate('settings'); } },
       { text: 'Cancelar', cls: 'btn-secondary', action: () => closeModal() },
       { text: 'Guardar Cambios', cls: 'btn-primary', id: 'prof-save-btn', action: saveProfile },
     ]);
@@ -506,6 +542,11 @@ const App = (() => {
 
   // ─── Init ──────────────────────────────────────────────────────────────────
   function init() {
+    // Initialize system settings & preferences
+    if (typeof Settings !== 'undefined') {
+      Settings.init();
+    }
+
     // Restore sidebar preference
     const isCollapsed = (localStorage.getItem('talento360_sidebar_collapsed') ?? localStorage.getItem('humano360_sidebar_collapsed')) === 'true';
     if (isCollapsed) {
@@ -595,6 +636,9 @@ const App = (() => {
       // FX: logout sound
       if (typeof FX !== 'undefined') FX.Sound.logout();
       Auth.clear();
+      if (typeof Settings !== 'undefined') {
+        Settings.resetToDefaults();
+      }
       showLogin();
       showToast('Sesión cerrada correctamente.', 'info');
     });
@@ -610,6 +654,9 @@ const App = (() => {
     });
     document.getElementById('topbar-profile-btn')?.addEventListener('click', () => {
       openProfileModal();
+    });
+    document.getElementById('topbar-settings-btn')?.addEventListener('click', () => {
+      navigate('settings');
     });
 
     // Sidebar toggle (both sidebar and topbar buttons)
@@ -640,7 +687,7 @@ const App = (() => {
     });
 
     // Nav items
-    document.querySelectorAll('.nav-item[data-module]:not(.nav-group-toggle)').forEach(btn => {
+    document.querySelectorAll('.nav-item[data-module]:not(.nav-group-toggle), .sidebar-settings-btn[data-module]').forEach(btn => {
       btn.addEventListener('click', () => {
         // FX: nav click animation
         if (typeof FX !== 'undefined') FX.animateNavClick(btn);
@@ -687,9 +734,15 @@ const App = (() => {
           localStorage.setItem('h360_user', JSON.stringify(storedUser));
         }
       }
+      if (typeof Settings !== 'undefined' && storedUser && storedUser.username) {
+        Settings.loadForUser(storedUser.username);
+      }
       showApp();
       navigate('dashboard');
     } else {
+      if (typeof Settings !== 'undefined') {
+        Settings.resetToDefaults();
+      }
       showLogin();
     }
 

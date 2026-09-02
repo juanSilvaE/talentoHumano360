@@ -14,6 +14,7 @@ const FX = (() => {
   }
 
   function _tone(opts) {
+    if (typeof Settings !== 'undefined' && !Settings.get('soundEnabled')) return;
     try {
       const { freq = 440, freq2, type = 'sine', volume = 0.18, duration = 0.12, attack = 0.008, decay = 0.05 } = opts;
       const ctx = _getCtx();
@@ -33,6 +34,7 @@ const FX = (() => {
   }
 
   function _chord(notes, delay = 0) {
+    if (typeof Settings !== 'undefined' && !Settings.get('soundEnabled')) return;
     notes.forEach((n, i) => setTimeout(() => _tone(n), delay + i * 30));
   }
 
@@ -114,6 +116,7 @@ const FX = (() => {
   // ─── Particle Burst (confetti-style) ─────────────────────────────────────
   function burst(x, y, opts = {}) {
     if (!window.anime) return;
+    if (typeof Settings !== 'undefined' && Settings.get('reduceMotion')) return;
     const { count = 14, colors = ['#22c55e', '#facc15', '#3b82f6', '#f97316', '#a855f7', '#ffffff'], size = 8 } = opts;
     const container = document.body;
 
