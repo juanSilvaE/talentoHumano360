@@ -26,7 +26,7 @@ router.post('/login', async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT username, nombre, rol
+      `SELECT username, nombre, rol, cargo_laboral
        FROM usuarios
        WHERE (LOWER(username) = $1 OR LOWER(SPLIT_PART(username, '@', 1)) = $1)
          AND password = $2
@@ -44,7 +44,7 @@ router.post('/login', async (req, res) => {
       username: user.username,
       name:     user.nombre,
       role:     user.rol,
-      jobTitle: resolveJobTitle(user.rol),
+      jobTitle: user.cargo_laboral || resolveJobTitle(user.rol),
       department: resolveDepartment(user.rol),
     };
 
@@ -95,7 +95,7 @@ router.put('/profile', authMiddleware, async (req, res) => {
   try {
     // Fetch current user from DB
     const userQ = await pool.query(
-      'SELECT username, password, nombre, rol FROM usuarios WHERE LOWER(username) = LOWER($1) AND estado = \'ACTIVO\' LIMIT 1',
+      'SELECT username, password, nombre, rol, cargo_laboral FROM usuarios WHERE LOWER(username) = LOWER($1) AND estado = \'ACTIVO\' LIMIT 1',
       [username]
     );
 
@@ -122,7 +122,7 @@ router.put('/profile', authMiddleware, async (req, res) => {
 
     // Update in database
     const updateQ = await pool.query(
-      'UPDATE usuarios SET nombre = $1, password = $2 WHERE LOWER(username) = LOWER($3) RETURNING username, nombre, rol',
+      'UPDATE usuarios SET nombre = $1, password = $2 WHERE LOWER(username) = LOWER($3) RETURNING username, nombre, rol, cargo_laboral',
       [cleanNombre, finalPassword, username]
     );
 
@@ -131,7 +131,7 @@ router.put('/profile', authMiddleware, async (req, res) => {
       username: updatedUser.username,
       name:     updatedUser.nombre,
       role:     updatedUser.rol,
-      jobTitle: resolveJobTitle(updatedUser.rol),
+      jobTitle: updatedUser.cargo_laboral || resolveJobTitle(updatedUser.rol),
       department: resolveDepartment(updatedUser.rol),
     };
 

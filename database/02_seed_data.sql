@@ -2,12 +2,13 @@
 
 -- 3. Insertar el usuario administrador
 --    La contraseña se guarda hasheada con bcrypt (nunca en texto plano).
-INSERT INTO public.usuarios (username, password, nombre, rol, estado)
+INSERT INTO public.usuarios (username, password, nombre, rol, cargo_laboral, estado)
 VALUES 
-    ('angela.ussa@boyaca.gov.co', '@Angela123', 'Angela Ussa', 'Administrador', 'ACTIVO'),
-    ('carlos@boyaca.gov.co', 'carlos123', 'Carlos Andrés Torres Rivera', 'Coordinador', 'ACTIVO'),
-    ('maria@boyaca.gov.co', 'maria123', 'María Camila Rodríguez Niño', 'Consulta', 'ACTIVO')
-    ON CONFLICT (username) DO UPDATE SET password = EXCLUDED.password, nombre = EXCLUDED.nombre, rol = EXCLUDED.rol, estado = 'ACTIVO';
+    ('admin@boyaca.gov.co', 'admin123', 'Administrador', 'Administrador', NULL, 'ACTIVO'),
+    ('angela.ussa@boyaca.gov.co', '@Angela123', 'Angela Ussa', 'Administrador', 'Directora de Talento Humano', 'ACTIVO'),
+    ('carlos@boyaca.gov.co', 'carlos123', 'Carlos Andrés Torres Rivera', 'Coordinador', 'Coordinador de Solicitudes', 'ACTIVO'),
+    ('maria@boyaca.gov.co', 'maria123', 'María Camila Rodríguez Niño', 'Consulta', 'Analista de Talento Humano', 'ACTIVO')
+    ON CONFLICT (username) DO UPDATE SET password = EXCLUDED.password, nombre = EXCLUDED.nombre, rol = EXCLUDED.rol, cargo_laboral = EXCLUDED.cargo_laboral, estado = 'ACTIVO';
 
 -- ============================================================
 -- DEPENDENCIAS

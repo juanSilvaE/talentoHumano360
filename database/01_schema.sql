@@ -15,6 +15,7 @@ CREATE TABLE usuarios (
     password VARCHAR(120) NOT NULL,
     nombre VARCHAR(160) NOT NULL,
     rol VARCHAR(80) NOT NULL DEFAULT 'Administrador',
+    cargo_laboral VARCHAR(200) DEFAULT NULL,
     estado VARCHAR(30) NOT NULL DEFAULT 'ACTIVO'
 );
 

@@ -1,0 +1,6 @@
+# Environment variables
+.env
+web/.env
+
+# Node modules
+node_modules/
