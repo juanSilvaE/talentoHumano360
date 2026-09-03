@@ -500,12 +500,16 @@ const FX = (() => {
   // ─── Logo Breathing Glow ──────────────────────────────────────────────────
   function startLogoBreathing() {
     if (!window.anime) return;
-    const logo = document.querySelector('.sidebar-logo img, .sidebar-logo svg');
-    if (!logo) return;
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const targets = document.querySelectorAll('.sidebar-logo img, .sidebar-logo svg');
+    if (!targets.length) return;
 
     anime({
-      targets: logo,
-      filter: [
+      targets,
+      filter: isDark ? [
+        'drop-shadow(0 0 4px rgba(255,255,255,0.3)) drop-shadow(0 0 8px rgba(209,173,42,0.3))',
+        'drop-shadow(0 0 10px rgba(255,255,255,0.65)) drop-shadow(0 0 16px rgba(209,173,42,0.65))',
+      ] : [
         'drop-shadow(0 0 4px rgba(209,173,42,0.35))',
         'drop-shadow(0 0 14px rgba(209,173,42,0.75))',
       ],

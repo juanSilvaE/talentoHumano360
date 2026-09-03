@@ -819,7 +819,7 @@ tbody tr:last-child td { border-bottom: none; }
 .profile-avatar-large {
   width: 60px; height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-green-dark), var(--color-mustard));
+  background: var(--color-red, #E32431);
   color: #fff;
   display: flex;
   align-items: center;
@@ -1294,11 +1294,11 @@ tbody tr:last-child td { border-bottom: none; }
 .settings-card-icon--purple  { background: rgba(184, 75, 167, 0.12); color: var(--color-purple); }
 .settings-card-icon--danger  { background: rgba(227, 36, 49, 0.12); color: var(--color-red); }
 
-[data-theme="dark"] .settings-card-icon--emerald { background: rgba(40, 135, 27, 0.2); color: #86efac; }
+[data-theme="dark"] .settings-card-icon--emerald { background: rgba(40, 135, 27, 0.2); color: var(--color-green-bright); }
 [data-theme="dark"] .settings-card-icon--gold    { background: rgba(209, 173, 42, 0.22); color: var(--color-mustard); }
-[data-theme="dark"] .settings-card-icon--blue    { background: rgba(0, 123, 199, 0.2); color: #7dd3fc; }
-[data-theme="dark"] .settings-card-icon--purple  { background: rgba(184, 75, 167, 0.2); color: #f0abfc; }
-[data-theme="dark"] .settings-card-icon--danger  { background: rgba(227, 36, 49, 0.2); color: #fca5a5; }
+[data-theme="dark"] .settings-card-icon--blue    { background: rgba(0, 123, 199, 0.2); color: var(--color-blue-light); }
+[data-theme="dark"] .settings-card-icon--purple  { background: rgba(184, 75, 167, 0.2); color: var(--color-purple); }
+[data-theme="dark"] .settings-card-icon--danger  { background: rgba(227, 36, 49, 0.2); color: var(--color-red); }
 
 .settings-card-title {
   font-size: var(--text-lg);
@@ -1367,19 +1367,21 @@ tbody tr:last-child td { border-bottom: none; }
   transition: all 0.25s ease;
   border-radius: 9999px;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
 }
 
 .switch-slider::before {
   position: absolute;
   content: "";
-  height: 22px;
-  width: 22px;
+  height: 20px;
+  width: 20px;
   left: 3px;
-  bottom: 3px;
+  top: 50%;
+  transform: translateY(-50%);
   background-color: #ffffff;
   transition: transform 0.25s ease;
   border-radius: 50%;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
 }
 
 .switch-toggle input:checked + .switch-slider {
@@ -1391,14 +1393,14 @@ tbody tr:last-child td { border-bottom: none; }
 }
 
 .switch-toggle input:checked + .switch-slider::before {
-  transform: translateX(24px);
+  transform: translate(24px, -50%);
 }
 
 [data-theme="dark"] .switch-slider {
   background-color: #273e5f;
 }
 [data-theme="dark"] .switch-toggle input:checked + .switch-slider {
-  background-color: var(--color-green-dark);
+  background-color: var(--color-amber, #d97706);
 }
 
 /* ─── Segmented Control ──────────────────────────────────────────────────── */
@@ -1440,19 +1442,20 @@ tbody tr:last-child td { border-bottom: none; }
 }
 
 [data-theme="dark"] .segmented-control {
-  background: #16253c;
-  border-color: #273e5f;
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
 }
 [data-theme="dark"] .segmented-btn {
-  color: #8096b3;
+  color: var(--color-slate);
 }
 [data-theme="dark"] .segmented-btn:hover {
-  color: #f1f5f9;
+  color: var(--text-primary);
 }
 [data-theme="dark"] .segmented-btn.is-active {
-  background: #223755;
-  color: #86efac;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: var(--color-amber, #d97706);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.35);
 }
 
 /* ─── Theme Picker Cards ─────────────────────────────────────────────────── */
@@ -1546,15 +1549,15 @@ tbody tr:last-child td { border-bottom: none; }
 }
 
 [data-theme="dark"] .theme-option {
-  background: #16253c;
-  border-color: #273e5f;
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
 }
 [data-theme="dark"] .theme-option:hover {
-  border-color: #3b5a87;
+  border-color: var(--color-slate);
 }
 [data-theme="dark"] .theme-option.is-active {
   border-color: var(--color-green-bright);
-  background: rgba(40, 135, 27, 0.15);
+  background: rgba(40, 135, 27, 0.18);
   box-shadow: 0 0 0 2px rgba(40, 135, 27, 0.35);
 }
 

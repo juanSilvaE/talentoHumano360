@@ -203,16 +203,18 @@ const App = (() => {
     });
   }
 
-  // ─── Avatar Palettes ────────────────────────────────────────────────────────
+  // ─── Avatar Palettes (Solid Colors) ──────────────────────────────────────────
   const AVATAR_PALETTES = [
-    { id: 'boyaca', name: 'Talento 360 (Verde & Oro)', bg: 'linear-gradient(135deg, #287522, #D1AD2A)' },
-    { id: 'emerald', name: 'Esmeralda Andina (Bosque & Verde)', bg: 'linear-gradient(135deg, #355833, #28871B)' },
-    { id: 'boyaca-blue', name: 'Gobernación (Navy & Azul)', bg: 'linear-gradient(135deg, #005387, #007BC7)' },
-    { id: 'sunset', name: 'Atardecer Boyacá (Naranja & Rosa)', bg: 'linear-gradient(135deg, #D14600, #CF3A78)' },
-    { id: 'royal', name: 'Ciruela & Púrpura', bg: 'linear-gradient(135deg, #914169, #B84BA7)' },
-    { id: 'ruby', name: 'Rojo & Terracota', bg: 'linear-gradient(135deg, #A5451B, #E32431)' },
-    { id: 'ocean', name: 'Teal & Azul Claro', bg: 'linear-gradient(135deg, #1D8096, #007BC7)' },
-    { id: 'gold', name: 'Taupe & Mostaza Dorado', bg: 'linear-gradient(135deg, #857352, #D1AD2A)' },
+    { id: 'red', name: 'Rojo Institucional', bg: '#E32431' },
+    { id: 'blue', name: 'Azul Gobernación', bg: '#005387' },
+    { id: 'cyan', name: 'Azul Claro', bg: '#007BC7' },
+    { id: 'teal', name: 'Verde Azulado (Teal)', bg: '#1D8096' },
+    { id: 'amber', name: 'Ámbar Cálido', bg: '#D97706' },
+    { id: 'mustard', name: 'Amarillo Mostaza', bg: '#D1AD2A' },
+    { id: 'pink', name: 'Fucsia Institucional', bg: '#CF3A78' },
+    { id: 'purple', name: 'Púrpura Andino', bg: '#B84BA7' },
+    { id: 'plum', name: 'Ciruela', bg: '#914169' },
+    { id: 'forest', name: 'Verde Bosque', bg: '#287522' },
   ];
 
   let currentAvatarColor = null;
@@ -220,7 +222,20 @@ const App = (() => {
   function getAvatarColor(username) {
     const key = `talento360_avatar_color_${username || 'default'}`;
     const legacyKey = `humano360_avatar_color_${username || 'default'}`;
-    return localStorage.getItem(key) || localStorage.getItem(legacyKey) || AVATAR_PALETTES[0].bg;
+    let saved = localStorage.getItem(key) || localStorage.getItem(legacyKey);
+    if (saved) {
+      if (saved.includes('linear-gradient')) {
+        const hexMatch = saved.match(/#[0-9a-fA-F]{3,8}/);
+        if (hexMatch && hexMatch[0].toLowerCase() !== '#1b5e20' && hexMatch[0].toLowerCase() !== '#287522') {
+          saved = hexMatch[0];
+        } else {
+          saved = AVATAR_PALETTES[0].bg;
+        }
+        localStorage.setItem(key, saved);
+      }
+      return saved;
+    }
+    return AVATAR_PALETTES[0].bg;
   }
 
   function setAvatarColor(username, color) {
@@ -345,11 +360,11 @@ const App = (() => {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/></svg>
             <span>Color del Avatar</span>
           </div>
-          <p class="avatar-color-subtitle">Selecciona tu combinación de colores favorita o elige un tono personalizado:</p>
+          <p class="avatar-color-subtitle">Selecciona un color institucional sólido o elige un tono personalizado:</p>
           <div class="avatar-swatches-grid" id="avatar-swatches-container">
             ${swatchesHtml}
             <div class="avatar-color-custom-btn" title="Elegir color personalizado">
-              <input type="color" id="prof-custom-color" value="#1b5e20" aria-label="Color personalizado" />
+              <input type="color" id="prof-custom-color" value="${(currentAvatarColor && currentAvatarColor.startsWith('#')) ? currentAvatarColor : '#E32431'}" aria-label="Color personalizado" />
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
             </div>
           </div>
@@ -463,14 +478,13 @@ const App = (() => {
         });
       });
 
-      // Custom color picker handler
+      // Custom color picker handler (pure solid color)
       const customColorInput = document.getElementById('prof-custom-color');
       if (customColorInput) {
         customColorInput.addEventListener('input', (e) => {
           const hex = e.target.value;
-          const bg = `linear-gradient(135deg, ${hex}, #1b5e20)`;
-          currentAvatarColor = bg;
-          previewAvatar.style.background = bg;
+          currentAvatarColor = hex;
+          previewAvatar.style.background = hex;
 
           swatchesContainer.querySelectorAll('.avatar-swatch').forEach(s => {
             s.classList.remove('active');
@@ -540,6 +554,84 @@ const App = (() => {
     }
   }
 
+  // ─── Live Topbar Date & Time ───────────────────────────────────────────────
+  function updateTopbarDateTime() {
+    const dateEl = document.getElementById('topbar-date-text');
+    const timeEl = document.getElementById('topbar-time-text');
+    if (!dateEl && !timeEl) return;
+
+    const now = new Date();
+    if (dateEl) {
+      const dayName = now.toLocaleDateString('es-CO', { weekday: 'long' });
+      const capDay = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+      const monthName = now.toLocaleDateString('es-CO', { month: 'short' }).replace('.', '');
+      const capMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+      dateEl.textContent = `${capDay}, ${now.getDate()} ${capMonth} ${now.getFullYear()}`;
+    }
+    if (timeEl) {
+      timeEl.textContent = now.toLocaleTimeString('es-CO', {
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+      });
+    }
+  }
+
+  // ─── Quick Access Controls (Theme & Sound) ─────────────────────────────────
+  function updateTopbarQuickControls() {
+    const themeBtn = document.getElementById('topbar-theme-toggle');
+    const soundBtn = document.getElementById('topbar-sound-toggle');
+
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+      (typeof Settings !== 'undefined' && Settings.get('theme') === 'dark');
+
+    if (themeBtn) {
+      if (isDark) {
+        themeBtn.setAttribute('title', 'Modo Oscuro activo (clic para Modo Claro)');
+        themeBtn.setAttribute('aria-label', 'Cambiar a Modo Claro');
+        themeBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#f59e0b;">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>`;
+      } else {
+        themeBtn.setAttribute('title', 'Modo Claro activo (clic para Modo Oscuro)');
+        themeBtn.setAttribute('aria-label', 'Cambiar a Modo Oscuro');
+        themeBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#005387;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>`;
+      }
+    }
+
+    const isSoundOn = typeof Settings !== 'undefined' ? Settings.get('soundEnabled') !== false : true;
+    if (soundBtn) {
+      if (isSoundOn) {
+        soundBtn.setAttribute('title', 'Efectos de sonido: Activados (clic para silenciar)');
+        soundBtn.setAttribute('aria-label', 'Silenciar efectos de sonido');
+        soundBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--color-teal);">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>`;
+      } else {
+        soundBtn.setAttribute('title', 'Efectos de sonido: Silenciados (clic para activar)');
+        soundBtn.setAttribute('aria-label', 'Activar efectos de sonido');
+        soundBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--color-red);">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <line x1="23" y1="9" x2="17" y2="15"/>
+            <line x1="17" y1="9" x2="23" y2="15"/>
+          </svg>`;
+      }
+    }
+  }
+
   // ─── Init ──────────────────────────────────────────────────────────────────
   function init() {
     // Initialize system settings & preferences
@@ -553,13 +645,10 @@ const App = (() => {
       document.getElementById('app')?.classList.add('sidebar-collapsed');
     }
 
-    // Topbar date
-    const dateEl = document.getElementById('topbar-date');
-    if (dateEl) {
-      dateEl.textContent = new Date().toLocaleDateString('es-CO', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-      });
-    }
+    // Topbar live date/time & quick controls
+    updateTopbarDateTime();
+    setInterval(updateTopbarDateTime, 1000);
+    updateTopbarQuickControls();
 
     // Password toggle
     const toggleBtn = document.getElementById('toggle-password');
@@ -659,6 +748,30 @@ const App = (() => {
       navigate('settings');
     });
 
+    document.getElementById('topbar-theme-toggle')?.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+        (typeof Settings !== 'undefined' && Settings.get('theme') === 'dark');
+      const nextTheme = isDark ? 'light' : 'dark';
+      if (typeof Settings !== 'undefined') {
+        Settings.set('theme', nextTheme);
+      } else {
+        document.documentElement.setAttribute('data-theme', nextTheme);
+        localStorage.setItem('talento360_theme', nextTheme);
+      }
+      updateTopbarQuickControls();
+      if (typeof FX !== 'undefined' && FX.Sound) FX.Sound.click();
+    });
+
+    document.getElementById('topbar-sound-toggle')?.addEventListener('click', () => {
+      if (typeof Settings !== 'undefined') {
+        const nextSound = !Settings.get('soundEnabled');
+        Settings.set('soundEnabled', nextSound);
+        updateTopbarQuickControls();
+        showToast(nextSound ? 'Efectos de sonido activados' : 'Efectos de sonido silenciados', 'info');
+        if (nextSound && typeof FX !== 'undefined' && FX.Sound) FX.Sound.click();
+      }
+    });
+
     // Sidebar toggle (both sidebar and topbar buttons)
     const toggleSidebar = () => {
       const app = document.getElementById('app');
@@ -750,7 +863,7 @@ const App = (() => {
     if (typeof FX !== 'undefined') FX.init();
   }
 
-  return { init, navigate, showLogin, showApp, showToast, openModal, closeModal, openProfileModal };
+  return { init, navigate, showLogin, showApp, showToast, openModal, closeModal, openProfileModal, updateTopbarQuickControls, updateTopbarDateTime };
 })();
 
 // ─── Bootstrap ───────────────────────────────────────────────────────────────

@@ -96,10 +96,21 @@ const Settings = (() => {
     document.documentElement.setAttribute('data-theme', valid);
     document.documentElement.setAttribute('data-theme-setting', valid);
 
-    // Update meta theme-color for mobile header
+    // Update meta theme-color for mobile header (using corporate tones)
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     if (metaTheme) {
-      metaTheme.setAttribute('content', valid === 'dark' ? '#0a111c' : '#287522');
+      metaTheme.setAttribute('content', valid === 'dark' ? '#041624' : '#287522');
+    }
+
+    // Update Favicon based on theme
+    const favicon = document.getElementById('app-favicon') || document.querySelector('link[rel="icon"]');
+    if (favicon) {
+      favicon.setAttribute('href', valid === 'dark' ? 'imgs/logoCondorBlanco.png' : 'imgs/logoCondor.png');
+    }
+
+    // Sync Topbar Quick Controls (theme toggle button)
+    if (typeof App !== 'undefined' && App.updateTopbarQuickControls) {
+      App.updateTopbarQuickControls();
     }
   }
 

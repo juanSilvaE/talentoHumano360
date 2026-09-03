@@ -75,6 +75,11 @@ tbody tr:nth-child(10) { animation-delay: 0.20s; }
   animation: slide-in-left 0.2s ease;
 }
 
+[data-theme="dark"] .nav-item.active::before {
+  background: var(--color-mustard) !important;
+  box-shadow: 0 0 10px rgba(209, 173, 42, 0.9);
+}
+
 @keyframes slide-in-left {
   from { transform: scaleY(0); }
   to   { transform: scaleY(1); }
@@ -101,6 +106,9 @@ tbody tr:nth-child(10) { animation-delay: 0.20s; }
 /* ─── Sidebar Hover Glow on Active ──────────────────────────────────────── */
 .nav-item.active {
   box-shadow: inset 0 0 20px rgba(40, 135, 27, 0.10);
+}
+[data-theme="dark"] .nav-item.active {
+  box-shadow: inset 0 0 16px rgba(209, 173, 42, 0.15), 0 4px 16px rgba(209, 173, 42, 0.25);
 }
 
 /* ─── Topbar Logo Glow ───────────────────────────────────────────────────── */
@@ -174,6 +182,10 @@ tbody tr:nth-child(10) { animation-delay: 0.20s; }
 /* ─── Gold Accent Line at top of active nav ─────────────────────────────── */
 .nav-subitem.active::before {
   background: var(--color-gold-500);
+}
+[data-theme="dark"] .nav-subitem.active::before {
+  background: var(--color-red) !important;
+  box-shadow: 0 0 8px rgba(227, 36, 49, 0.9) !important;
 }
 
 /* ─── Focus visible ring ─────────────────────────────────────────────────── */
