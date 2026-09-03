@@ -115,6 +115,76 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
+// ─── POST /api/viaticos/bulk (Carga Masiva) ──────────────────────────────────
+router.post('/bulk', auth, async (req, res) => {
+  if (!canEdit(req.user.role)) return res.status(403).json({ error: 'Permisos insuficientes.' });
+  const rows = Array.isArray(req.body.rows) ? req.body.rows : Array.isArray(req.body) ? req.body : [];
+  if (!rows.length) return res.status(400).json({ error: 'No se recibieron registros para importar.' });
+
+  const client = await pool.connect();
+  let inserted = 0;
+  let skipped = 0;
+  const errors = [];
+
+  try {
+    await client.query('BEGIN');
+    const d = new Date();
+    const today = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const documento = (row.documento || row.cedula || row['Cédula'] || row['Documento'] || '').toString().trim();
+      const persona = (row.persona || row.nombreCompleto || row.nombre || row['Servidor Público'] || row['Nombre Completo'] || '').toString().trim();
+      const dependencia = (row.dependencia || row['Dependencia'] || '').toString().trim();
+      const cargo = (row.cargo || row.cargoActual || row['Cargo'] || '').toString().trim();
+      const destino = (row.destino || row['Destino'] || 'SIN ESPECIFICAR').toString().trim();
+      const motivo = (row.motivo || row.objetoComision || row['Objeto Comisión'] || row['Motivo'] || '').toString().trim();
+      const fechaInicio = (row.fechaInicio || row.fechaSalida || row.inicio || row['Fecha Salida'] || row['Fecha Inicio'] || '').toString().trim();
+      const fechaFin = (row.fechaFin || row.fechaRetorno || row.fin || row['Fecha Retorno'] || row['Fecha Fin'] || fechaInicio || '').toString().trim();
+      const dias = parseInt(row.dias || row['Días'] || 1) || 1;
+      const valorDiario = parseFloat(row.valorDiario || row['Valor Diario'] || 0) || 0;
+      const estado = normalizeStatus(row.estado || row['Estado'] || 'Pendiente');
+      const observaciones = (row.observaciones || row.notas || row['Observaciones'] || '').toString().trim();
+      const tipoDestino = (row.tipoDestino || row['Tipo Destino'] || 'Nacional').toString().trim();
+
+      if (!persona || !documento || !destino) {
+        errors.push(`Fila ${i + 1}: Documento, servidor y destino son requeridos.`);
+        skipped++;
+        continue;
+      }
+
+      const r = await client.query(
+        `INSERT INTO viaticos(dependencia,apellidos_nombres,documento,cargo,destino,motivo,fecha_inicio,fecha_fin,dias,valor_diario,estado,observaciones,fecha_solicitud,aprobado_por,tipo_destino)
+         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING id_viatico`,
+        [upper(dependencia), upper(persona), documento, upper(cargo)||'NO REGISTRADO', upper(destino), motivo||'Carga masiva Excel',
+         fechaInicio||today, fechaFin||today, dias, valorDiario,
+         estado, observaciones||'Importado desde Excel', today, '', tipoDestino]);
+
+      const newId = r.rows[0].id_viatico;
+      await client.query(
+        'INSERT INTO historial_viaticos(id_viatico,estado_nuevo,nota,actualizado_por) VALUES($1,$2,$3,$4)',
+        [newId, estado, 'Importado masivamente vía Excel', req.user.username||'web']);
+
+      inserted++;
+    }
+
+    await client.query('COMMIT');
+    res.json({
+      message: `Carga masiva completada: ${inserted} viáticos importados, ${skipped} omitidos.`,
+      inserted,
+      skipped,
+      total: rows.length,
+      errors
+    });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('[viaticos] bulk error:', err.message);
+    res.status(500).json({ error: 'Error durante la carga masiva de viáticos.' });
+  } finally {
+    client.release();
+  }
+});
+
 // ─── PUT /api/viaticos/:id ────────────────────────────────────────────────────
 router.put('/:id', auth, async (req, res) => {
   if (!canEdit(req.user.role)) return res.status(403).json({ error: 'Permisos insuficientes.' });

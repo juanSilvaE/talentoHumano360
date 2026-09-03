@@ -249,7 +249,16 @@ const EmployeesModule = (() => {
             <p class="page-desc">Gestión de perfiles del talento humano vinculado a la Gobernación de Boyacá</p>
           </div>
           <div class="page-actions">
-            ${Auth.canEdit() ? `<button class="btn btn-primary" onclick="EmployeesModule.openCreate()">
+            <button class="btn btn-secondary" onclick="EmployeesModule.exportExcel()" style="display:inline-flex; align-items:center; gap:6px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Exportar Excel
+            </button>
+            ${Auth.canEdit() ? `
+            <button class="btn btn-secondary" onclick="EmployeesModule.openImportModal()" style="display:inline-flex; align-items:center; gap:6px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              Carga Masiva Excel
+            </button>
+            <button class="btn btn-primary" onclick="EmployeesModule.openCreate()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Nuevo Servidor
             </button>` : ''}
@@ -320,5 +329,89 @@ const EmployeesModule = (() => {
     load();
   }
 
-  return { render, openCreate, openEdit, confirmDelete, goPage, search, clearSearch };
+  const EXCEL_COLUMNS = [
+    { header: 'Cédula', key: 'cedula', width: 15, sample: '1049601234' },
+    { header: 'Nombre Completo', key: 'nombreCompleto', width: 32, sample: 'PEREZ RODRIGUEZ JUAN CARLOS' },
+    { header: 'Dependencia', key: 'dependencia', width: 30, sample: 'SECRETARÍA DE HACIENDA' },
+    { header: 'Cargo Actual', key: 'cargoActual', width: 28, sample: 'PROFESIONAL UNIVERSITARIO' },
+    { header: 'Correo Institucional', key: 'correo', width: 28, sample: 'juan.perez@boyaca.gov.co' },
+    { header: 'Celular', key: 'celular', width: 16, sample: '3101234567' },
+    { header: 'Fecha Ingreso', key: 'fechaIngreso', width: 16, sample: '15/02/2020' },
+    { header: 'Sexo', key: 'sexo', width: 14, sample: 'MASCULINO' },
+  ];
+
+  async function exportExcel() {
+    try {
+      App.showToast('Generando archivo Excel...', 'info');
+      const res = await API.getEmployees({ q: state.q, page: 1, limit: 10000 });
+      const records = res.data || state.data;
+      ExcelService.exportToExcel({
+        filename: 'Talento360_Servidores_Publicos',
+        sheetName: 'Servidores Públicos',
+        columns: EXCEL_COLUMNS,
+        data: records
+      });
+      App.showToast(`Se exportaron ${records.length} servidores exitosamente.`, 'success');
+    } catch (err) {
+      App.showToast('Error al exportar: ' + err.message, 'error');
+    }
+  }
+
+  function openImportModal() {
+    ExcelService.openImportModal({
+      title: 'Carga Masiva de Servidores Públicos',
+      subtitle: 'Importe perfiles de servidores públicos a la Gobernación mediante un archivo Excel (.xlsx / .xls)',
+      moduleName: 'servidores',
+      columns: EXCEL_COLUMNS,
+      sampleRows: [
+        {
+          'Cédula': '1049612345',
+          'Nombre Completo': 'GOMEZ PEREZ ANDREA PAOLA',
+          'Dependencia': 'SECRETARÍA DE EDUCACIÓN',
+          'Cargo Actual': 'AUXILIAR ADMINISTRATIVO',
+          'Correo Institucional': 'andrea.gomez@boyaca.gov.co',
+          'Celular': '3124567890',
+          'Fecha Ingreso': '01/03/2021',
+          'Sexo': 'FEMENINO'
+        },
+        {
+          'Cédula': '79850123',
+          'Nombre Completo': 'RODRIGUEZ MARTINEZ LUIS FERNANDO',
+          'Dependencia': 'SECRETARÍA GENERAL',
+          'Cargo Actual': 'PROFESIONAL ESPECIALIZADO',
+          'Correo Institucional': 'luis.rodriguez@boyaca.gov.co',
+          'Celular': '3209876543',
+          'Fecha Ingreso': '15/01/2019',
+          'Sexo': 'MASCULINO'
+        }
+      ],
+      validateRow: (row) => {
+        const cedula = (row['Cédula'] || row.cedula || row['Documento'] || row.documento || '').toString().trim();
+        const nombre = (row['Nombre Completo'] || row.nombreCompleto || row['Servidor Público'] || row.persona || '').toString().trim();
+        if (!cedula || !nombre) {
+          return { valid: false, error: 'Cédula y Nombre Completo son obligatorios.' };
+        }
+        return {
+          valid: true,
+          cleanRow: {
+            cedula,
+            nombreCompleto: nombre,
+            dependencia: (row['Dependencia'] || row.dependencia || '').toString().trim(),
+            cargoActual: (row['Cargo Actual'] || row.cargoActual || row['Cargo'] || '').toString().trim(),
+            correo: (row['Correo Institucional'] || row.correo || '').toString().trim(),
+            celular: (row['Celular'] || row.celular || '').toString().trim(),
+            fechaIngreso: (row['Fecha Ingreso'] || row.fechaIngreso || '').toString().trim(),
+            sexo: (row['Sexo'] || row.sexo || '').toString().trim()
+          }
+        };
+      },
+      onImport: async (rows) => {
+        const res = await API.bulkCreateEmployees(rows);
+        App.showToast(res.message || `${res.inserted} servidores importados.`, 'success');
+        await load();
+      }
+    });
+  }
+
+  return { render, openCreate, openEdit, confirmDelete, goPage, search, clearSearch, exportExcel, openImportModal };
 })();

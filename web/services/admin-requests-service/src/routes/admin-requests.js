@@ -138,6 +138,82 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
+// ─── POST /api/admin-requests/bulk (Carga Masiva) ────────────────────────────
+router.post('/bulk', auth, async (req, res) => {
+  if (!canEdit(req.user.role)) return res.status(403).json({ error: 'Permisos insuficientes.' });
+  const rows = Array.isArray(req.body.rows) ? req.body.rows : Array.isArray(req.body) ? req.body : [];
+  if (!rows.length) return res.status(400).json({ error: 'No se recibieron registros para importar.' });
+
+  const client = await pool.connect();
+  let inserted = 0;
+  let skipped = 0;
+  const errors = [];
+
+  try {
+    await client.query('BEGIN');
+    const d = new Date();
+    const today = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      let tipo = (row.tipo || row['Tipo'] || 'Permiso Laboral').toString().trim();
+      if (!VALID_TIPOS.includes(tipo)) {
+        const t = tipo.toLowerCase();
+        if (t.includes('incap')) tipo = 'Incapacidad';
+        else if (t.includes('licen')) tipo = 'Licencia';
+        else tipo = 'Permiso Laboral';
+      }
+
+      const documento = (row.documento || row.cedula || row['Cédula'] || row['Documento'] || '').toString().trim();
+      const persona = (row.persona || row.nombreCompleto || row.nombre || row['Servidor Público'] || row['Nombre Completo'] || '').toString().trim();
+      const dependencia = (row.dependencia || row['Dependencia'] || '').toString().trim();
+      const cargo = (row.cargo || row.cargoActual || row['Cargo'] || '').toString().trim();
+      const fechaInicio = (row.fechaInicio || row.inicio || row['Fecha Inicio'] || '').toString().trim();
+      const fechaFin = (row.fechaFin || row.fin || row['Fecha Fin'] || fechaInicio || '').toString().trim();
+      const diasSolicitados = parseInt(row.diasSolicitados || row.dias || row['Días'] || 1) || 1;
+      const motivo = (row.motivo || row.diagnostico || row['Motivo'] || row['Diagnóstico'] || '').toString().trim();
+      const estado = normalizeStatus(row.estado || row['Estado'] || 'Pendiente');
+      const observaciones = (row.observaciones || row.notas || row['Observaciones'] || '').toString().trim();
+
+      if (!persona || !documento || !dependencia) {
+        errors.push(`Fila ${i + 1}: Documento, servidor y dependencia son requeridos.`);
+        skipped++;
+        continue;
+      }
+
+      const r = await client.query(
+        `INSERT INTO solicitudes_admin(tipo,dependencia,apellidos_nombres,documento,cargo,fecha_inicio,fecha_fin,
+          dias_solicitados,motivo,estado,observaciones,fecha_solicitud)
+         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id_solicitud`,
+        [tipo, upper(dependencia), upper(persona), documento, upper(cargo)||'NO REGISTRADO',
+         fechaInicio||today, fechaFin||today, diasSolicitados, motivo||'Carga masiva Excel',
+         estado, observaciones||'Importado desde Excel', today]);
+
+      const newId = r.rows[0].id_solicitud;
+      await client.query(
+        'INSERT INTO historial_solicitudes_admin(id_solicitud,estado_nuevo,nota,actualizado_por) VALUES($1,$2,$3,$4)',
+        [newId, estado, 'Importado masivamente vía Excel', req.user.username||'web']);
+
+      inserted++;
+    }
+
+    await client.query('COMMIT');
+    res.json({
+      message: `Carga masiva completada: ${inserted} solicitudes importadas, ${skipped} omitidas.`,
+      inserted,
+      skipped,
+      total: rows.length,
+      errors
+    });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('[admin-requests] bulk error:', err.message);
+    res.status(500).json({ error: 'Error durante la carga masiva de solicitudes administrativas.' });
+  } finally {
+    client.release();
+  }
+});
+
 // ─── PUT /api/admin-requests/:id ─────────────────────────────────────────────
 router.put('/:id', auth, async (req, res) => {
   if (!canEdit(req.user.role)) return res.status(403).json({ error: 'Permisos insuficientes.' });

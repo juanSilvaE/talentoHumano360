@@ -6,20 +6,25 @@ const DashboardModule = (() => {
   let chartBar = null;
   let chartDona = null;
 
+  // Configurar tipografía global de Chart.js si está cargado
+  if (typeof Chart !== 'undefined' && Chart.defaults) {
+    Chart.defaults.font.family = "'Nunito Sans', sans-serif";
+  }
+
   const STATUS_COLORS = {
-    'Aprobada':   ['rgba(16,185,129,0.7)', 'rgba(16,185,129,1)'],
-    'Finalizada': ['rgba(139,92,246,0.7)', 'rgba(139,92,246,1)'],
-    'Pendiente':  ['rgba(245,158,11,0.7)', 'rgba(245,158,11,1)'],
-    'En revisión':['rgba(59,130,246,0.7)', 'rgba(59,130,246,1)'],
-    'Rechazada':  ['rgba(239,68,68,0.7)',  'rgba(239,68,68,1)'],
+    'Aprobada':   ['rgba(40, 135, 27, 0.75)', '#28871B'],
+    'Finalizada': ['rgba(184, 75, 167, 0.75)', '#B84BA7'],
+    'Pendiente':  ['rgba(209, 70, 0, 0.75)', '#D14600'],
+    'En revisión':['rgba(0, 123, 199, 0.75)', '#007BC7'],
+    'Rechazada':  ['rgba(227, 36, 49, 0.75)', '#E32431'],
   };
 
   const TYPE_COLORS = [
-    ['rgba(37,99,235,0.7)',   'rgba(37,99,235,1)'],
-    ['rgba(16,185,129,0.7)', 'rgba(16,185,129,1)'],
-    ['rgba(245,158,11,0.7)', 'rgba(245,158,11,1)'],
-    ['rgba(200,166,61,0.7)', 'rgba(200,166,61,1)'],
-    ['rgba(139,92,246,0.7)', 'rgba(139,92,246,1)'],
+    ['rgba(40, 117, 34, 0.8)',   '#287522'],
+    ['rgba(209, 173, 42, 0.8)',  '#D1AD2A'],
+    ['rgba(0, 123, 199, 0.8)',   '#007BC7'],
+    ['rgba(29, 128, 150, 0.8)',  '#1D8096'],
+    ['rgba(207, 58, 120, 0.8)',  '#CF3A78'],
   ];
 
   function activityDot(tipo) {
@@ -182,20 +187,8 @@ const DashboardModule = (() => {
             datasets: [{
               label: 'Solicitudes',
               data: valores,
-              backgroundColor: [
-                'rgba(37,99,235,0.75)',
-                'rgba(16,185,129,0.75)',
-                'rgba(245,158,11,0.75)',
-                'rgba(200,166,61,0.75)',
-                'rgba(139,92,246,0.75)',
-              ],
-              borderColor: [
-                'rgba(59,130,246,1)',
-                'rgba(52,211,153,1)',
-                'rgba(251,191,36,1)',
-                'rgba(240,200,74,1)',
-                'rgba(167,139,250,1)',
-              ],
+              backgroundColor: TYPE_COLORS.map(c => c[0]),
+              borderColor: TYPE_COLORS.map(c => c[1]),
               borderWidth: 1.5,
               borderRadius: 8,
               borderSkipped: false,

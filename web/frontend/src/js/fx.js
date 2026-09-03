@@ -117,7 +117,7 @@ const FX = (() => {
   function burst(x, y, opts = {}) {
     if (!window.anime) return;
     if (typeof Settings !== 'undefined' && Settings.get('reduceMotion')) return;
-    const { count = 14, colors = ['#22c55e', '#facc15', '#3b82f6', '#f97316', '#a855f7', '#ffffff'], size = 8 } = opts;
+    const { count = 14, colors = ['#28871B', '#D1AD2A', '#007BC7', '#D14600', '#B84BA7', '#ffffff'], size = 8 } = opts;
     const container = document.body;
 
     for (let i = 0; i < count; i++) {
@@ -500,14 +500,14 @@ const FX = (() => {
   // ─── Logo Breathing Glow ──────────────────────────────────────────────────
   function startLogoBreathing() {
     if (!window.anime) return;
-    const logo = document.querySelector('.sidebar-logo svg');
+    const logo = document.querySelector('.sidebar-logo img, .sidebar-logo svg');
     if (!logo) return;
 
     anime({
       targets: logo,
       filter: [
-        'drop-shadow(0 0 6px rgba(46,125,50,0.4))',
-        'drop-shadow(0 0 18px rgba(46,125,50,0.85))',
+        'drop-shadow(0 0 4px rgba(209,173,42,0.35))',
+        'drop-shadow(0 0 14px rgba(209,173,42,0.75))',
       ],
       duration: 2200,
       direction: 'alternate',
@@ -537,7 +537,7 @@ const FX = (() => {
     const rect = btn.getBoundingClientRect();
     burst(rect.left + rect.width / 2, rect.top + rect.height / 2, {
       count: 18,
-      colors: ['#22c55e', '#facc15', '#ffffff', '#86efac', '#fde047'],
+      colors: ['#28871B', '#287522', '#D1AD2A', '#ffffff', '#857352'],
     });
     Sound.confirm();
   }

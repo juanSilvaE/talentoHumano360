@@ -56,6 +56,7 @@ const API = (() => {
     getEmployees: (params = {}) => request('/employees?' + new URLSearchParams(params)),
     getEmployeeCatalogs: () => request('/employees/catalogs'),
     createEmployee: (data) => request('/employees', { method: 'POST', body: JSON.stringify(data) }),
+    bulkCreateEmployees: (rows) => request('/employees/bulk', { method: 'POST', body: JSON.stringify({ rows }) }),
     updateEmployee: (cedula, data) => request(`/employees/${cedula}`, { method: 'PUT', body: JSON.stringify(data) }),
     deleteEmployee: (cedula) => request(`/employees/${cedula}`, { method: 'DELETE' }),
 
@@ -63,6 +64,7 @@ const API = (() => {
     getRequests: (params = {}) => request('/requests?' + new URLSearchParams(params)),
     getRequestCatalogs: () => request('/requests/catalogs'),
     createRequest: (data) => request('/requests', { method: 'POST', body: JSON.stringify(data) }),
+    bulkCreateRequests: (rows) => request('/requests/bulk', { method: 'POST', body: JSON.stringify({ rows }) }),
     updateRequest: (id, data) => request(`/requests/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     updateRequestStatus: (id, estado, notaGestion = '') =>
       request(`/requests/${id}/status`, { method: 'PATCH', body: JSON.stringify({ estado, notaGestion }) }),
@@ -72,6 +74,7 @@ const API = (() => {
     getAdminRequests: (params = {}) => request('/admin-requests?' + new URLSearchParams(params)),
     getAdminRequestsStats: () => request('/admin-requests/stats'),
     createAdminRequest: (data) => request('/admin-requests', { method: 'POST', body: JSON.stringify(data) }),
+    bulkCreateAdminRequests: (rows) => request('/admin-requests/bulk', { method: 'POST', body: JSON.stringify({ rows }) }),
     updateAdminRequest: (id, data) => request(`/admin-requests/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     updateAdminRequestStatus: (id, estado, notaGestion = '') =>
       request(`/admin-requests/${id}/status`, { method: 'PATCH', body: JSON.stringify({ estado, notaGestion }) }),
@@ -81,6 +84,7 @@ const API = (() => {
     getViaticos: (params = {}) => request('/viaticos?' + new URLSearchParams(params)),
     getViaticosStats: () => request('/viaticos/stats'),
     createViatico: (data) => request('/viaticos', { method: 'POST', body: JSON.stringify(data) }),
+    bulkCreateViaticos: (rows) => request('/viaticos/bulk', { method: 'POST', body: JSON.stringify({ rows }) }),
     updateViatico: (id, data) => request(`/viaticos/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     updateViaticoStatus: (id, estado, observaciones = '') =>
       request(`/viaticos/${id}/status`, { method: 'PATCH', body: JSON.stringify({ estado, observaciones }) }),

@@ -274,7 +274,16 @@ const AdminRequestsModule = (() => {
             <p class="page-desc">Administre permisos laborales, incapacidades y licencias del personal</p>
           </div>
           <div class="page-actions">
-            ${Auth.canEdit() ? `<button class="btn btn-primary" onclick="AdminRequestsModule.openCreate()">
+            <button class="btn btn-secondary" onclick="AdminRequestsModule.exportExcel()" style="display:inline-flex; align-items:center; gap:6px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Exportar Excel
+            </button>
+            ${Auth.canEdit() ? `
+            <button class="btn btn-secondary" onclick="AdminRequestsModule.openImportModal()" style="display:inline-flex; align-items:center; gap:6px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              Carga Masiva Excel
+            </button>
+            <button class="btn btn-primary" onclick="AdminRequestsModule.openCreate()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Nueva Solicitud
             </button>` : ''}
@@ -445,5 +454,103 @@ const AdminRequestsModule = (() => {
     }
   }
 
-  return { render, openCreate, openEdit, openStatusPicker, selectQuickStatus, confirmDelete, applyFilters, clearFilters, goPage, setTipo };
+  const EXCEL_COLUMNS = [
+    { header: 'Radicado', key: 'radicado', width: 18, sample: 'PL-2026-00045' },
+    { header: 'Tipo', key: 'tipo', width: 18, sample: 'Permiso Laboral' },
+    { header: 'Cédula', key: 'documento', width: 15, sample: '1049601234' },
+    { header: 'Servidor Público', key: 'persona', width: 32, sample: 'GARCIA MARTINEZ LUIS FERNANDO' },
+    { header: 'Dependencia', key: 'dependencia', width: 30, sample: 'SECRETARÍA DE HACIENDA' },
+    { header: 'Cargo', key: 'cargo', width: 26, sample: 'PROFESIONAL UNIVERSITARIO' },
+    { header: 'Fecha Inicio', key: 'fechaInicio', width: 16, sample: '15/05/2026' },
+    { header: 'Fecha Fin', key: 'fechaFin', width: 16, sample: '15/05/2026' },
+    { header: 'Días', key: 'dias', width: 10, sample: '1' },
+    { header: 'Motivo o Diagnóstico', key: 'motivo', width: 32, sample: 'Diligencia personal urgente' },
+    { header: 'Estado', key: 'estado', width: 16, sample: 'Aprobada' },
+    { header: 'Observaciones', key: 'observaciones', width: 30, sample: 'Soporte recibido' },
+  ];
+
+  async function exportExcel() {
+    try {
+      App.showToast('Generando archivo Excel...', 'info');
+      const res = await API.getAdminRequests({ tipo: state.tipo, ...state.filters, page: 1, limit: 10000 });
+      const records = res.data || state.data;
+      ExcelService.exportToExcel({
+        filename: `Talento360_${(state.tipo || 'Solicitudes_Admin').replace(/\s+/g, '_')}`,
+        sheetName: tipoPlural(state.tipo),
+        columns: EXCEL_COLUMNS,
+        data: records
+      });
+      App.showToast(`Se exportaron ${records.length} registros de ${tipoPlural(state.tipo)} exitosamente.`, 'success');
+    } catch (err) {
+      App.showToast('Error al exportar: ' + err.message, 'error');
+    }
+  }
+
+  function openImportModal() {
+    ExcelService.openImportModal({
+      title: `Carga Masiva de Solicitudes Administrativas (${tipoPlural(state.tipo)})`,
+      subtitle: `Importe registros masivos de ${tipoPlural(state.tipo).toLowerCase()} mediante un archivo Excel (.xlsx / .xls)`,
+      moduleName: tipoPlural(state.tipo).toLowerCase(),
+      columns: EXCEL_COLUMNS.filter(c => c.key !== 'radicado'),
+      sampleRows: [
+        {
+          'Tipo': state.tipo || 'Permiso Laboral',
+          'Cédula': '1049612345',
+          'Servidor Público': 'GOMEZ PEREZ ANDREA PAOLA',
+          'Dependencia': 'SECRETARÍA DE EDUCACIÓN',
+          'Cargo': 'AUXILIAR ADMINISTRATIVO',
+          'Fecha Inicio': '01/06/2026',
+          'Fecha Fin': '01/06/2026',
+          'Días': '1',
+          'Motivo o Diagnóstico': 'Cita médica especializada EPS',
+          'Estado': 'Pendiente',
+          'Observaciones': 'Anexa orden médica'
+        },
+        {
+          'Tipo': state.tipo || 'Permiso Laboral',
+          'Cédula': '79850123',
+          'Servidor Público': 'RODRIGUEZ MARTINEZ LUIS FERNANDO',
+          'Dependencia': 'SECRETARÍA GENERAL',
+          'Cargo': 'PROFESIONAL ESPECIALIZADO',
+          'Fecha Inicio': '10/06/2026',
+          'Fecha Fin': '12/06/2026',
+          'Días': '3',
+          'Motivo o Diagnóstico': 'Calamidad doméstica justificada',
+          'Estado': 'Aprobada',
+          'Observaciones': 'Autorizado por jefe inmediato'
+        }
+      ],
+      validateRow: (row) => {
+        const documento = (row['Cédula'] || row.documento || row.cedula || row['Documento'] || '').toString().trim();
+        const persona = (row['Servidor Público'] || row.persona || row.nombreCompleto || row['Nombre Completo'] || '').toString().trim();
+        const dependencia = (row['Dependencia'] || row.dependencia || '').toString().trim();
+        if (!documento || !persona || !dependencia) {
+          return { valid: false, error: 'Cédula, Servidor y Dependencia son requeridos.' };
+        }
+        return {
+          valid: true,
+          cleanRow: {
+            tipo: (row['Tipo'] || row.tipo || state.tipo || 'Permiso Laboral').toString().trim(),
+            documento,
+            persona,
+            dependencia,
+            cargo: (row['Cargo'] || row.cargo || '').toString().trim(),
+            fechaInicio: (row['Fecha Inicio'] || row.fechaInicio || '').toString().trim(),
+            fechaFin: (row['Fecha Fin'] || row.fechaFin || '').toString().trim(),
+            diasSolicitados: parseInt(row['Días'] || row.diasSolicitados || row.dias || 1) || 1,
+            motivo: (row['Motivo o Diagnóstico'] || row.motivo || row.diagnostico || '').toString().trim(),
+            estado: (row['Estado'] || row.estado || 'Pendiente').toString().trim(),
+            observaciones: (row['Observaciones'] || row.observaciones || '').toString().trim()
+          }
+        };
+      },
+      onImport: async (rows) => {
+        const res = await API.bulkCreateAdminRequests(rows);
+        App.showToast(res.message || `${res.inserted} solicitudes importadas.`, 'success');
+        await load();
+      }
+    });
+  }
+
+  return { render, openCreate, openEdit, openStatusPicker, selectQuickStatus, confirmDelete, applyFilters, clearFilters, goPage, setTipo, exportExcel, openImportModal };
 })();

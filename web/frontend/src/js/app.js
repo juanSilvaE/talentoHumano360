@@ -205,14 +205,14 @@ const App = (() => {
 
   // ─── Avatar Palettes ────────────────────────────────────────────────────────
   const AVATAR_PALETTES = [
-    { id: 'boyaca', name: 'Talento 360 (Verde & Oro)', bg: 'linear-gradient(135deg, #1b5e20, #c8a63d)' },
-    { id: 'emerald', name: 'Esmeralda Andina (Verde)', bg: 'linear-gradient(135deg, #059669, #10b981)' },
-    { id: 'boyaca-blue', name: 'Gobernación (Azul & Oro)', bg: 'linear-gradient(135deg, #1d4ed8, #eab308)' },
-    { id: 'sunset', name: 'Atardecer Boyacá (Naranja/Rosa)', bg: 'linear-gradient(135deg, #ea580c, #ec4899)' },
-    { id: 'royal', name: 'Púrpura Real (Violeta/Indigo)', bg: 'linear-gradient(135deg, #7c3aed, #3b82f6)' },
-    { id: 'ruby', name: 'Rubí Imperial (Rojo Carmesí)', bg: 'linear-gradient(135deg, #dc2626, #f43f5e)' },
-    { id: 'ocean', name: 'Océano Turquesa (Cian & Azul)', bg: 'linear-gradient(135deg, #0891b2, #0284c7)' },
-    { id: 'gold', name: 'Oro Colonial (Dorado Puro)', bg: 'linear-gradient(135deg, #d97706, #fbbf24)' },
+    { id: 'boyaca', name: 'Talento 360 (Verde & Oro)', bg: 'linear-gradient(135deg, #287522, #D1AD2A)' },
+    { id: 'emerald', name: 'Esmeralda Andina (Bosque & Verde)', bg: 'linear-gradient(135deg, #355833, #28871B)' },
+    { id: 'boyaca-blue', name: 'Gobernación (Navy & Azul)', bg: 'linear-gradient(135deg, #005387, #007BC7)' },
+    { id: 'sunset', name: 'Atardecer Boyacá (Naranja & Rosa)', bg: 'linear-gradient(135deg, #D14600, #CF3A78)' },
+    { id: 'royal', name: 'Ciruela & Púrpura', bg: 'linear-gradient(135deg, #914169, #B84BA7)' },
+    { id: 'ruby', name: 'Rojo & Terracota', bg: 'linear-gradient(135deg, #A5451B, #E32431)' },
+    { id: 'ocean', name: 'Teal & Azul Claro', bg: 'linear-gradient(135deg, #1D8096, #007BC7)' },
+    { id: 'gold', name: 'Taupe & Mostaza Dorado', bg: 'linear-gradient(135deg, #857352, #D1AD2A)' },
   ];
 
   let currentAvatarColor = null;

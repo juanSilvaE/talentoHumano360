@@ -247,7 +247,16 @@ const RequestsModule = (() => {
             <p class="page-desc">Gestión de solicitudes de vacaciones del personal de la Gobernación de Boyacá</p>
           </div>
           <div class="page-actions">
-            ${Auth.canEdit() ? `<button class="btn btn-primary" onclick="RequestsModule.openCreate()">
+            <button class="btn btn-secondary" onclick="RequestsModule.exportExcel()" style="display:inline-flex; align-items:center; gap:6px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Exportar Excel
+            </button>
+            ${Auth.canEdit() ? `
+            <button class="btn btn-secondary" onclick="RequestsModule.openImportModal()" style="display:inline-flex; align-items:center; gap:6px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              Carga Masiva Excel
+            </button>
+            <button class="btn btn-primary" onclick="RequestsModule.openCreate()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Nueva Solicitud
             </button>` : ''}
@@ -402,5 +411,95 @@ const RequestsModule = (() => {
     }
   }
 
-  return { render, openCreate, openEdit, openStatusPicker, selectQuickStatus, confirmDelete, applyFilters, clearFilters, goPage };
+  const EXCEL_COLUMNS = [
+    { header: 'Radicado', key: 'radicado', width: 20, sample: 'VAC-2026-00101' },
+    { header: 'Cédula', key: 'documento', width: 15, sample: '1049601234' },
+    { header: 'Servidor Público', key: 'persona', width: 32, sample: 'PEREZ RODRIGUEZ JUAN CARLOS' },
+    { header: 'Dependencia', key: 'dependencia', width: 30, sample: 'SECRETARÍA DE HACIENDA' },
+    { header: 'Cargo', key: 'cargo', width: 26, sample: 'PROFESIONAL UNIVERSITARIO' },
+    { header: 'Fecha Inicio', key: 'fechaInicio', width: 16, sample: '10/05/2026' },
+    { header: 'Días', key: 'dias', width: 10, sample: '15' },
+    { header: 'Tipo', key: 'tipo', width: 18, sample: 'Vacaciones' },
+    { header: 'Estado', key: 'estado', width: 16, sample: 'Pendiente' },
+    { header: 'Observaciones', key: 'notas', width: 32, sample: 'Periodo 2025-2026' },
+  ];
+
+  async function exportExcel() {
+    try {
+      App.showToast('Generando archivo Excel...', 'info');
+      const res = await API.getRequests({ ...state.filters, page: 1, limit: 10000 });
+      const records = res.data || state.data;
+      ExcelService.exportToExcel({
+        filename: 'Talento360_Solicitudes_Vacaciones',
+        sheetName: 'Vacaciones',
+        columns: EXCEL_COLUMNS,
+        data: records
+      });
+      App.showToast(`Se exportaron ${records.length} solicitudes de vacaciones exitosamente.`, 'success');
+    } catch (err) {
+      App.showToast('Error al exportar: ' + err.message, 'error');
+    }
+  }
+
+  function openImportModal() {
+    ExcelService.openImportModal({
+      title: 'Carga Masiva de Solicitudes de Vacaciones',
+      subtitle: 'Importe solicitudes de vacaciones de funcionarios a la plataforma mediante un archivo Excel (.xlsx / .xls)',
+      moduleName: 'vacaciones',
+      columns: EXCEL_COLUMNS.filter(c => c.key !== 'radicado'),
+      sampleRows: [
+        {
+          'Cédula': '1049612345',
+          'Servidor Público': 'GOMEZ PEREZ ANDREA PAOLA',
+          'Dependencia': 'SECRETARÍA DE EDUCACIÓN',
+          'Cargo': 'AUXILIAR ADMINISTRATIVO',
+          'Fecha Inicio': '01/06/2026',
+          'Días': '15',
+          'Tipo': 'Vacaciones',
+          'Estado': 'Pendiente',
+          'Observaciones': 'Disfrute de primer periodo 2025'
+        },
+        {
+          'Cédula': '79850123',
+          'Servidor Público': 'RODRIGUEZ MARTINEZ LUIS FERNANDO',
+          'Dependencia': 'SECRETARÍA GENERAL',
+          'Cargo': 'PROFESIONAL ESPECIALIZADO',
+          'Fecha Inicio': '15/07/2026',
+          'Días': '10',
+          'Tipo': 'Vacaciones',
+          'Estado': 'Aprobada',
+          'Observaciones': 'Resolución 104 de 2026'
+        }
+      ],
+      validateRow: (row) => {
+        const documento = (row['Cédula'] || row.documento || row.cedula || row['Documento'] || '').toString().trim();
+        const persona = (row['Servidor Público'] || row.persona || row.nombreCompleto || row['Nombre Completo'] || '').toString().trim();
+        const dependencia = (row['Dependencia'] || row.dependencia || '').toString().trim();
+        if (!documento || !persona || !dependencia) {
+          return { valid: false, error: 'Cédula, Servidor y Dependencia son requeridos.' };
+        }
+        return {
+          valid: true,
+          cleanRow: {
+            documento,
+            persona,
+            dependencia,
+            cargo: (row['Cargo'] || row.cargo || '').toString().trim(),
+            fechaInicio: (row['Fecha Inicio'] || row.fechaInicio || '').toString().trim(),
+            diasTotales: parseInt(row['Días'] || row.diasTotales || row.dias || 1) || 1,
+            tipo: (row['Tipo'] || row.tipo || 'Vacaciones').toString().trim(),
+            estado: (row['Estado'] || row.estado || 'Pendiente').toString().trim(),
+            observaciones: (row['Observaciones'] || row.observaciones || row.notas || '').toString().trim()
+          }
+        };
+      },
+      onImport: async (rows) => {
+        const res = await API.bulkCreateRequests(rows);
+        App.showToast(res.message || `${res.inserted} solicitudes importadas.`, 'success');
+        await load();
+      }
+    });
+  }
+
+  return { render, openCreate, openEdit, openStatusPicker, selectQuickStatus, confirmDelete, applyFilters, clearFilters, goPage, exportExcel, openImportModal };
 })();

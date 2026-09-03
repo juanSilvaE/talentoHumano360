@@ -189,6 +189,119 @@ router.post('/', auth, async (req, res) => {
   } finally { client.release(); }
 });
 
+// ─── POST /api/employees/bulk (Carga Masiva) ─────────────────────────────────
+router.post('/bulk', auth, async (req, res) => {
+  if (!canEdit(req.user.role)) return res.status(403).json({ error: 'Permisos insuficientes.' });
+  const rows = Array.isArray(req.body.rows) ? req.body.rows : Array.isArray(req.body) ? req.body : [];
+  if (!rows.length) return res.status(400).json({ error: 'No se recibieron registros para importar.' });
+
+  const client = await pool.connect();
+  let inserted = 0;
+  let skipped = 0;
+  const errors = [];
+
+  try {
+    await client.query('BEGIN');
+
+    const nextId = async (table, col, prefix, width) => {
+      const r = await client.query(`SELECT ${col} FROM ${table}`);
+      let max = 0;
+      r.rows.forEach(row => {
+        const digits = (row[col.toLowerCase()] || '').replace(/\D/g, '');
+        if (digits) max = Math.max(max, parseInt(digits));
+      });
+      return prefix + String(max + 1).padStart(width, '0');
+    };
+
+    const findOrCreate = async (table, idCol, nameCol, prefix, width, name, insertFn) => {
+      const cleanName = clean(name) || 'NO REGISTRADO';
+      const existing = await client.query(`SELECT ${idCol} FROM ${table} WHERE LOWER(${nameCol}) = LOWER($1) LIMIT 1`, [cleanName]);
+      if (existing.rows.length > 0) return existing.rows[0][idCol.toLowerCase()];
+      const id = await nextId(table, idCol, prefix, width);
+      await insertFn(id, cleanName);
+      return id;
+    };
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const cedula = (row.cedula || row.documento || row['Cédula'] || row['Documento'] || '').toString().trim();
+      const nombreCompleto = (row.nombreCompleto || row.persona || row.nombre || row['Nombre Completo'] || row['Servidor Público'] || '').toString().trim();
+      const dependencia = (row.dependencia || row['Dependencia'] || '').toString().trim();
+      const cargoActual = (row.cargoActual || row.cargo || row['Cargo Actual'] || row['Cargo'] || '').toString().trim();
+      const correo = (row.correo || row.email || row['Correo Institucional'] || row['Correo'] || '').toString().trim();
+      const celular = (row.celular || row.telefono || row['Celular'] || row['Teléfono'] || '').toString().trim();
+      const fechaIngreso = (row.fechaIngreso || row.ingreso || row['Fecha Ingreso'] || '').toString().trim();
+      const sexo = (row.sexo || row['Sexo'] || '').toString().trim();
+
+      if (!cedula || !nombreCompleto) {
+        errors.push(`Fila ${i + 1}: Cédula y nombre son requeridos.`);
+        skipped++;
+        continue;
+      }
+
+      // Check duplicate
+      const dup = await client.query('SELECT 1 FROM personas WHERE cedula = $1 LIMIT 1', [cedula]);
+      if (dup.rows.length > 0) {
+        skipped++;
+        continue;
+      }
+
+      const personId = await nextId('personas', 'id_persona', 'PER', 4);
+      const contactId = await nextId('contactos', 'id_contacto', 'CON', 4);
+      const educationId = await nextId('educacion', 'id_educacion', 'EDU', 4);
+      const recordId = await nextId('rel_principal', 'id_registro', 'REL', 4);
+
+      const deptId = await findOrCreate('dependencias', 'id_dependencia', 'dependencia', 'DEP', 3, dependencia || 'NO REGISTRADO', async (id, name) =>
+        client.query('INSERT INTO dependencias(id_dependencia, dependencia) VALUES ($1,$2)', [id, name]));
+
+      const cargoId = await findOrCreate('cargos', 'id_cargo', 'cargo', 'CAR', 3, cargoActual || 'NO REGISTRADO', async (id, name) =>
+        client.query("INSERT INTO cargos(id_cargo, tipo_cargo, cargo, codigo, grado, asignacion_sueldo, nivel) VALUES ($1,'PLANTA',$2,'N/A','N/A','$0','NO REGISTRADO')", [id, name]));
+
+      const statusId = await findOrCreate('estados', 'id_estado', 'situacion', 'EST', 3, 'ACTIVO', async (id, name) =>
+        client.query("INSERT INTO estados(id_estado, clasificacion_empleo, situacion, funciones_pagadas, novedades, opec) VALUES ($1,'NO REGISTRADO',$2,'NO REGISTRADO','','NO REGISTRADO')", [id, name]));
+
+      const cleanNombre = clean(nombreCompleto);
+      const parts = cleanNombre.split(' ');
+      const apellido1 = parts[0] || 'NO REGISTRADO';
+      const apellido2 = parts[1] || 'NO REGISTRADO';
+      const nombres   = parts.slice(2).join(' ') || parts[0] || 'NO REGISTRADO';
+
+      await client.query(
+        "INSERT INTO personas(id_persona,cedula,primer_apellido,segundo_apellido,nombres,nombre_completo,expedida,tipo_sangre,fecha_nacimiento,edad,sexo) VALUES($1,$2,$3,$4,$5,$6,'TUNJA','NO REGISTRADO','NO REGISTRADO','NO REGISTRADO',$7)",
+        [personId, cedula, apellido1, apellido2, nombres, cleanNombre, clean(sexo) || 'NO REGISTRADO']);
+
+      await client.query(
+        "INSERT INTO contactos(id_contacto,direccion,ciudad,telefono_fijo,celular,correo_personal,correo_institucional) VALUES($1,'NO REGISTRADO','TUNJA, BOYACA','NO REGISTRADO',$2,'NO REGISTRADO',$3)",
+        [contactId, celular || 'NO REGISTRADO', (correo || 'NO REGISTRADO').toLowerCase()]);
+
+      await client.query(
+        "INSERT INTO educacion(id_educacion,estudios,matricula_profesional,institucion_estudios,postgrado,institucion_postgrado,diplomado_cap_sena,correo_institucional) VALUES($1,'NO REGISTRADO','NO REGISTRADO','NO REGISTRADO','NO REGISTRADO','NO REGISTRADO','NO REGISTRADO',$2)",
+        [educationId, (correo || 'NO REGISTRADO').toLowerCase()]);
+
+      await client.query(
+        "INSERT INTO rel_principal(id_registro,id_persona,id_cargo_base,id_cargo_actual,id_dependencia,id_educacion,id_contacto,id_estado,otro_tiempo_gobernacion,fecha_ingreso,tiempo_servicio,fecha_encargo) VALUES($1,$2,$3,$4,$5,$6,$7,$8,'NO REGISTRADO',$9,'0 ANOS 0 MESES','NO REGISTRADO')",
+        [recordId, personId, cargoId, cargoId, deptId, educationId, contactId, statusId, fechaIngreso || 'NO REGISTRADO']);
+
+      inserted++;
+    }
+
+    await client.query('COMMIT');
+    res.json({
+      message: `Carga masiva completada: ${inserted} servidores importados, ${skipped} omitidos o duplicados.`,
+      inserted,
+      skipped,
+      total: rows.length,
+      errors
+    });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('[employees] bulk error:', err.message);
+    res.status(500).json({ error: 'Error durante la carga masiva de servidores.' });
+  } finally {
+    client.release();
+  }
+});
+
 // ─── PUT /api/employees/:cedula ───────────────────────────────────────────────
 router.put('/:cedula', auth, async (req, res) => {
   if (!canEdit(req.user.role)) return res.status(403).json({ error: 'Permisos insuficientes.' });

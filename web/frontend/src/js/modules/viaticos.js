@@ -279,7 +279,7 @@ const ViaticosModule = (() => {
 
         <div class="form-group span-2">
           <label class="form-label">Valor Total del Viático</label>
-          <input id="vf-vtotal" class="form-input" placeholder="Calculado automáticamente" readonly style="background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.3);color:#34d399;font-weight:700;font-size:1.05rem;" value="${formatCOP(r.valorTotal||0)}" />
+          <input id="vf-vtotal" class="form-input" placeholder="Calculado automáticamente" readonly style="background:rgba(40,135,27,0.08);border-color:rgba(40,135,27,0.3);color:var(--color-green-dark);font-weight:700;font-size:1.05rem;" value="${formatCOP(r.valorTotal||0)}" />
         </div>
 
         <div class="form-group">
@@ -786,7 +786,16 @@ const ViaticosModule = (() => {
             <p class="page-desc">Gestión de solicitudes, comisiones y aprobaciones de viáticos del personal institucional</p>
           </div>
           <div class="page-actions">
-            ${Auth.canEdit() ? `<button class="btn btn-primary" onclick="ViaticosModule.openCreate()">
+            <button class="btn btn-secondary" onclick="ViaticosModule.exportExcel()" style="display:inline-flex; align-items:center; gap:6px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Exportar Excel
+            </button>
+            ${Auth.canEdit() ? `
+            <button class="btn btn-secondary" onclick="ViaticosModule.openImportModal()" style="display:inline-flex; align-items:center; gap:6px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              Carga Masiva Excel
+            </button>
+            <button class="btn btn-primary" onclick="ViaticosModule.openCreate()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Nuevo Viático
             </button>` : ''}
@@ -841,6 +850,106 @@ const ViaticosModule = (() => {
     await load();
   }
 
+  const EXCEL_COLUMNS = [
+    { header: 'Código Solicitud', key: 'radicado', width: 18, sample: 'VIT-2026-00012' },
+    { header: 'Cédula', key: 'documento', width: 15, sample: '1049601234' },
+    { header: 'Servidor Público', key: 'persona', width: 32, sample: 'GARCIA MARTINEZ LUIS FERNANDO' },
+    { header: 'Dependencia', key: 'dependencia', width: 30, sample: 'SECRETARÍA DE HACIENDA' },
+    { header: 'Cargo', key: 'cargo', width: 26, sample: 'PROFESIONAL UNIVERSITARIO' },
+    { header: 'Destino', key: 'destino', width: 28, sample: 'BOGOTÁ D.C.' },
+    { header: 'Fecha Salida', key: 'fechaInicio', width: 16, sample: '20/05/2026' },
+    { header: 'Fecha Retorno', key: 'fechaFin', width: 16, sample: '22/05/2026' },
+    { header: 'Días', key: 'dias', width: 10, sample: '3' },
+    { header: 'Valor Diario', key: 'valorDiario', width: 16, sample: '120000', format: (v) => formatCOP(v) },
+    { header: 'Total Viáticos', key: 'valorTotal', width: 18, sample: '360000', format: (v) => formatCOP(v) },
+    { header: 'Objeto Comisión', key: 'motivo', width: 35, sample: 'Capacitación en gestión tributaria - DIAN' },
+    { header: 'Estado', key: 'estado', width: 16, sample: 'Aprobada' },
+  ];
+
+  async function exportExcel() {
+    try {
+      App.showToast('Generando archivo Excel...', 'info');
+      const res = await API.getViaticos({ ...state.filters, page: 1, limit: 10000 });
+      const records = res.data || state.data;
+      ExcelService.exportToExcel({
+        filename: 'Talento360_Viaticos_Institucionales',
+        sheetName: 'Viáticos',
+        columns: EXCEL_COLUMNS,
+        data: records
+      });
+      App.showToast(`Se exportaron ${records.length} registros de viáticos exitosamente.`, 'success');
+    } catch (err) {
+      App.showToast('Error al exportar: ' + err.message, 'error');
+    }
+  }
+
+  function openImportModal() {
+    ExcelService.openImportModal({
+      title: 'Carga Masiva de Viáticos Institucionales',
+      subtitle: 'Importe solicitudes de comisiones y viáticos mediante un archivo Excel (.xlsx / .xls)',
+      moduleName: 'viáticos',
+      columns: EXCEL_COLUMNS.filter(c => c.key !== 'radicado' && c.key !== 'valorTotal'),
+      sampleRows: [
+        {
+          'Cédula': '1049612345',
+          'Servidor Público': 'GOMEZ PEREZ ANDREA PAOLA',
+          'Dependencia': 'SECRETARÍA DE EDUCACIÓN',
+          'Cargo': 'AUXILIAR ADMINISTRATIVO',
+          'Destino': 'MEDELLÍN, ANTIOQUIA',
+          'Fecha Salida': '10/06/2026',
+          'Fecha Retorno': '13/06/2026',
+          'Días': '4',
+          'Valor Diario': '135000',
+          'Objeto Comisión': 'Congreso nacional de educación pública',
+          'Estado': 'Pendiente'
+        },
+        {
+          'Cédula': '79850123',
+          'Servidor Público': 'RODRIGUEZ MARTINEZ LUIS FERNANDO',
+          'Dependencia': 'SECRETARÍA GENERAL',
+          'Cargo': 'PROFESIONAL ESPECIALIZADO',
+          'Destino': 'BOGOTÁ D.C.',
+          'Fecha Salida': '20/06/2026',
+          'Fecha Retorno': '21/06/2026',
+          'Días': '2',
+          'Valor Diario': '150000',
+          'Objeto Comisión': 'Gestión documental MinInterior',
+          'Estado': 'Aprobada'
+        }
+      ],
+      validateRow: (row) => {
+        const documento = (row['Cédula'] || row.documento || row.cedula || row['Documento'] || '').toString().trim();
+        const persona = (row['Servidor Público'] || row.persona || row.nombreCompleto || row['Nombre Completo'] || '').toString().trim();
+        const destino = (row['Destino'] || row.destino || '').toString().trim();
+        if (!documento || !persona || !destino) {
+          return { valid: false, error: 'Cédula, Servidor y Destino son requeridos.' };
+        }
+        return {
+          valid: true,
+          cleanRow: {
+            documento,
+            persona,
+            dependencia: (row['Dependencia'] || row.dependencia || '').toString().trim(),
+            cargo: (row['Cargo'] || row.cargo || '').toString().trim(),
+            destino,
+            fechaInicio: (row['Fecha Salida'] || row.fechaInicio || row.inicio || '').toString().trim(),
+            fechaFin: (row['Fecha Retorno'] || row.fechaFin || row.fin || '').toString().trim(),
+            dias: parseInt(row['Días'] || row.dias || 1) || 1,
+            valorDiario: parseFloat((row['Valor Diario'] || row.valorDiario || 0).toString().replace(/[^\d.]/g, '')) || 0,
+            motivo: (row['Objeto Comisión'] || row.motivo || row.objetoComision || '').toString().trim(),
+            estado: (row['Estado'] || row.estado || 'Pendiente').toString().trim()
+          }
+        };
+      },
+      onImport: async (rows) => {
+        const res = await API.bulkCreateViaticos(rows);
+        App.showToast(res.message || `${res.inserted} viáticos importados.`, 'success');
+        await load();
+        loadStats();
+      }
+    });
+  }
+
   return {
     render,
     openCreate,
@@ -862,5 +971,7 @@ const ViaticosModule = (() => {
     onFileSelected,
     removeUploadedFile,
     viewSoporte,
+    exportExcel,
+    openImportModal,
   };
 })();

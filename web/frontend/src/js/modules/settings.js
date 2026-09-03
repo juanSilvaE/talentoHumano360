@@ -99,7 +99,7 @@ const Settings = (() => {
     // Update meta theme-color for mobile header
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     if (metaTheme) {
-      metaTheme.setAttribute('content', valid === 'dark' ? '#09111e' : '#1b5e20');
+      metaTheme.setAttribute('content', valid === 'dark' ? '#0a111c' : '#287522');
     }
   }
 
@@ -690,7 +690,7 @@ const SettingsModule = (() => {
       const modalHtml = `
         <div style="display:flex;flex-direction:column;gap:14px;padding:4px 0;">
           <div style="display:flex;align-items:flex-start;gap:14px;">
-            <div style="width:44px;height:44px;border-radius:12px;background:rgba(239,68,68,0.12);color:#ef4444;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(227,36,49,0.12);color:var(--color-red);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:24px;height:24px;">
                 <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
               </svg>

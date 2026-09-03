@@ -7,7 +7,7 @@
   <title>Talento 360 — Gobernación de Boyacá</title>
   <meta name="description"
     content="Sistema de Gestión de Talento Humano — Gobernación de Boyacá. Administre servidores públicos, solicitudes de vacaciones, permisos, incapacidades, licencias y viáticos." />
-  <meta name="theme-color" content="#1b5e20" />
+  <meta name="theme-color" content="#287522" />
 
   <!-- Instant Settings Bootstrap (Anti-FOUC) — Per-user preference isolation -->
   <script>
@@ -34,19 +34,29 @@
     })();
   </script>
 
-  <!-- Preload fonts -->
+  <!-- Preload fonts (Nunito Sans) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
     rel="stylesheet" />
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
+  <!-- SheetJS (Excel Engine) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="imgs/logoCondor.png" />
+
+  <!-- Preload background image & logo -->
+  <link rel="preload" as="image" href="imgs/gobernacion_bg.jpeg" />
+  <link rel="preload" as="image" href="imgs/logoCondor.png" />
+
   <!-- Styles -->
-  <link rel="stylesheet" href="css/main.css?v=20260902_09" />
-  <link rel="stylesheet" href="css/components.css?v=20260902_09" />
-  <link rel="stylesheet" href="css/animations.css?v=20260902_09" />
+  <link rel="stylesheet" href="css/main.css?v=20260903_paleta" />
+  <link rel="stylesheet" href="css/components.css?v=20260903_paleta" />
+  <link rel="stylesheet" href="css/animations.css?v=20260903_paleta" />
 
   <!-- Anime.js (motion engine) -->
   <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
@@ -58,11 +68,7 @@
   <div id="login-screen" class="login-screen" role="main">
 
     <!-- Left Panel: Boyacá Imagery (Clean Unobstructed Photo) -->
-    <div class="login-panel-left">
-      <div class="login-panel-left__overlay"></div>
-      <div class="login-orb login-orb--1"></div>
-      <div class="login-orb login-orb--2"></div>
-    </div>
+    <div class="login-panel-left"></div>
 
     <!-- Right Panel: Login Form -->
     <div class="login-panel-right">
@@ -72,20 +78,7 @@
         <div class="login-logo-wrap">
           <!-- Icon badge -->
           <div class="login-logo-icon">
-            <svg viewBox="0 0 60 60" fill="none" aria-hidden="true">
-              <circle cx="30" cy="30" r="28" fill="url(#ll-g)"/>
-              <!-- 360 orbit arc -->
-              <path d="M8 30 A22 22 0 1 1 52 30" stroke="#c8a63d" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.7"/>
-              <!-- Person -->
-              <circle cx="30" cy="23" r="7" fill="white" opacity="0.92"/>
-              <path d="M14 44c0-8.8 7.2-16 16-16s16 7.2 16 16" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.92"/>
-              <defs>
-                <linearGradient id="ll-g" x1="2" y1="2" x2="58" y2="58">
-                  <stop offset="0%" stop-color="#2e7d32"/>
-                  <stop offset="100%" stop-color="#1b5e20"/>
-                </linearGradient>
-              </defs>
-            </svg>
+            <img src="imgs/logoCondor.png" alt="Escudo de Boyacá — Cóndor" class="login-logo-condor" />
           </div>
           <!-- Wordmark -->
           <div class="login-logo-text">
@@ -177,21 +170,8 @@
     <aside id="sidebar" class="sidebar" role="navigation" aria-label="Menú principal">
       <div class="sidebar-header">
         <div class="sidebar-logo">
-          <!-- Talento 360 logo icon -->
-          <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
-            <circle cx="20" cy="20" r="19" fill="url(#slg2)"/>
-            <!-- 360 arc -->
-            <path d="M5 20 A15 15 0 1 1 35 20" stroke="#c8a63d" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.8"/>
-            <!-- Person -->
-            <circle cx="20" cy="15" r="5" fill="white" opacity="0.92"/>
-            <path d="M9 30c0-6.1 4.9-11 11-11s11 4.9 11 11" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.92"/>
-            <defs>
-              <linearGradient id="slg2" x1="0" y1="0" x2="40" y2="40">
-                <stop offset="0%" stop-color="#2e7d32"/>
-                <stop offset="100%" stop-color="#1b5e20"/>
-              </linearGradient>
-            </defs>
-          </svg>
+          <!-- Talento 360 Condor logo -->
+          <img src="imgs/logoCondor.png" alt="Escudo de Boyacá — Cóndor" class="sidebar-logo-condor" />
         </div>
         <div class="sidebar-brand">
           <span class="sidebar-title">Talento <span>360</span></span>
@@ -406,16 +386,17 @@
   </div>
 
   <!-- ─── Scripts ──────────────────────────────────────────────────────── -->
-  <script src="js/modules/settings.js?v=20260902_09"></script>
-  <script src="js/fx.js?v=20260902_09"></script>
-  <script src="js/auth.js?v=20260902_09"></script>
-  <script src="js/api.js?v=20260902_09"></script>
-  <script src="js/modules/dashboard.js?v=20260902_09"></script>
-  <script src="js/modules/employees.js?v=20260902_09"></script>
-  <script src="js/modules/requests.js?v=20260902_09"></script>
-  <script src="js/modules/admin-requests.js?v=20260902_09"></script>
-  <script src="js/modules/viaticos.js?v=20260902_09"></script>
-  <script src="js/app.js?v=20260902_09"></script>
+  <script src="js/modules/settings.js?v=20260902_11"></script>
+  <script src="js/fx.js?v=20260902_11"></script>
+  <script src="js/auth.js?v=20260902_11"></script>
+  <script src="js/api.js?v=20260902_11"></script>
+  <script src="js/modules/excel-service.js?v=20260902_11"></script>
+  <script src="js/modules/dashboard.js?v=20260902_11"></script>
+  <script src="js/modules/employees.js?v=20260902_11"></script>
+  <script src="js/modules/requests.js?v=20260902_11"></script>
+  <script src="js/modules/admin-requests.js?v=20260902_11"></script>
+  <script src="js/modules/viaticos.js?v=20260902_11"></script>
+  <script src="js/app.js?v=20260902_11"></script>
 </body>
 
 </html>
