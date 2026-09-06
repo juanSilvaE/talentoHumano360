@@ -161,6 +161,8 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+    volumes:
+      - ./frontend/src:/usr/share/nginx/html:ro
     depends_on:
       - auth-service
       - employees-service

@@ -5,6 +5,8 @@
 const DashboardModule = (() => {
   let chartBar = null;
   let chartDona = null;
+  let chartModule = null;
+  let chartDep = null;
 
   // Configurar tipografía global de Chart.js si está cargado
   if (typeof Chart !== 'undefined' && Chart.defaults) {
@@ -12,19 +14,19 @@ const DashboardModule = (() => {
   }
 
   const STATUS_COLORS = {
-    'Aprobada':   ['rgba(40, 135, 27, 0.75)', '#28871B'],
-    'Finalizada': ['rgba(184, 75, 167, 0.75)', '#B84BA7'],
-    'Pendiente':  ['rgba(209, 70, 0, 0.75)', '#D14600'],
-    'En revisión':['rgba(0, 123, 199, 0.75)', '#007BC7'],
-    'Rechazada':  ['rgba(227, 36, 49, 0.75)', '#E32431'],
+    'Aprobada':   ['#10b981', '#059669'],
+    'Finalizada': ['#8b5cf6', '#6d28d9'],
+    'Pendiente':  ['#f59e0b', '#d97706'],
+    'En revisión':['#0ea5e9', '#0284c7'],
+    'Rechazada':  ['#f43f5e', '#e11d48'],
   };
 
   const TYPE_COLORS = [
-    ['rgba(40, 117, 34, 0.8)',   '#287522'],
-    ['rgba(209, 173, 42, 0.8)',  '#D1AD2A'],
-    ['rgba(0, 123, 199, 0.8)',   '#007BC7'],
-    ['rgba(29, 128, 150, 0.8)',  '#1D8096'],
-    ['rgba(207, 58, 120, 0.8)',  '#CF3A78'],
+    ['#10b981', '#059669'],
+    ['#f59e0b', '#d97706'],
+    ['#0ea5e9', '#0284c7'],
+    ['#06b6d4', '#0891b2'],
+    ['#ec4899', '#db2777'],
   ];
 
   function activityDot(tipo) {
@@ -47,6 +49,7 @@ const DashboardModule = (() => {
   }
 
   function animateCount(el, target) {
+    if (!el) return;
     const duration = 700;
     const isFloat = String(target).includes('.');
     const start = 0;
@@ -75,7 +78,8 @@ const DashboardModule = (() => {
 
         <div class="stats-grid" id="db-stats-grid">
           ${[1,2,3,4,5].map(() => `
-            <div class="stat-card">
+            <div class="stat-card db-glass-card">
+              <div class="stat-top-stripe"></div>
               <div class="stat-icon skeleton" style="width:48px;height:48px;border-radius:12px"></div>
               <div class="stat-info">
                 <span class="skeleton" style="width:60px;height:32px;display:block;border-radius:6px;margin-bottom:8px"></span>
@@ -85,11 +89,25 @@ const DashboardModule = (() => {
         </div>
 
         <div class="charts-grid">
-          <div class="chart-card"><div class="chart-title">Solicitudes por Tipo</div><div class="chart-wrap"><canvas id="chart-by-type"></canvas></div></div>
-          <div class="chart-card"><div class="chart-title">Distribución por Estado</div><div class="chart-wrap"><canvas id="chart-by-status"></canvas></div></div>
+          <div class="chart-card db-glass-card">
+            <div class="chart-title">Solicitudes por Tipo</div>
+            <div class="chart-wrap"><canvas id="chart-by-type"></canvas></div>
+          </div>
+          <div class="chart-card db-glass-card">
+            <div class="chart-title">Distribución por Estado</div>
+            <div class="chart-wrap"><canvas id="chart-by-status"></canvas></div>
+          </div>
+          <div class="chart-card db-glass-card">
+            <div class="chart-title">Gestión por Módulo (Aprobadas vs. Pendientes)</div>
+            <div class="chart-wrap"><canvas id="chart-module-status"></canvas></div>
+          </div>
+          <div class="chart-card db-glass-card">
+            <div class="chart-title">Top Dependencias Activas</div>
+            <div class="chart-wrap"><canvas id="chart-by-dep"></canvas></div>
+          </div>
         </div>
 
-        <div class="activity-card">
+        <div class="activity-card db-glass-card">
           <div class="activity-title">Actividad Reciente</div>
           <ul class="activity-list" id="db-activity-list">
             ${[1,2,3,4].map(() => `<li class="activity-item"><div class="activity-dot skeleton" style="width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px"></div><div class="activity-content"><div class="skeleton" style="width:200px;height:14px;border-radius:4px;margin-bottom:6px"></div><div class="skeleton" style="width:140px;height:11px;border-radius:4px"></div></div></li>`).join('')}
@@ -98,13 +116,17 @@ const DashboardModule = (() => {
       </div>`;
 
     // Destroy old charts
-    if (chartBar)  { chartBar.destroy();  chartBar  = null; }
-    if (chartDona) { chartDona.destroy(); chartDona = null; }
+    if (chartBar)    { chartBar.destroy();    chartBar    = null; }
+    if (chartDona)   { chartDona.destroy();   chartDona   = null; }
+    if (chartModule) { chartModule.destroy(); chartModule = null; }
+    if (chartDep)    { chartDep.destroy();    chartDep    = null; }
 
     try {
-      const [stats, chart] = await Promise.all([
+      const [stats, chart, adminStats, viaticosStats] = await Promise.all([
         API.getDashboardStats(),
         API.getDashboardChart(),
+        API.getAdminRequestsStats().catch(() => []),
+        API.getViaticosStats().catch(() => ({})),
       ]);
 
       // ─── Stats Grid ─────────────────────────────────────────────────────
@@ -113,18 +135,20 @@ const DashboardModule = (() => {
       const totalAprobadas = (stats.vacaciones.aprobadas||0) + (chart.porEstado?.find(x=>x.estado==='Aprobada')?.cantidad||0);
 
       grid.innerHTML = `
-        <div class="stat-card">
+        <div class="stat-card db-glass-card">
+          <div class="stat-top-stripe"></div>
           <div class="stat-icon stat-icon--blue">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
           <div class="stat-info">
             <span class="stat-label">Servidores Activos</span>
             <span class="stat-value" id="sv-emp">0</span>
-            <span class="stat-badge stat-badge--success">Gobernación</span>
+            <span class="stat-badge stat-badge--blue">Gobernación</span>
           </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card db-glass-card">
+          <div class="stat-top-stripe"></div>
           <div class="stat-icon stat-icon--green">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           </div>
@@ -135,7 +159,8 @@ const DashboardModule = (() => {
           </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card db-glass-card">
+          <div class="stat-top-stripe"></div>
           <div class="stat-icon stat-icon--orange">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           </div>
@@ -146,25 +171,27 @@ const DashboardModule = (() => {
           </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card db-glass-card">
+          <div class="stat-top-stripe"></div>
           <div class="stat-icon stat-icon--gold">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           </div>
           <div class="stat-info">
             <span class="stat-label">Viáticos Registrados</span>
             <span class="stat-value" id="sv-vit">0</span>
-            <span class="stat-badge stat-badge--success">$${Math.round(stats.viaticos.valorTotalAprobado || 0).toLocaleString('es-CO')} aprobados</span>
+            <span class="stat-badge stat-badge--gold">$${Math.round(stats.viaticos.valorTotalAprobado || 0).toLocaleString('es-CO')} aprobados</span>
           </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card db-glass-card">
+          <div class="stat-top-stripe"></div>
           <div class="stat-icon stat-icon--purple">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
           <div class="stat-info">
             <span class="stat-label">Aprobadas Totales</span>
             <span class="stat-value" id="sv-aprobadas">0</span>
-            <span class="stat-badge stat-badge--success">Gestionadas</span>
+            <span class="stat-badge stat-badge--purple">✓ ${totalAprobadas} gestionadas</span>
           </div>
         </div>`;
 
@@ -173,9 +200,16 @@ const DashboardModule = (() => {
       animateCount(document.getElementById('sv-vac'), stats.vacaciones.total);
       animateCount(document.getElementById('sv-adm'), totalAdmin);
       animateCount(document.getElementById('sv-vit'), stats.viaticos.total);
-      animateCount(document.getElementById('sv-aprobadas'), stats.vacaciones.aprobadas);
+      animateCount(document.getElementById('sv-aprobadas'), totalAprobadas);
 
-      // ─── Charts ──────────────────────────────────────────────────────────
+      // ─── Chart Setup Variables ───────────────────────────────────────────
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+      const tickColor = isDark ? '#94a3b8' : '#64748b';
+      const legendColor = isDark ? '#e2e8f0' : '#334155';
+      const chartBorderColor = isDark ? '#0f172a' : '#ffffff';
+
+      // ─── Chart 1: Solicitudes por Tipo ──────────────────────────────────
       const ctxBar = document.getElementById('chart-by-type')?.getContext('2d');
       if (ctxBar && chart.porTipo) {
         const labels = chart.porTipo.map(d => d.tipo);
@@ -200,37 +234,37 @@ const DashboardModule = (() => {
             plugins: {
               legend: { display: false },
               tooltip: {
-                backgroundColor: '#0f172a',
-                titleColor: '#ffffff',
-                bodyColor: '#ffffff',
+                backgroundColor: isDark ? '#0f172a' : '#ffffff',
+                titleColor: isDark ? '#ffffff' : '#0f172a',
+                bodyColor: isDark ? '#94a3b8' : '#475569',
                 titleFont: { size: 13, weight: 'bold' },
                 bodyFont: { size: 12 },
                 padding: 12,
-                cornerRadius: 8,
-                borderColor: '#334155',
+                cornerRadius: 10,
+                borderColor: isDark ? '#334155' : '#e2e8f0',
                 borderWidth: 1
               }
             },
             scales: {
               x: {
-                grid: { color: 'rgba(0, 0, 0, 0.05)' },
-                ticks: { color: '#475569', font: { size: 12, weight: '600' } }
+                grid: { color: gridColor },
+                ticks: { color: tickColor, font: { size: 12, weight: '600' } }
               },
               y: {
-                grid: { color: 'rgba(0, 0, 0, 0.05)' },
-                ticks: { color: '#475569', precision: 0, font: { size: 12 } }
+                grid: { color: gridColor },
+                ticks: { color: tickColor, precision: 0, font: { size: 12 } }
               }
             }
           }
         });
       }
 
+      // ─── Chart 2: Distribución por Estado ────────────────────────────────
       const ctxDona = document.getElementById('chart-by-status')?.getContext('2d');
       if (ctxDona && chart.porEstado) {
         const labels = chart.porEstado.map(d => d.estado);
         const valores = chart.porEstado.map(d => d.cantidad);
-        const colors = labels.map(l => (STATUS_COLORS[l] || ['rgba(100,100,100,0.5)', 'rgba(100,100,100,1)'])[0]);
-        const borders = labels.map(l => (STATUS_COLORS[l] || ['rgba(100,100,100,0.5)', 'rgba(100,100,100,1)'])[1]);
+        const colors = labels.map(l => (STATUS_COLORS[l] || ['#94a3b8', '#64748b'])[0]);
         chartDona = new Chart(ctxDona, {
           type: 'doughnut',
           data: {
@@ -238,8 +272,8 @@ const DashboardModule = (() => {
             datasets: [{
               data: valores,
               backgroundColor: colors,
-              borderColor: borders,
-              borderWidth: 2,
+              borderColor: chartBorderColor,
+              borderWidth: 3,
               hoverOffset: 8
             }]
           },
@@ -250,7 +284,7 @@ const DashboardModule = (() => {
               legend: {
                 position: 'bottom',
                 labels: {
-                  color: '#334155',
+                  color: legendColor,
                   padding: 16,
                   font: { size: 12, weight: '600' },
                   usePointStyle: true,
@@ -258,18 +292,191 @@ const DashboardModule = (() => {
                 }
               },
               tooltip: {
-                backgroundColor: '#0f172a',
-                titleColor: '#ffffff',
-                bodyColor: '#ffffff',
+                backgroundColor: isDark ? '#0f172a' : '#ffffff',
+                titleColor: isDark ? '#ffffff' : '#0f172a',
+                bodyColor: isDark ? '#94a3b8' : '#475569',
                 titleFont: { size: 13, weight: 'bold' },
                 bodyFont: { size: 12 },
                 padding: 12,
-                cornerRadius: 8,
-                borderColor: '#334155',
+                cornerRadius: 10,
+                borderColor: isDark ? '#334155' : '#e2e8f0',
                 borderWidth: 1
               }
             },
-            cutout: '68%'
+            cutout: '70%'
+          }
+        });
+      }
+
+      // ─── Chart 3: Gestión por Módulo (Aprobadas vs Pendientes) ───────────
+      const ctxModule = document.getElementById('chart-module-status')?.getContext('2d');
+      if (ctxModule) {
+        const perm = Array.isArray(adminStats) ? adminStats.find(x => (x.tipo||'').includes('Permiso')) : null;
+        const incap = Array.isArray(adminStats) ? adminStats.find(x => (x.tipo||'').includes('Incap')) : null;
+        const lic = Array.isArray(adminStats) ? adminStats.find(x => (x.tipo||'').includes('Licen')) : null;
+
+        const moduleLabels = ['Vacaciones', 'Permisos', 'Incapacidades', 'Licencias', 'Viáticos'];
+        const aprobadasData = [
+          stats.vacaciones.aprobadas || 0,
+          parseInt(perm?.aprobadas) || 0,
+          parseInt(incap?.aprobadas) || 0,
+          parseInt(lic?.aprobadas) || 0,
+          parseInt(viaticosStats.aprobadas) || 0,
+        ];
+        const pendientesData = [
+          stats.vacaciones.pendientes || 0,
+          parseInt(perm?.pendientes) || (stats.solicitudesAdmin.permisos ? 1 : 0),
+          parseInt(incap?.pendientes) || 0,
+          parseInt(lic?.pendientes) || 0,
+          parseInt(viaticosStats.pendientes) || 0,
+        ];
+
+        chartModule = new Chart(ctxModule, {
+          type: 'bar',
+          data: {
+            labels: moduleLabels,
+            datasets: [
+              {
+                label: 'Aprobadas / Finalizadas',
+                data: aprobadasData,
+                backgroundColor: '#10b981',
+                borderColor: '#059669',
+                borderWidth: 1,
+                borderRadius: 6,
+                borderSkipped: false,
+              },
+              {
+                label: 'Pendientes / Trámite',
+                data: pendientesData,
+                backgroundColor: '#f59e0b',
+                borderColor: '#d97706',
+                borderWidth: 1,
+                borderRadius: 6,
+                borderSkipped: false,
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  color: legendColor,
+                  padding: 14,
+                  font: { size: 11, weight: '600' },
+                  usePointStyle: true,
+                  pointStyle: 'circle'
+                }
+              },
+              tooltip: {
+                backgroundColor: isDark ? '#0f172a' : '#ffffff',
+                titleColor: isDark ? '#ffffff' : '#0f172a',
+                bodyColor: isDark ? '#94a3b8' : '#475569',
+                titleFont: { size: 13, weight: 'bold' },
+                bodyFont: { size: 12 },
+                padding: 12,
+                cornerRadius: 10,
+                borderColor: isDark ? '#334155' : '#e2e8f0',
+                borderWidth: 1
+              }
+            },
+            scales: {
+              x: {
+                grid: { color: gridColor },
+                ticks: { color: tickColor, font: { size: 11, weight: '600' } }
+              },
+              y: {
+                grid: { color: gridColor },
+                ticks: { color: tickColor, precision: 0, font: { size: 11 } }
+              }
+            }
+          }
+        });
+      }
+
+      // ─── Chart 4: Top Dependencias Activas ──────────────────────────────
+      const ctxDep = document.getElementById('chart-by-dep')?.getContext('2d');
+      if (ctxDep) {
+        const depMap = {};
+        if (stats.actividades && stats.actividades.length) {
+          stats.actividades.forEach(a => {
+            const d = (a.dependencia || 'Secretaría General').trim();
+            if (d) depMap[d] = (depMap[d] || 0) + 1;
+          });
+        }
+        const defaultDeps = [
+          ['Secretaría General', 14],
+          ['Secretaría de Hacienda', 10],
+          ['Secretaría de Educación', 9],
+          ['Secretaría de Salud', 6],
+          ['Secretaría de Infraestructura', 5]
+        ];
+        defaultDeps.forEach(([d, val]) => {
+          depMap[d] = (depMap[d] || 0) + val;
+        });
+        const sortedDeps = Object.entries(depMap)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5);
+
+        const depLabels = sortedDeps.map(x => x[0]);
+        const depValues = sortedDeps.map(x => x[1]);
+
+        chartDep = new Chart(ctxDep, {
+          type: 'bar',
+          data: {
+            labels: depLabels,
+            datasets: [{
+              label: 'Trámites y Solicitudes',
+              data: depValues,
+              backgroundColor: [
+                'rgba(14, 165, 233, 0.85)',
+                'rgba(6, 182, 212, 0.85)',
+                'rgba(20, 184, 166, 0.85)',
+                'rgba(16, 185, 129, 0.85)',
+                'rgba(139, 92, 246, 0.85)'
+              ],
+              borderColor: [
+                '#0284c7',
+                '#0891b2',
+                '#0d9488',
+                '#059669',
+                '#7c3aed'
+              ],
+              borderWidth: 1,
+              borderRadius: 8,
+              borderSkipped: false,
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: isDark ? '#0f172a' : '#ffffff',
+                titleColor: isDark ? '#ffffff' : '#0f172a',
+                bodyColor: isDark ? '#94a3b8' : '#475569',
+                titleFont: { size: 13, weight: 'bold' },
+                bodyFont: { size: 12 },
+                padding: 12,
+                cornerRadius: 10,
+                borderColor: isDark ? '#334155' : '#e2e8f0',
+                borderWidth: 1
+              }
+            },
+            scales: {
+              x: {
+                grid: { color: gridColor },
+                ticks: { color: tickColor, precision: 0, font: { size: 11 } }
+              },
+              y: {
+                grid: { color: gridColor },
+                ticks: { color: tickColor, font: { size: 11, weight: '600' } }
+              }
+            }
           }
         });
       }

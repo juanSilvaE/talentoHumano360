@@ -57,12 +57,17 @@ const RequestsModule = (() => {
           </button>
         </td>
         <td class="td-actions">
-          <button class="btn btn-secondary btn-sm btn-icon" onclick="RequestsModule.openEdit(${r.id})" title="Editar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          ${Auth.canEdit() ? `<button class="btn btn-danger btn-sm btn-icon" onclick="RequestsModule.confirmDelete(${r.id},'${escHtml(r.persona)}')" title="Eliminar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-          </button>` : ''}
+          <div class="td-actions-wrap">
+            <button class="btn-action-view" onclick="RequestsModule.openView(${r.id})" title="Ver Detalles de Solicitud">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <button class="btn-action-edit" onclick="RequestsModule.openEdit(${r.id})" title="Editar Solicitud">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            ${Auth.canEdit() ? `<button class="btn-action-delete" onclick="RequestsModule.confirmDelete(${r.id},'${escHtml(r.persona)}')" title="Eliminar Solicitud">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            </button>` : ''}
+          </div>
         </td>
       </tr>`).join('');
   }
@@ -82,6 +87,68 @@ const RequestsModule = (() => {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>`;
+  }
+
+  function openView(id) {
+    const r = state.data.find(x => x.id === id);
+    if (!r) return;
+    const content = `
+      <div class="detail-modal-card">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Radicado</span>
+            <span class="detail-value">${escHtml(r.radicado || '—')}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Estado</span>
+            <div class="detail-badge-wrap"><span class="badge ${badgeClass(r.estado)}">${escHtml(r.estado || '—')}</span></div>
+          </div>
+          <div class="detail-item detail-grid--full">
+            <span class="detail-label">Servidor Público</span>
+            <span class="detail-value">${escHtml(r.persona || '—')}</span>
+          </div>
+          <div class="detail-item detail-grid--full">
+            <span class="detail-label">Dependencia</span>
+            <span class="detail-value">${escHtml(r.dependencia || '—')}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Tipo de Solicitud</span>
+            <span class="detail-value">${escHtml(r.tipo || 'Vacaciones')}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Días Totales</span>
+            <span class="detail-value">${r.diasTotales || 0} días</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Fecha de Inicio</span>
+            <span class="detail-value">${escHtml(r.fechaInicio || '—')}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Fecha de Fin</span>
+            <span class="detail-value">${escHtml(r.fechaFin || '—')}</span>
+          </div>
+          ${r.observaciones ? `
+          <div class="detail-item detail-grid--full">
+            <span class="detail-label">Observaciones</span>
+            <span class="detail-value">${escHtml(r.observaciones)}</span>
+          </div>` : ''}
+        </div>
+      </div>
+    `;
+    const actions = [
+      { text: 'Cerrar', cls: 'btn-secondary', action: () => App.closeModal() },
+    ];
+    if (Auth.canEdit()) {
+      actions.push({
+        text: 'Editar Solicitud',
+        cls: 'btn-gold',
+        action: () => {
+          App.closeModal();
+          openEdit(id);
+        }
+      });
+    }
+    App.openModal(`Detalles de Solicitud · ${r.radicado || ''}`, content, actions);
   }
 
   function openCreate() {
@@ -256,8 +323,8 @@ const RequestsModule = (() => {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
               Carga Masiva Excel
             </button>
-            <button class="btn btn-primary" onclick="RequestsModule.openCreate()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <button class="btn btn-primary btn-liquid-create" onclick="RequestsModule.openCreate()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Nueva Solicitud
             </button>` : ''}
           </div>
@@ -501,5 +568,5 @@ const RequestsModule = (() => {
     });
   }
 
-  return { render, openCreate, openEdit, openStatusPicker, selectQuickStatus, confirmDelete, applyFilters, clearFilters, goPage, exportExcel, openImportModal };
+  return { render, openCreate, openView, openEdit, openStatusPicker, selectQuickStatus, confirmDelete, applyFilters, clearFilters, goPage, exportExcel, openImportModal };
 })();

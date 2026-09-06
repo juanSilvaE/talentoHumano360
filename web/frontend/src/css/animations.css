@@ -5,6 +5,8 @@
 /* ─── Page Transition ────────────────────────────────────────────────────── */
 .module-enter {
   animation: module-fade-in 0.35s ease forwards;
+  position: relative;
+  min-height: 100%;
 }
 
 @keyframes module-fade-in {
@@ -63,21 +65,45 @@ tbody tr:nth-child(10) { animation-delay: 0.20s; }
 }
 
 /* ─── Nav Item Active Indicator ──────────────────────────────────────────── */
-.nav-item.active::before {
+.nav-item.active::before,
+.nav-group-toggle.active::before {
   content: '';
   position: absolute;
   left: 0;
-  top: 20%;
-  height: 60%;
-  width: 3px;
-  background: var(--color-green-bright);
+  top: 16%;
+  height: 68%;
+  width: 4px;
+  background: #86efac;
   border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 8px rgba(134, 239, 172, 0.85);
   animation: slide-in-left 0.2s ease;
+  z-index: 5;
 }
 
-[data-theme="dark"] .nav-item.active::before {
-  background: var(--color-mustard) !important;
-  box-shadow: 0 0 10px rgba(209, 173, 42, 0.9);
+.nav-subitem.active::before {
+  content: '' !important;
+  display: block !important;
+  position: absolute;
+  left: 0;
+  top: 16%;
+  height: 68%;
+  width: 4px;
+  background: #fde047 !important;
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 8px rgba(253, 224, 71, 0.85) !important;
+  animation: slide-in-left 0.2s ease;
+  z-index: 5;
+}
+
+[data-theme="dark"] .nav-item.active::before,
+[data-theme="dark"] .nav-group-toggle.active::before {
+  background: #facc15 !important;
+  box-shadow: 0 0 8px rgba(250, 204, 21, 0.8) !important;
+}
+
+[data-theme="dark"] .nav-subitem.active::before {
+  background: #f87171 !important;
+  box-shadow: 0 0 8px rgba(248, 113, 113, 0.8) !important;
 }
 
 @keyframes slide-in-left {
@@ -101,14 +127,6 @@ tbody tr:nth-child(10) { animation-delay: 0.20s; }
 @keyframes badge-pop {
   from { transform: scale(0.8); opacity: 0; }
   to   { transform: scale(1); opacity: 1; }
-}
-
-/* ─── Sidebar Hover Glow on Active ──────────────────────────────────────── */
-.nav-item.active {
-  box-shadow: inset 0 0 20px rgba(40, 135, 27, 0.10);
-}
-[data-theme="dark"] .nav-item.active {
-  box-shadow: inset 0 0 16px rgba(209, 173, 42, 0.15), 0 4px 16px rgba(209, 173, 42, 0.25);
 }
 
 /* ─── Topbar Logo Glow ───────────────────────────────────────────────────── */
@@ -179,22 +197,95 @@ tbody tr:nth-child(10) { animation-delay: 0.20s; }
   background: rgba(255,255,255,0.2);
 }
 
-/* ─── Gold Accent Line at top of active nav ─────────────────────────────── */
-.nav-subitem.active::before {
-  background: var(--color-gold-500);
-}
-[data-theme="dark"] .nav-subitem.active::before {
-  background: var(--color-red) !important;
-  box-shadow: 0 0 8px rgba(227, 36, 49, 0.9) !important;
-}
-
 /* ─── Focus visible ring ─────────────────────────────────────────────────── */
 :focus-visible {
   outline: 2px solid var(--color-primary-400);
   outline-offset: 2px;
 }
 
+
 button:focus:not(:focus-visible) { outline: none; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Liquid Glass — Keyframes & Dashboard Animations
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Mesh Background Drift ──────────────────────────────────────────────── */
+@keyframes mesh-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(60px, -40px) scale(1.08); }
+  66%       { transform: translate(-30px, 50px) scale(0.95); }
+}
+@keyframes mesh-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40%       { transform: translate(-70px, 30px) scale(1.12); }
+  75%       { transform: translate(40px, -60px) scale(0.92); }
+}
+@keyframes mesh-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  30%       { transform: translate(50px, 55px) scale(1.06); }
+  70%       { transform: translate(-55px, -35px) scale(0.97); }
+}
+@keyframes mesh-drift-4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(-40px, -50px) scale(1.10); }
+}
+
+/* ─── Iridescent Border Hue Rotation ────────────────────────────────────── */
+@keyframes iris-rotate {
+  0%   { --iris-angle: 135deg; }
+  25%  { --iris-angle: 195deg; }
+  50%  { --iris-angle: 270deg; }
+  75%  { --iris-angle: 315deg; }
+  100% { --iris-angle: 135deg; }
+}
+
+/* ─── Specular Highlight Sweep ───────────────────────────────────────────── */
+@keyframes specular-sweep {
+  0%   { transform: translateX(-100%) skewX(-15deg); opacity: 0; }
+  20%  { opacity: 1; }
+  60%  { opacity: 0.6; }
+  100% { transform: translateX(250%) skewX(-15deg); opacity: 0; }
+}
+
+/* ─── Card Float (subtle vertical bob) ───────────────────────────────────── */
+@keyframes card-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-4px); }
+}
+
+/* ─── Orb Pulse (breathing opacity) ─────────────────────────────────────── */
+@keyframes orb-pulse {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50%       { opacity: 1; transform: scale(1.04); }
+}
+
+/* ─── Liquid Button Ripple ───────────────────────────────────────────────── */
+@keyframes liquid-ripple {
+  0%   { transform: scale(0); opacity: 0.5; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+/* ─── Glass Card Shimmer (on hover) ─────────────────────────────────────── */
+@keyframes glass-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ─── Dashboard Glass Cards — entry stagger ─────────────────────────────── */
+.db-glass-card {
+  animation: db-card-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.db-glass-card:nth-child(1) { animation-delay: 0.05s; }
+.db-glass-card:nth-child(2) { animation-delay: 0.10s; }
+.db-glass-card:nth-child(3) { animation-delay: 0.15s; }
+.db-glass-card:nth-child(4) { animation-delay: 0.20s; }
+.db-glass-card:nth-child(5) { animation-delay: 0.25s; }
+
+@keyframes db-card-enter {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
 
 /* ─── Reduced motion ─────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {

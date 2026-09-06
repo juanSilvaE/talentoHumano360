@@ -89,33 +89,74 @@ const App = (() => {
     dashboard: 'Dashboard',
     employees: 'Servidores Públicos',
     requests: 'Solicitudes de Vacaciones',
-    'admin-requests': 'Gestión de Solicitudes Administrativas',
+    'admin-requests': 'Solicitudes Administrativas',
     viaticos: 'Viáticos',
     settings: 'Configuración',
+  };
+
+  const MODULE_ICONS = {
+    dashboard: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/>',
+    employees: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    requests: '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+    'admin-requests': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>',
+    viaticos: '<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+    settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
   };
 
   async function navigate(module, options = {}) {
     const container = document.getElementById('module-container');
     const pageTitle = document.getElementById('page-title');
+    const breadcrumbIcon = document.querySelector('.breadcrumb-icon');
     if (!container) return;
 
     // Update active nav
-    document.querySelectorAll('.nav-item:not(.nav-subitem), .sidebar-settings-btn').forEach(b => {
+    document.querySelectorAll('.nav-item, .sidebar-settings-btn').forEach(b => {
       b.classList.remove('active');
       b.removeAttribute('aria-current');
     });
-    document.querySelectorAll('.nav-subitem').forEach(b => {
-      b.classList.remove('active');
-      b.removeAttribute('aria-current');
-    });
-    const navBtn = document.getElementById(`nav-${module}`);
-    if (navBtn) {
-      navBtn.classList.add('active');
-      navBtn.setAttribute('aria-current', 'page');
+
+    if (module === 'admin-requests') {
+      const adminGroupBtn = document.getElementById('nav-admin-group');
+      const menu = document.getElementById('admin-submenu');
+      if (adminGroupBtn) {
+        adminGroupBtn.classList.add('active');
+        adminGroupBtn.setAttribute('aria-current', 'true');
+        adminGroupBtn.setAttribute('aria-expanded', 'true');
+      }
+      if (menu) {
+        menu.setAttribute('aria-hidden', 'false');
+      }
+    } else {
+      const navBtn = document.getElementById(`nav-${module}`);
+      if (navBtn) {
+        navBtn.classList.add('active');
+        navBtn.setAttribute('aria-current', 'page');
+      }
     }
 
-    if (pageTitle) pageTitle.textContent = MODULE_TITLES[module] || module;
-    document.title = `${MODULE_TITLES[module] || module} — Talento 360`;
+    let title = MODULE_TITLES[module] || module;
+    let iconSvg = MODULE_ICONS[module] || MODULE_ICONS.dashboard;
+
+    if (module === 'admin-requests') {
+      const tipoKey = options.tipo || 'permisos';
+      if (tipoKey === 'permisos') {
+        title = 'Permisos Laborales';
+        iconSvg = '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>';
+      } else if (tipoKey === 'incapacidades') {
+        title = 'Incapacidades Médicas';
+        iconSvg = '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>';
+      } else if (tipoKey === 'licencias') {
+        title = 'Licencias Institucionales';
+        iconSvg = '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>';
+      }
+    }
+
+    if (pageTitle) pageTitle.textContent = title;
+    document.title = `${title} — Talento 360`;
+    if (breadcrumbIcon) breadcrumbIcon.innerHTML = iconSvg;
+    const badge = document.getElementById('topbar-breadcrumb-badge');
+    if (badge) badge.setAttribute('title', title);
+    document.getElementById('app')?.setAttribute('data-current-module', module);
 
     // FX: page transition
     if (typeof FX !== 'undefined') {
@@ -129,7 +170,12 @@ const App = (() => {
             await AdminRequestsModule.render(container, tipoKey);
             const subnavMap = { permisos: 'nav-permisos', incapacidades: 'nav-incapacidades', licencias: 'nav-licencias' };
             const activeSubBtn = document.getElementById(subnavMap[tipoKey] || 'nav-permisos');
-            if (activeSubBtn) activeSubBtn.classList.add('active');
+            if (activeSubBtn) {
+              activeSubBtn.classList.add('active');
+              activeSubBtn.setAttribute('aria-current', 'page');
+            }
+            const adminGroupBtn = document.getElementById('nav-admin-group');
+            if (adminGroupBtn) adminGroupBtn.classList.add('active');
             expandAdminGroup();
             break;
           }
@@ -154,7 +200,12 @@ const App = (() => {
           await AdminRequestsModule.render(container, tipoKey);
           const subnavMap = { permisos: 'nav-permisos', incapacidades: 'nav-incapacidades', licencias: 'nav-licencias' };
           const activeSubBtn = document.getElementById(subnavMap[tipoKey] || 'nav-permisos');
-          if (activeSubBtn) activeSubBtn.classList.add('active');
+          if (activeSubBtn) {
+            activeSubBtn.classList.add('active');
+            activeSubBtn.setAttribute('aria-current', 'page');
+          }
+          const adminGroupBtn = document.getElementById('nav-admin-group');
+          if (adminGroupBtn) adminGroupBtn.classList.add('active');
           expandAdminGroup();
           break;
         }
@@ -279,6 +330,8 @@ const App = (() => {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'grid';
     updateUserDisplay(user);
+    updateTopbarDateTime();
+    updateTopbarQuickControls();
     // FX: animate app entry
     if (typeof FX !== 'undefined') {
       FX.animateAppEnter();
@@ -562,72 +615,44 @@ const App = (() => {
 
     const now = new Date();
     if (dateEl) {
-      const dayName = now.toLocaleDateString('es-CO', { weekday: 'long' });
-      const capDay = dayName.charAt(0).toUpperCase() + dayName.slice(1);
-      const monthName = now.toLocaleDateString('es-CO', { month: 'short' }).replace('.', '');
-      const capMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-      dateEl.textContent = `${capDay}, ${now.getDate()} ${capMonth} ${now.getFullYear()}`;
+      const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      const diaSemana = dias[now.getDay()];
+      const mes = meses[now.getMonth()];
+      dateEl.textContent = `${diaSemana}, ${now.getDate()} ${mes} ${now.getFullYear()}`;
     }
     if (timeEl) {
-      timeEl.textContent = now.toLocaleTimeString('es-CO', {
-        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
-      });
+      let hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'p.m.' : 'a.m.';
+      hours = hours % 12 || 12;
+      timeEl.textContent = `${hours}:${minutes} ${ampm}`;
     }
   }
 
-  // ─── Quick Access Controls (Theme & Sound) ─────────────────────────────────
+  // ─── Quick Access Controls (Theme & Contrast) ──────────────────────────────
   function updateTopbarQuickControls() {
-    const themeBtn = document.getElementById('topbar-theme-toggle');
-    const soundBtn = document.getElementById('topbar-sound-toggle');
+    const themeSwitch = document.getElementById('topbar-theme-toggle');
+    const contrastBtn = document.getElementById('topbar-contrast-toggle');
 
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
       (typeof Settings !== 'undefined' && Settings.get('theme') === 'dark');
 
-    if (themeBtn) {
-      if (isDark) {
-        themeBtn.setAttribute('title', 'Modo Oscuro activo (clic para Modo Claro)');
-        themeBtn.setAttribute('aria-label', 'Cambiar a Modo Claro');
-        themeBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#f59e0b;">
-            <circle cx="12" cy="12" r="5"/>
-            <line x1="12" y1="1" x2="12" y2="3"/>
-            <line x1="12" y1="21" x2="12" y2="23"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-            <line x1="1" y1="12" x2="3" y2="12"/>
-            <line x1="21" y1="12" x2="23" y2="12"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-          </svg>`;
-      } else {
-        themeBtn.setAttribute('title', 'Modo Claro activo (clic para Modo Oscuro)');
-        themeBtn.setAttribute('aria-label', 'Cambiar a Modo Oscuro');
-        themeBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#005387;">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-          </svg>`;
-      }
+    if (themeSwitch) {
+      themeSwitch.setAttribute('aria-checked', String(isDark));
+      themeSwitch.setAttribute('title', isDark ? 'Modo Oscuro activo (clic para cambiar a Modo Claro)' : 'Modo Claro activo (clic para cambiar a Modo Oscuro)');
     }
 
-    const isSoundOn = typeof Settings !== 'undefined' ? Settings.get('soundEnabled') !== false : true;
-    if (soundBtn) {
-      if (isSoundOn) {
-        soundBtn.setAttribute('title', 'Efectos de sonido: Activados (clic para silenciar)');
-        soundBtn.setAttribute('aria-label', 'Silenciar efectos de sonido');
-        soundBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--color-teal);">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
-          </svg>`;
+    const isHighContrast = document.documentElement.getAttribute('data-high-contrast') === 'true' ||
+      (typeof Settings !== 'undefined' && Settings.get('highContrast') === true);
+
+    if (contrastBtn) {
+      if (isHighContrast) {
+        contrastBtn.classList.add('is-active');
+        contrastBtn.setAttribute('title', 'Líneas de tabla y alto contraste: Activados (clic para desactivar)');
       } else {
-        soundBtn.setAttribute('title', 'Efectos de sonido: Silenciados (clic para activar)');
-        soundBtn.setAttribute('aria-label', 'Activar efectos de sonido');
-        soundBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--color-red);">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <line x1="23" y1="9" x2="17" y2="15"/>
-            <line x1="17" y1="9" x2="23" y2="15"/>
-          </svg>`;
+        contrastBtn.classList.remove('is-active');
+        contrastBtn.setAttribute('title', 'Líneas de tabla y alto contraste: Desactivados (clic para activar)');
       }
     }
   }
@@ -748,6 +773,21 @@ const App = (() => {
       navigate('settings');
     });
 
+    document.getElementById('topbar-contrast-toggle')?.addEventListener('click', () => {
+      const isHigh = document.documentElement.getAttribute('data-high-contrast') === 'true' ||
+        (typeof Settings !== 'undefined' && Settings.get('highContrast') === true);
+      const next = !isHigh;
+      if (next) {
+        document.documentElement.setAttribute('data-high-contrast', 'true');
+      } else {
+        document.documentElement.removeAttribute('data-high-contrast');
+      }
+      if (typeof Settings !== 'undefined') Settings.set('highContrast', next);
+      updateTopbarQuickControls();
+      showToast(next ? 'Líneas de tabla y alto contraste activados' : 'Alto contraste desactivado', 'info');
+      if (typeof FX !== 'undefined' && FX.Sound) FX.Sound.click();
+    });
+
     document.getElementById('topbar-theme-toggle')?.addEventListener('click', () => {
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
         (typeof Settings !== 'undefined' && Settings.get('theme') === 'dark');
@@ -762,33 +802,23 @@ const App = (() => {
       if (typeof FX !== 'undefined' && FX.Sound) FX.Sound.click();
     });
 
-    document.getElementById('topbar-sound-toggle')?.addEventListener('click', () => {
-      if (typeof Settings !== 'undefined') {
-        const nextSound = !Settings.get('soundEnabled');
-        Settings.set('soundEnabled', nextSound);
-        updateTopbarQuickControls();
-        showToast(nextSound ? 'Efectos de sonido activados' : 'Efectos de sonido silenciados', 'info');
-        if (nextSound && typeof FX !== 'undefined' && FX.Sound) FX.Sound.click();
-      }
-    });
-
     // Sidebar toggle (both sidebar and topbar buttons)
     const toggleSidebar = () => {
       const app = document.getElementById('app');
       if (!app) return;
-      const collapsed = app.classList.toggle('sidebar-collapsed');
-      localStorage.setItem('talento360_sidebar_collapsed', String(collapsed));
-      // FX: sidebar toggle animation
-      if (typeof FX !== 'undefined') FX.animateSidebarToggle(collapsed);
+      if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) sidebar.classList.toggle('mobile-open');
+      } else {
+        const collapsed = app.classList.toggle('sidebar-collapsed');
+        localStorage.setItem('talento360_sidebar_collapsed', String(collapsed));
+        // FX: sidebar toggle animation
+        if (typeof FX !== 'undefined') FX.animateSidebarToggle(collapsed);
+      }
     };
 
     document.getElementById('sidebar-toggle')?.addEventListener('click', toggleSidebar);
     document.getElementById('topbar-sidebar-toggle')?.addEventListener('click', toggleSidebar);
-
-    // Mobile menu
-    document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
-      document.getElementById('sidebar').classList.toggle('mobile-open');
-    });
 
     // Modal close
     document.getElementById('modal-close')?.addEventListener('click', closeModal);

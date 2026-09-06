@@ -46,12 +46,17 @@ const EmployeesModule = (() => {
         <td>${e.correo || '—'}</td>
         <td>${badgeSex(e.sexo)}</td>
         <td class="td-actions">
-          <button class="btn btn-secondary btn-sm btn-icon" onclick="EmployeesModule.openEdit('${e.cedula}')" title="Editar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          ${Auth.canEdit() ? `<button class="btn btn-danger btn-sm btn-icon" onclick="EmployeesModule.confirmDelete('${e.cedula}','${escHtml(e.nombreCompleto)}')" title="Eliminar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-          </button>` : ''}
+          <div class="td-actions-wrap">
+            <button class="btn-action-view" onclick="EmployeesModule.openView('${e.cedula}')" title="Ver Detalles del Servidor">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <button class="btn-action-edit" onclick="EmployeesModule.openEdit('${e.cedula}')" title="Editar Servidor">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            ${Auth.canEdit() ? `<button class="btn-action-delete" onclick="EmployeesModule.confirmDelete('${e.cedula}','${escHtml(e.nombreCompleto)}')" title="Eliminar Servidor">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            </button>` : ''}
+          </div>
         </td>
       </tr>`).join('');
   }
@@ -73,10 +78,59 @@ const EmployeesModule = (() => {
       </div>`;
   }
 
+  function openView(cedula) {
+    const emp = state.data.find(e => e.cedula === cedula);
+    if (!emp) return;
+    const content = `
+      <div class="detail-modal-card">
+        <div class="detail-grid">
+          <div class="detail-item detail-grid--full">
+            <span class="detail-label">Nombre Completo</span>
+            <span class="detail-value">${escHtml(emp.nombreCompleto || '—')}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Cédula de Ciudadanía</span>
+            <span class="detail-value">${escHtml(emp.cedula || '—')}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Sexo</span>
+            <span class="detail-value">${escHtml(emp.sexo || '—')}</span>
+          </div>
+          <div class="detail-item detail-grid--full">
+            <span class="detail-label">Dependencia</span>
+            <span class="detail-value">${escHtml(emp.dependencia || '—')}</span>
+          </div>
+          <div class="detail-item detail-grid--full">
+            <span class="detail-label">Cargo Actual</span>
+            <span class="detail-value">${escHtml(emp.cargoActual || '—')}</span>
+          </div>
+          <div class="detail-item detail-grid--full">
+            <span class="detail-label">Correo Institucional</span>
+            <span class="detail-value">${escHtml(emp.correo || '—')}</span>
+          </div>
+        </div>
+      </div>
+    `;
+    const actions = [
+      { text: 'Cerrar', cls: 'btn-secondary', action: () => App.closeModal() },
+    ];
+    if (Auth.canEdit()) {
+      actions.push({
+        text: 'Editar Servidor',
+        cls: 'btn-gold',
+        action: () => {
+          App.closeModal();
+          openEdit(cedula);
+        }
+      });
+    }
+    App.openModal('Ficha del Servidor Público', content, actions);
+  }
+
   function openCreate() {
     App.openModal('Nuevo Servidor', buildForm(), [
       { text: 'Cancelar', cls: 'btn-secondary', action: () => App.closeModal() },
-      { text: 'Guardar', cls: 'btn-primary', id: 'emp-save-btn', action: saveCreate },
+      { text: 'Crear Servidor', cls: 'btn-primary', id: 'emp-save-btn', action: saveCreate },
     ]);
     loadCatalogs();
   }
@@ -258,8 +312,8 @@ const EmployeesModule = (() => {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
               Carga Masiva Excel
             </button>
-            <button class="btn btn-primary" onclick="EmployeesModule.openCreate()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <button class="btn btn-primary btn-liquid-create" onclick="EmployeesModule.openCreate()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Nuevo Servidor
             </button>` : ''}
           </div>
@@ -413,5 +467,5 @@ const EmployeesModule = (() => {
     });
   }
 
-  return { render, openCreate, openEdit, confirmDelete, goPage, search, clearSearch, exportExcel, openImportModal };
+  return { render, openCreate, openView, openEdit, confirmDelete, goPage, search, clearSearch, exportExcel, openImportModal };
 })();
