@@ -79,7 +79,12 @@ const AdminRequestsModule = (() => {
     tbody.innerHTML = state.data.map(r => `
       <tr>
         <td class="td-radicado">${r.radicado}</td>
-        <td class="td-primary" title="${r.persona}">${truncate(r.persona, 28) || '—'}</td>
+        <td>
+          <div class="user-table-cell">
+            <span class="td-primary" title="${r.persona}">${truncate(r.persona, 28) || '—'}</span>
+            <span class="user-table-cc font-mono">${r.documento ? `C.C. ${r.documento}` : '—'}</span>
+          </div>
+        </td>
         <td title="${r.dependencia}">${truncate(r.dependencia, 26) || '—'}</td>
         <td><span class="badge ${tipoBadge(r.tipo)}">${r.tipo}</span></td>
         <td>${r.fechaInicio || '—'}</td>
@@ -402,7 +407,7 @@ const AdminRequestsModule = (() => {
           <div class="table-wrap">
             <table>
               <thead><tr>
-                <th>Radicado</th><th>Servidor</th><th>Dependencia</th>
+                <th>Radicado</th><th>Servidor Público</th><th>Dependencia</th>
                 <th>Tipo</th><th>Fecha Inicio</th><th>Días</th><th>Estado</th><th>Acciones</th>
               </tr></thead>
               <tbody id="adm-tbody"><tr><td colspan="8"><div class="empty-state loading-pulse">Cargando...</div></td></tr></tbody>

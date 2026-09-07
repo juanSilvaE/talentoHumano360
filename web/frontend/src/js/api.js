@@ -89,5 +89,18 @@ const API = (() => {
     updateViaticoStatus: (id, estado, observaciones = '') =>
       request(`/viaticos/${id}/status`, { method: 'PATCH', body: JSON.stringify({ estado, observaciones }) }),
     deleteViatico: (id) => request(`/viaticos/${id}`, { method: 'DELETE' }),
+
+    // Horarios y Modalidades de Trabajo
+    getHorarios: (params = {}) => request('/horarios?' + new URLSearchParams(params)),
+    getHorariosStats: () => request('/horarios/stats'),
+    getHorarioById: (id) => request(`/horarios/${id}`),
+    createHorario: (data) => request('/horarios', { method: 'POST', body: JSON.stringify(data) }),
+    updateHorario: (id, data) => request(`/horarios/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    updateHorarioStatus: (id, estado, nota = '') =>
+      request(`/horarios/${id}/status`, { method: 'PATCH', body: JSON.stringify({ estado, nota }) }),
+    deleteHorario: (id) => request(`/horarios/${id}`, { method: 'DELETE' }),
+    calculateHorarioDates: (data) => request('/horarios/calculate-dates', { method: 'POST', body: JSON.stringify(data) }),
+    checkHorariosExpirations: () => request('/horarios/check-expirations', { method: 'POST' }),
+    bulkCreateHorarios: (rows) => request('/horarios/bulk', { method: 'POST', body: JSON.stringify({ rows }) }),
   };
 })();

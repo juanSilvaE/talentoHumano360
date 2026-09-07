@@ -122,7 +122,12 @@ const ViaticosModule = (() => {
     tbody.innerHTML = state.data.map(r => `
       <tr>
         <td class="td-radicado">${r.radicado}</td>
-        <td class="td-primary" title="${r.persona}">${truncate(r.persona, 26) || '—'}</td>
+        <td>
+          <div class="user-table-cell">
+            <span class="td-primary" title="${r.persona}">${truncate(r.persona, 26) || '—'}</span>
+            <span class="user-table-cc font-mono">${r.documento ? `C.C. ${r.documento}` : '—'}</span>
+          </div>
+        </td>
         <td title="${r.dependencia}">${truncate(r.dependencia, 24) || '—'}</td>
         <td title="${r.destino}">${truncate(r.destino, 20) || '—'}</td>
         <td>${r.fechaInicio || '—'}</td>
@@ -914,7 +919,7 @@ const ViaticosModule = (() => {
           <div class="table-wrap">
             <table>
               <thead><tr>
-                <th>Radicado</th><th>Servidor</th><th>Dependencia</th><th>Destino</th>
+                <th>Radicado</th><th>Servidor Público</th><th>Dependencia</th><th>Destino</th>
                 <th>Fecha Inicio</th><th>Días</th><th>Valor Total</th><th>Estado</th><th>Acciones</th>
               </tr></thead>
               <tbody id="vit-tbody"><tr><td colspan="9"><div class="empty-state loading-pulse">Cargando...</div></td></tr></tbody>

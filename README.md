@@ -25,19 +25,21 @@ talento360/
 │   ├── docker-compose.yml          # Orquestador maestro de contenedores
 │   ├── database/                   # Scripts SQL de inicialización y esquemas
 │   │   ├── 01_schema_and_data.sql  # Tablas principales, cargos, dependencias y usuarios
-│   │   └── 03_new_modules.sql      # Tablas de viáticos, solicitudes admin e historial
+│   │   ├── 03_new_modules.sql      # Tablas de viáticos, solicitudes admin e historial
+│   │   └── 04_horarios.sql         # Tablas de horarios, modalidades y trazabilidad
 │   ├── frontend/                   # Cliente Web SPA (HTML5, Vanilla CSS, JS Modular)
 │   │   └── src/
 │   │       ├── index.html          # Punto de entrada de la aplicación
 │   │       ├── css/                # Hojas de estilos (main, components, animations)
-│   │       └── js/                 # Lógica de la aplicación y módulos (viaticos, requests, etc.)
+│   │       └── js/                 # Lógica de la aplicación y módulos (horarios, viaticos, etc.)
 │   └── services/                   # Microservicios en Node.js / Express
 │       ├── auth-service/           # Autenticación JWT y validación de usuarios (Puerto 3001)
 │       ├── employees-service/      # Directorio de personal y hojas de vida (Puerto 3002)
 │       ├── requests-service/       # Solicitudes de Vacaciones (Puerto 3003)
 │       ├── admin-requests-service/ # Permisos, Incapacidades y Licencias (Puerto 3004)
 │       ├── viaticos-service/       # Comisiones y Viáticos (Puerto 3005)
-│       └── dashboard-service/      # Analítica y métricas del sistema (Puerto 3006)
+│       ├── dashboard-service/      # Analítica y métricas del sistema (Puerto 3006)
+│       └── horarios-service/       # Horarios y Modalidades de Trabajo (Puerto 3007)
 └── README.md
 ```
 

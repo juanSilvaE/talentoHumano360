@@ -30,7 +30,7 @@ const EmployeesModule = (() => {
     const tbody = document.getElementById('emp-tbody');
     if (!tbody) return;
     if (!state.data.length) {
-      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <span class="empty-state-title">No se encontraron servidores</span>
         <span class="empty-state-desc">${state.q ? `No hay resultados para "${state.q}"` : 'Aún no hay servidores registrados.'}</span>
@@ -39,8 +39,12 @@ const EmployeesModule = (() => {
     }
     tbody.innerHTML = state.data.map(e => `
       <tr>
-        <td class="td-primary" title="${e.nombreCompleto}">${e.nombreCompleto || '—'}</td>
-        <td>${e.cedula || '—'}</td>
+        <td>
+          <div class="user-table-cell">
+            <span class="td-primary" title="${e.nombreCompleto}">${e.nombreCompleto || '—'}</span>
+            <span class="user-table-cc font-mono">C.C. ${e.cedula || '—'}</span>
+          </div>
+        </td>
         <td title="${e.dependencia}">${truncate(e.dependencia, 30) || '—'}</td>
         <td title="${e.cargoActual}">${truncate(e.cargoActual, 28) || '—'}</td>
         <td>${e.correo || '—'}</td>
@@ -342,8 +346,7 @@ const EmployeesModule = (() => {
             <table>
               <thead>
                 <tr>
-                  <th>Nombre Completo</th>
-                  <th>Cédula</th>
+                  <th>Servidor Público</th>
                   <th>Dependencia</th>
                   <th>Cargo Actual</th>
                   <th>Correo</th>
@@ -352,7 +355,7 @@ const EmployeesModule = (() => {
                 </tr>
               </thead>
               <tbody id="emp-tbody">
-                <tr><td colspan="7"><div class="empty-state loading-pulse">Cargando servidores...</div></td></tr>
+                <tr><td colspan="6"><div class="empty-state loading-pulse">Cargando servidores...</div></td></tr>
               </tbody>
             </table>
           </div>

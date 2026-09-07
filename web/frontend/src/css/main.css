@@ -2091,11 +2091,16 @@ body {
 .modal-close:hover { color: var(--color-danger); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
 
 .modal-body {
-  padding: 1.75rem var(--space-6);
+  padding: 1.5rem var(--space-6);
   overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
   background: #ffffff;
   color: #334155;
+}
+
+.modal-box.modal-schedule {
+  max-width: 720px;
 }
 
 .modal-footer {
