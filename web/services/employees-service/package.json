@@ -3,11 +3,15 @@
   "version": "1.0.0",
   "description": "Talento 360 — Servicio de Servidores/Perfiles",
   "main": "src/server.js",
-  "scripts": { "start": "node src/server.js" },
+  "scripts": {
+    "start": "node src/server.js"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.11.3"
+    "multer": "^2.3.0",
+    "pg": "^8.11.3",
+    "xlsx": "^0.18.5"
   }
 }

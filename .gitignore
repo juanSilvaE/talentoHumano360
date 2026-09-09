@@ -4,3 +4,7 @@ web/.env
 
 # Node modules
 node_modules/
+
+# Scratch & temporary test scripts
+scratch/
+web/scratch/

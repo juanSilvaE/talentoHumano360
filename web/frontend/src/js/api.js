@@ -54,9 +54,48 @@ const API = (() => {
 
     // Employees
     getEmployees: (params = {}) => request('/employees?' + new URLSearchParams(params)),
+    getEmployeeByCedula: (cedula) => request(`/employees/${cedula}`),
     getEmployeeCatalogs: () => request('/employees/catalogs'),
     createEmployee: (data) => request('/employees', { method: 'POST', body: JSON.stringify(data) }),
     bulkCreateEmployees: (rows) => request('/employees/bulk', { method: 'POST', body: JSON.stringify({ rows }) }),
+    uploadEmployeesExcel: async (file) => {
+      if (!file) throw new Error('No se ha seleccionado ningún archivo.');
+      if (file.name.startsWith('~$')) {
+        throw new Error('El archivo seleccionado es un temporal de Excel (~$) bloqueado por el sistema. Cierra Microsoft Excel y selecciona el archivo original.');
+      }
+      const formData = new FormData();
+      formData.append('archivo', file);
+      const token = Auth.getToken();
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      let res;
+      try {
+        res = await fetch('/api/employees/importar-excel', {
+          method: 'POST',
+          headers,
+          body: formData
+        });
+      } catch (fetchErr) {
+        console.error('[API.uploadEmployeesExcel] fetch error:', fetchErr);
+        if (file.name.startsWith('~$')) {
+          throw new Error('El archivo temporal de Excel (~$) está bloqueado por el sistema. Cierra Excel y selecciona el archivo original.');
+        }
+        throw new Error(`Error de red al transferir el archivo: ${fetchErr.message || 'Verifica que el archivo no esté bloqueado por otra aplicación.'}`);
+      }
+
+      if (res.status === 401) {
+        Auth.clear();
+        App.showLogin();
+        throw new Error('Sesión expirada. Inicia sesión nuevamente.');
+      }
+      if (res.status === 413) {
+        throw new Error('El archivo supera el tamaño máximo permitido por el servidor.');
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+      return data;
+    },
     updateEmployee: (cedula, data) => request(`/employees/${cedula}`, { method: 'PUT', body: JSON.stringify(data) }),
     deleteEmployee: (cedula) => request(`/employees/${cedula}`, { method: 'DELETE' }),
 

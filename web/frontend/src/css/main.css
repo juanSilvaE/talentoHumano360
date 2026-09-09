@@ -2943,6 +2943,11 @@ body {
   color: var(--color-mustard) !important;
   border-color: rgba(209, 173, 42, 0.4) !important;
 }
+[data-theme="dark"] .badge--vacante {
+  background: rgba(254, 240, 138, 0.16) !important;
+  color: #fef08a !important;
+  border-color: rgba(250, 204, 21, 0.45) !important;
+}
 [data-theme="dark"] .badge--permiso {
   background: rgba(0, 123, 199, 0.2) !important;
   color: #7dd3fc !important;

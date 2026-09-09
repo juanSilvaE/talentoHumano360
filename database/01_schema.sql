@@ -30,7 +30,9 @@ CREATE TABLE personas (
     tipo_sangre VARCHAR(30),
     fecha_nacimiento VARCHAR(60),
     edad VARCHAR(30),
-    sexo VARCHAR(30)
+    sexo VARCHAR(30),
+    documento_pendiente BOOLEAN DEFAULT FALSE,
+    es_vacante BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE dependencias (
@@ -92,7 +94,9 @@ CREATE TABLE rel_principal (
     id_educacion VARCHAR(30),
     id_contacto VARCHAR(30),
     id_estado VARCHAR(30),
-    otro_tiempo_gobernacion VARCHAR(120),
+    otro_tiempo_gobernacion TEXT,
+    otros_tiempos_periodos JSONB DEFAULT '[]'::jsonb,
+    tiempo_total_gobernacion TEXT,
     fecha_ingreso VARCHAR(80),
     tiempo_servicio VARCHAR(120),
     fecha_encargo VARCHAR(80),
