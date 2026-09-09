@@ -338,7 +338,11 @@ router.get('/catalogs', auth, async (_, res) => {
       })).filter(c => Boolean(c.cargo)),
       cargosPorDependencia,
       divipola: {
-        departamentos: Array.from(departamentosSet).sort(),
+        departamentos: Array.from(departamentosSet).sort((a, b) => {
+          if (a === 'BOYACÁ') return -1;
+          if (b === 'BOYACÁ') return 1;
+          return a.localeCompare(b, 'es');
+        }),
         municipiosPorDepto
       },
       grados: GRADOS_VALIDOS,
