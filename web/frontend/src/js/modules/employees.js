@@ -15,7 +15,7 @@ const EmployeesModule = (() => {
       cargos: [],
       cargosPorDependencia: {},
       divipola: { departamentos: [], municipiosPorDepto: {} },
-      grados: ['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','N/a','NE'],
+      grados: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', 'N/a', 'NE'],
       clasificaciones: ['CARRERA ADMINISTRATIVA', 'LIBRE NOMBRAMIENTO Y REMOCIÓN', 'PROVISIONAL', 'PERIODO FIJO', 'TEMPORAL', 'TRABAJADOR OFICIAL'],
       estadosServidor: ['Activo', 'Inactivo', 'Pensionado'],
       sexos: ['Femenino', 'Masculino', 'Prefiero no decirlo'],
@@ -161,46 +161,65 @@ const EmployeesModule = (() => {
 
   function badgeEstadoServidor(est) {
     const val = (est || 'Activo').toLowerCase();
-    if (val === 'activo') return '<span class="badge badge--activo" style="background:#dcfce7; color:#15803d; border:1px solid #86efac; font-weight:600;">Activo</span>';
-    if (val === 'pensionado') return '<span class="badge badge--pensionado" style="background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe; font-weight:600;">Pensionado</span>';
-    return '<span class="badge badge--inactivo" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-weight:600;">Inactivo</span>';
+    if (val === 'activo') return '<span class="badge badge--activo">Activo</span>';
+    if (val === 'pensionado') return '<span class="badge badge--pensionado">Pensionado</span>';
+    return '<span class="badge badge--inactivo">Inactivo</span>';
   }
 
   function badgeClasificacion(clasif) {
-    if (!clasif || clasif === '—') return '<span class="badge" style="background:#f1f5f9; color:#64748b;">—</span>';
+    if (!clasif || clasif === '—') return '<span class="badge-clasif badge-clasif--default">—</span>';
     const c = clasif.toUpperCase();
+    const iconShield = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+    const iconBriefcase = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`;
+
     if (c === 'VACANTE') {
-      return '<span class="badge badge--vacante" style="font-size:11px; padding:3px 8px; background:#fef9c3; color:#854d0e; border:1px solid #fde047; font-weight:700;" title="Plaza vacante">VACANTE</span>';
+      return `<span class="badge-clasif badge-clasif--vacante">${iconBriefcase} VACANTE</span>`;
     }
     if (c.includes('CARRERA')) {
-      return `<span class="badge badge--carrera" style="font-size:11px; padding:3px 8px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-weight:600;" title="Carrera Administrativa • Esquema de Horarios y Modalidades"><svg style="width:12px;height:12px;vertical-align:-1px;margin-right:3px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${escHtml(clasif)}</span>`;
+      return `<span class="badge-clasif badge-clasif--carrera" title="Carrera Administrativa">${iconShield} ${escHtml(clasif)}</span>`;
     }
     if (c.includes('LIBRE')) {
-      return `<span class="badge badge--libre" style="font-size:11px; padding:3px 8px; background:#f5f3ff; color:#6d28d9; border:1px solid #ddd6fe; font-weight:600;" title="Libre Nombramiento y Remoción • Esquema de Horarios y Modalidades"><svg style="width:12px;height:12px;vertical-align:-1px;margin-right:3px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${escHtml(clasif)}</span>`;
+      return `<span class="badge-clasif badge-clasif--libre" title="Libre Nombramiento y Remoción">${iconShield} ${escHtml(clasif)}</span>`;
     }
     if (c.includes('PROVISIONAL')) {
-      return `<span class="badge badge--provisional" style="font-size:11px; padding:3px 8px; background:#fef3c7; color:#b45309; border:1px solid #fde68a; font-weight:600;" title="Provisionalidad • Esquema de Horarios y Modalidades"><svg style="width:12px;height:12px;vertical-align:-1px;margin-right:3px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${escHtml(clasif)}</span>`;
+      return `<span class="badge-clasif badge-clasif--provisional" title="Nombramiento Provisional">${iconShield} ${escHtml(clasif)}</span>`;
     }
     if (c.includes('TEMPORAL') || c.includes('PERIODO')) {
-      return `<span class="badge badge--temporal" style="font-size:11px; padding:3px 8px; background:#fff7ed; color:#c2410c; border:1px solid #ffedd5; font-weight:600;" title="Temporal / Periodo • Esquema de Horarios y Modalidades"><svg style="width:12px;height:12px;vertical-align:-1px;margin-right:3px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${escHtml(clasif)}</span>`;
+      return `<span class="badge-clasif badge-clasif--temporal" title="Empleo Temporal / Periodo Fijo">${iconBriefcase} ${escHtml(clasif)}</span>`;
     }
     if (c.includes('TRABAJADOR')) {
-      return `<span class="badge badge--trabajador" style="font-size:11px; padding:3px 8px; background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; font-weight:600;" title="Trabajador Oficial • Esquema de Horarios y Modalidades"><svg style="width:12px;height:12px;vertical-align:-1px;margin-right:3px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${escHtml(clasif)}</span>`;
+      return `<span class="badge-clasif badge-clasif--trabajador" title="Trabajador Oficial">${iconBriefcase} ${escHtml(clasif)}</span>`;
     }
-    return `<span class="badge" style="font-size:11px; padding:3px 8px; background:#f8fafc; color:#334155; border:1px solid #e2e8f0; font-weight:600;" title="Esquema de Horarios y Modalidades"><svg style="width:12px;height:12px;vertical-align:-1px;margin-right:3px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${escHtml(clasif)}</span>`;
+    return `<span class="badge-clasif badge-clasif--default">${iconBriefcase} ${escHtml(clasif)}</span>`;
   }
 
   async function load() {
     try {
       const res = await API.getEmployees({ q: state.q, page: state.page, limit: 25 });
       let records = res.data || [];
-      // Ordenar: si no está activo, pasar al final de la lista
+      // Ordenar: 1) Activos con cédula (primeras), 2) Sin cédula (penúltimas), 3) Inactivos (últimas)
+      const getPriority = (emp) => {
+        const isActivo = (emp.estadoServidor || 'Activo').toLowerCase() === 'activo';
+        if (!isActivo) return 2; // Inactivos de últimas
+        const hasCedula = Boolean(
+          emp.cedula &&
+          String(emp.cedula).trim() !== '' &&
+          String(emp.cedula).trim() !== '0' &&
+          !String(emp.cedula).startsWith('PROV-') &&
+          !emp.documento_pendiente &&
+          !emp.es_vacante &&
+          emp.situacion !== 'VACANTE' &&
+          !(emp.nombreCompleto && emp.nombreCompleto.startsWith('PLAZA VACANTE'))
+        );
+        if (!hasCedula) return 1; // Sin cédula de penúltimas
+        return 0; // Activos con cédula
+      };
+
       records.sort((a, b) => {
-        const aActivo = (a.estadoServidor || 'Activo').toLowerCase() === 'activo';
-        const bActivo = (b.estadoServidor || 'Activo').toLowerCase() === 'activo';
-        if (aActivo && !bActivo) return -1;
-        if (!aActivo && bActivo) return 1;
-        return 0;
+        const pA = getPriority(a);
+        const pB = getPriority(b);
+        if (pA !== pB) return pA - pB;
+        return (a.nombreCompleto || '').localeCompare(b.nombreCompleto || '');
       });
       state.data = records;
       state.total = res.total || 0;
@@ -234,15 +253,15 @@ const EmployeesModule = (() => {
           <div class="user-table-cell">
             <span class="td-primary" title="${escHtml(e.nombreCompleto)}">${escHtml(e.nombreCompleto) || '—'}</span>
             ${(e.es_vacante || e.situacion === 'VACANTE' || (e.nombreCompleto && e.nombreCompleto.startsWith('PLAZA VACANTE')))
-              ? `<span class="badge badge--vacante" style="font-size:10px; padding:2px 8px; background:#fef9c3; color:#854d0e; border:1px solid #fde047; font-weight:700;" title="Plaza vacante de la planta">${escHtml(e.codigoVacante || 'PLAZA VACANTE')}</span>`
-              : ((e.documento_pendiente || (e.cedula && e.cedula.startsWith('PROV-')))
-                ? `<span class="badge badge--pendiente font-mono" style="font-size:11px; padding:2px 6px; font-weight:700;" title="ID Temporal Secuencial">${escHtml(e.cedula)} (Provisional)</span>`
-                : (e.cedula
-                    ? `<span class="user-table-cc font-mono" title="Cédula de Ciudadanía">C.C. ${escHtml(formattedCc)}</span>`
-                    : `<span class="badge badge--pendiente" style="font-size:10px; padding:1px 6px;">Sin Cédula</span>`
-                  )
-              )
-            }
+          ? `<span class="badge badge--vacante" title="Plaza vacante de la planta">${escHtml(e.codigoVacante || 'PLAZA VACANTE')}</span>`
+          : ((e.documento_pendiente || (e.cedula && e.cedula.startsWith('PROV-')))
+            ? `<span class="badge badge--provisional font-mono" title="ID Temporal Secuencial">${escHtml(e.cedula)} (Provisional)</span>`
+            : (e.cedula
+              ? `<span class="user-table-cc font-mono" title="Cédula de Ciudadanía">C.C. ${escHtml(formattedCc)}</span>`
+              : `<span class="badge badge--pendiente">Sin Cédula</span>`
+            )
+          )
+        }
           </div>
         </td>
         <td title="${escHtml(e.cargoActual)}">
@@ -254,8 +273,8 @@ const EmployeesModule = (() => {
         </td>
         <td style="font-size:12px;" title="Otro Tiempo Calculado: ${escHtml(e.otroTiempoCalculado || '0 años, 0 meses, 0 días')}${e.otroTiempoGobernacion ? ` • Original: ${escHtml(e.otroTiempoGobernacion)}` : ''}">
           ${(e.otroTiempoCalculado && e.otroTiempoCalculado !== '0 años, 0 meses, 0 días')
-            ? `<span style="font-weight:600; color:var(--text-primary);">${escHtml(e.otroTiempoCalculado)}</span>`
-            : (e.otroTiempoCalculado ? `<span style="color:var(--text-muted);">${escHtml(e.otroTiempoCalculado)}</span>` : '—')}
+          ? `<span style="font-weight:600; color:var(--text-primary);">${escHtml(e.otroTiempoCalculado)}</span>`
+          : (e.otroTiempoCalculado ? `<span style="color:var(--text-muted);">${escHtml(e.otroTiempoCalculado)}</span>` : '—')}
         </td>
         <td style="font-size:12px;" title="${escHtml(e.tiempoServicioCalculado)}">${escHtml(e.tiempoServicioCalculado || '—')}</td>
         <td style="font-size:12px; font-weight:700; color:var(--primary);" title="Tiempo Total Calculado: ${escHtml(e.tiempoTotalGobernacion || e.tiempoServicioCalculado || '—')} (${escHtml(e.tiempoServicioCalculado || '0')} + ${escHtml(e.otroTiempoCalculado || '0')})">${escHtml(e.tiempoTotalGobernacion || e.tiempoServicioCalculado || '—')}</td>
@@ -294,12 +313,113 @@ const EmployeesModule = (() => {
       </div>`;
   }
 
+  function sanitizeText(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/BOYAC\?\?/gi, 'BOYACÁ')
+      .replace(/RINC\?\?N/gi, 'RINCÓN')
+      .replace(/P\?\?REZ/gi, 'PÉREZ')
+      .replace(/CA\?AS/gi, 'CAÑAS')
+      .replace(/ACU\?A/gi, 'ACUÑA')
+      .replace(/PE\?A/gi, 'PEÑA')
+      .replace(/MU\?OZ/gi, 'MUÑOZ')
+      .replace(/NU\?EZ/gi, 'NUÑEZ')
+      .replace(/D\?AZ/gi, 'DÍAZ')
+      .replace(/G\?MEZ/gi, 'GÓMEZ')
+      .replace(/\?\?/g, '')
+      .replace(/\?/g, '')
+      .trim();
+  }
+
+  function getInitials(name) {
+    if (!name) return 'SP';
+    const clean = sanitizeText(name);
+    const parts = clean.split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return 'SP';
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  function formatSexo(val) {
+    if (!val) return 'No registrado';
+    const s = String(val).trim().toUpperCase();
+    if (s === 'M' || s === 'MASCULINO') return 'Masculino (M)';
+    if (s === 'F' || s === 'FEMENINO') return 'Femenino (F)';
+    return sanitizeText(val);
+  }
+
+  function switchFichaTab(tabId) {
+    const container = document.querySelector('.ficha-wrapper');
+    if (!container) return;
+    container.querySelectorAll('.ficha-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
+    });
+    container.querySelectorAll('.ficha-tab-pane').forEach(pane => {
+      pane.classList.toggle('active', pane.id === tabId);
+    });
+    const modalBody = document.getElementById('modal-body');
+    if (modalBody && modalBody.scrollTop > 100) {
+      modalBody.scrollTo({ top: 90, behavior: 'smooth' });
+    }
+  }
+
+  function copyFichaText(text, btnId) {
+    const btn = document.getElementById(btnId);
+    if (!navigator.clipboard) {
+      App.showToast('Copiado: ' + text, 'info');
+      return;
+    }
+    navigator.clipboard.writeText(text).then(() => {
+      if (btn) {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '✓ ¡Copiado!';
+        btn.style.background = 'rgba(34, 197, 94, 0.45)';
+        setTimeout(() => {
+          btn.innerHTML = orig;
+          btn.style.background = '';
+        }, 1800);
+      }
+      App.showToast(`Copiado al portapapeles: ${text}`, 'success');
+    }).catch(() => {
+      App.showToast('Copiado: ' + text, 'info');
+    });
+  }
+
+  function badgeClasificacion(clasif) {
+    if (!clasif) return '<span class="badge-clasif badge-clasif--default">No definida</span>';
+    const c = String(clasif).trim().toUpperCase();
+    let cls = 'badge-clasif--default';
+    let icon = '📋';
+
+    if (c.includes('CARRERA')) {
+      cls = 'badge-clasif--carrera';
+      icon = '🛡️';
+    } else if (c.includes('LIBRE') || c.includes('NOMBRAMIENTO')) {
+      cls = 'badge-clasif--libre';
+      icon = '⭐';
+    } else if (c.includes('PROVISIONAL')) {
+      cls = 'badge-clasif--provisional';
+      icon = '⏳';
+    } else if (c.includes('TEMPORAL')) {
+      cls = 'badge-clasif--temporal';
+      icon = '⏱️';
+    } else if (c.includes('TRABAJADOR')) {
+      cls = 'badge-clasif--trabajador';
+      icon = '👷';
+    } else if (c.includes('VACANTE')) {
+      cls = 'badge-clasif--vacante';
+      icon = '🏛️';
+    }
+
+    return `<span class="badge-clasif ${cls}"><span>${icon}</span> ${escHtml(clasif)}</span>`;
+  }
+
   async function openView(idOrCedula) {
     let emp = state.data.find(e => e.cedula === idOrCedula || e.id === idOrCedula);
     try {
       const full = await API.getEmployeeByCedula(idOrCedula);
       if (full) emp = full;
-    } catch (_) {}
+    } catch (_) { }
 
     if (!emp) return;
 
@@ -309,262 +429,506 @@ const EmployeesModule = (() => {
     let content = '';
 
     if (isVacante) {
+      const codVacante = sanitizeText(emp.codigoVacante || 'PLAZA VACANTE');
+      const depName = sanitizeText(emp.dependencia || 'Sin dependencia asignada');
+      const cargoName = sanitizeText(emp.cargoActual || emp.cargoBase || 'Cargo por Definir');
+      const salario = emp.asignacion || '$0';
+
       content = `
-        <div class="detail-modal-card" style="max-height: 75vh; overflow-y: auto; padding-right: 6px;">
-          <div style="background: rgba(254, 240, 138, 0.16); border: 1px solid #fde047; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 14px;">
-            <span style="font-size: 26px; line-height: 1;">🏛</span>
-            <div>
-              <div style="display:flex; align-items:center; gap:8px; margin-bottom: 6px; flex-wrap: wrap;">
-                <span class="badge badge--vacante" style="font-size: 13px; font-weight: 700; padding: 4px 12px; background: #fef9c3; color: #854d0e; border: 1px solid #fde047;">
-                  ${escHtml(emp.codigoVacante || 'PLAZA VACANTE')}
-                </span>
-                <span style="font-weight: 700; color: #854d0e; font-size: 14px;">Plaza Vacante de la Planta de Personal</span>
+        <div class="ficha-wrapper">
+          <!-- Hero Banner Vacante -->
+          <div class="ficha-hero" style="background: linear-gradient(135deg, #78350f 0%, #b45309 45%, #92400e 100%);">
+            <div class="ficha-hero-inner">
+              <div class="ficha-avatar-box">
+                <div class="ficha-avatar avatar--vacante">🏛</div>
+                <div class="ficha-avatar-badge vacante" title="Plaza Vacante"></div>
               </div>
-              <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
-                Esta plaza no cuenta con titular asignado. Únicamente se gestionan la dependencia y las especificaciones del cargo.
+              <div class="ficha-hero-info">
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom: 6px;">
+                  <span class="badge" style="font-size:12px; font-weight:800; padding:3px 10px; background:#fef3c7; color:#92400e; border:1px solid #fde68a;">
+                    ${escHtml(codVacante)}
+                  </span>
+                  <span style="font-size:12px; font-weight:700; color:#fef08a;">Plaza de la Planta de Personal</span>
+                </div>
+                <h3 class="ficha-hero-name" style="color:#ffffff;">${escHtml(cargoName)}</h3>
+                <div class="ficha-hero-sub">
+                  <span>🏢 Dependencia: <strong>${escHtml(depName)}</strong></span>
+                </div>
+                <div class="ficha-hero-pills">
+                  <span class="ficha-hero-pill pill--gold">🟡 Estado: Vacante sin titular</span>
+                  ${emp.codigoActual ? `<span class="ficha-hero-pill">🏷 Cód. ${escHtml(emp.codigoActual)}</span>` : ''}
+                  ${emp.gradoActual ? `<span class="ficha-hero-pill">📊 Grado ${escHtml(emp.gradoActual)}</span>` : ''}
+                </div>
+              </div>
+              <div class="ficha-hero-logo-wrap" title="Gobernación de Boyacá">
+                <img src="imgs/logoCondor.png" alt="Cóndor — Boyacá" class="ficha-hero-condor logo-light-theme" />
+                <img src="imgs/logoCondorBlanco.png" alt="Cóndor — Boyacá" class="ficha-hero-condor logo-dark-theme" />
               </div>
             </div>
           </div>
 
-          <div class="detail-section-title" style="font-weight: 700; color: var(--color-gold); margin-bottom: 12px; font-size: 13px; text-transform: uppercase; border-bottom: 1px solid var(--color-border); padding-bottom: 6px;">
-            🏛 Ubicación Organizacional y Especificaciones del Cargo
-          </div>
-          <div class="detail-grid" style="margin-bottom: 20px;">
-            <div class="detail-item detail-grid--full">
-              <span class="detail-label">Dependencia</span>
-              <span class="detail-value" style="font-weight: 600;">${escHtml(emp.dependencia || '—')}</span>
+          <!-- Cards Grid Vacante -->
+          <div class="ficha-grid">
+            <div class="ficha-card ficha-grid--full ficha-card--gold">
+              <div class="ficha-card-top">
+                <div class="ficha-card-icon">🏢</div>
+                <span class="ficha-card-label">Dependencia Organizacional</span>
+              </div>
+              <div class="ficha-card-val" style="font-size: 1.1rem;">${escHtml(depName)}</div>
+              <div class="ficha-card-sub">Ubicación jerárquica en la estructura de la Gobernación de Boyacá</div>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Cargo Actual / Denominación de la Plaza</span>
-              <span class="detail-value" style="font-weight: 600; color: var(--color-gold);">${escHtml(emp.cargoActual || '—')}</span>
+
+            <div class="ficha-card">
+              <div class="ficha-card-top">
+                <div class="ficha-card-icon">💼</div>
+                <span class="ficha-card-label">Denominación del Empleo</span>
+              </div>
+              <div class="ficha-card-val" style="color:var(--color-gold); font-size:1.05rem;">${escHtml(cargoName)}</div>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Código del Cargo</span>
-              <span class="detail-value font-mono">${escHtml(emp.codigoActual || '—')}</span>
+
+            <div class="ficha-card">
+              <div class="ficha-card-top">
+                <div class="ficha-card-icon">🏷</div>
+                <span class="ficha-card-label">Código y Grado</span>
+              </div>
+              <div class="ficha-card-val font-mono">
+                Código: <strong>${escHtml(emp.codigoActual || 'N/A')}</strong> • Grado: <strong>${escHtml(emp.gradoActual || 'N/A')}</strong>
+              </div>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Grado</span>
-              <span class="detail-value font-mono">${escHtml(emp.gradoActual || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Asignación Básica Salarial</span>
-              <span class="detail-value font-mono" style="color: var(--color-green-bright); font-weight:600;">${escHtml(emp.asignacion || '—')}</span>
+
+            <div class="ficha-card">
+              <div class="ficha-card-top">
+                <div class="ficha-card-icon">📋</div>
+                <span class="ficha-card-label">Clasificación</span>
+              </div>
+              <div class="ficha-card-val">${badgeClasificacion(emp.clasificacionEmpleo || 'CARRERA ADMINISTRATIVA')}</div>
             </div>
           </div>
         </div>
       `;
     } else {
+      const initials = getInitials(emp.nombreCompleto);
+      const isActivo = (emp.estadoServidor || 'Activo').toLowerCase() === 'activo';
+      const cleanNombre = sanitizeText(emp.nombreCompleto || 'Servidor Público');
+      const cleanApellidos = sanitizeText(emp.apellidos || emp.primerApellido || '—');
+      const cleanNombres = sanitizeText(emp.nombres || '—');
+      const cleanDep = sanitizeText(emp.dependencia || 'Sin dependencia asignada');
+      const cleanCargo = sanitizeText(emp.cargoActual || emp.cargoBase || 'Cargo no asignado');
+      const cleanMuni = sanitizeText(emp.municipioExpedicion || emp.ciudadExpedicion || emp.expedida || 'Tunja');
+      const cleanDepto = sanitizeText(emp.departamentoExpedicion || 'Boyacá');
+      const isProv = Boolean(emp.documento_pendiente || (emp.cedula && emp.cedula.startsWith('PROV-')));
+      const cedulaText = isProv ? `${emp.cedula} (ID Temporal)` : (emp.cedula ? formattedCc : 'Sin Cédula');
+      const cedulaRaw = emp.cedula || '';
+
       content = `
-        <div class="detail-modal-card" style="max-height: 75vh; overflow-y: auto; padding-right: 6px;">
-          <!-- 1. Identificación y Datos Personales -->
-          <div class="detail-section-title" style="font-weight: 700; color: var(--color-gold); margin-bottom: 12px; font-size: 13px; text-transform: uppercase; border-bottom: 1px solid var(--color-border); padding-bottom: 6px;">
-            👤 Datos Personales y Documentos
-          </div>
-          <div class="detail-grid" style="margin-bottom: 20px;">
-            <div class="detail-item detail-grid--full">
-              <span class="detail-label">Nombres y Apellidos</span>
-              <span class="detail-value" style="font-size: 16px; font-weight: 700;">${escHtml(emp.nombreCompleto || '—')}</span>
-              <span style="font-size:12px; color:var(--text-muted); display:block; margin-top:2px;">
-                Apellidos: <strong>${escHtml(emp.apellidos || emp.primerApellido || '—')}</strong> | Nombres: <strong>${escHtml(emp.nombres || '—')}</strong>
-              </span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Cédula de Ciudadanía</span>
-              ${(emp.documento_pendiente || (emp.cedula && emp.cedula.startsWith('PROV-')))
-                ? `<span class="badge badge--pendiente font-mono" style="font-size:12px; font-weight:700; padding:4px 8px;">${escHtml(emp.cedula)} (ID Temporal Secuencial)</span>`
-                : (emp.cedula
-                    ? `<span class="detail-value font-mono" style="font-weight: 700; font-size:15px;">${escHtml(formattedCc)}</span>`
-                    : `<span class="detail-value" style="color:var(--text-muted);">Sin Cédula Registrada</span>`
-                  )
-              }
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Municipio de Expedición</span>
-              <span class="detail-value">${escHtml(emp.municipioExpedicion || emp.ciudadExpedicion || emp.expedida || 'TUNJA')}, ${escHtml(emp.departamentoExpedicion || 'BOYACÁ')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Sexo</span>
-              <span class="detail-value">${escHtml(emp.sexo || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Tipo de Sangre</span>
-              <span class="detail-value font-mono" style="font-weight:700; color:var(--color-gold);">${escHtml(emp.tipoSangre || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Fecha de Nacimiento</span>
-              <span class="detail-value">${escHtml(emp.fechaNacimiento || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Edad (Cálculo Dinámico)</span>
-              <span class="detail-value" style="color: var(--color-green-bright); font-weight: 700;">${escHtml(emp.edadCalculada || '—')}</span>
-            </div>
-          </div>
-
-          <!-- 2. Ubicación, Cargos y Estado -->
-          <div class="detail-section-title" style="font-weight: 700; color: var(--color-gold); margin-bottom: 12px; font-size: 13px; text-transform: uppercase; border-bottom: 1px solid var(--color-border); padding-bottom: 6px;">
-            🏛 Ubicación, Cargos y Estado
-          </div>
-          <div class="detail-grid" style="margin-bottom: 20px;">
-            <div class="detail-item detail-grid--full">
-              <span class="detail-label">Dependencia</span>
-              <span class="detail-value" style="font-weight: 600;">${escHtml(emp.dependencia || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Denominación de Cargo</span>
-              <span class="detail-value" style="font-weight: 700; color: var(--color-gold);">${escHtml(emp.cargoActual || emp.cargoBase || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Código del Cargo</span>
-              <span class="detail-value font-mono">${escHtml(emp.codigoActual || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Grado</span>
-              <span class="detail-value font-mono">${escHtml(emp.gradoActual || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Clasificación del Empleo</span>
-              <span class="detail-value">${escHtml(emp.clasificacionEmpleo || 'CARRERA ADMINISTRATIVA')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Estado del Servidor</span>
-              <span class="detail-value">${badgeEstadoServidor(emp.estadoServidor)}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">OPEC</span>
-              <span class="detail-value font-mono">${escHtml(emp.opec || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Situación Administrativa</span>
-              <span class="detail-value">${escHtml(emp.situacion || 'ACTIVO')}</span>
-            </div>
-            ${emp.tipoDiscapacidad ? `
-              <div class="detail-item">
-                <span class="detail-label">Discapacidad</span>
-                <span class="detail-value badge badge--revision" style="text-transform: capitalize;">${escHtml(emp.tipoDiscapacidad)}</span>
+        <div class="ficha-wrapper">
+          <!-- ─── Hero Profile Header ─── -->
+          <div class="ficha-hero">
+            <div class="ficha-hero-inner">
+              <div class="ficha-avatar-box">
+                <div class="ficha-avatar">${escHtml(initials)}</div>
+                <div class="ficha-avatar-badge ${isActivo ? '' : 'inactivo'}" title="${isActivo ? 'Servidor Activo' : 'Servidor Inactivo'}"></div>
               </div>
-            ` : ''}
+              <div class="ficha-hero-info">
+                <h3 class="ficha-hero-name">${escHtml(cleanNombre)}</h3>
+                <div class="ficha-hero-sub">
+                  <span>Apellidos: <strong>${escHtml(cleanApellidos)}</strong></span>
+                  <span>•</span>
+                  <span>Nombres: <strong>${escHtml(cleanNombres)}</strong></span>
+                </div>
+                <div class="ficha-hero-pills">
+                  <div class="ficha-hero-pill ${isProv ? 'pill--gold' : ''}">
+                    <span>🪪 ${isProv ? 'ID Temp:' : 'C.C.'} <strong>${escHtml(cedulaText)}</strong></span>
+                    ${cedulaRaw ? `
+                      <button class="ficha-copy-btn" id="btn-copy-cc" onclick="EmployeesModule.copyFichaText('${escHtml(cedulaRaw)}', 'btn-copy-cc')" title="Copiar número">
+                        <svg style="width:11px;height:11px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copiar
+                      </button>
+                    ` : ''}
+                  </div>
+                  <span class="ficha-hero-pill ${isActivo ? 'pill--emerald' : ''}">
+                    ${isActivo ? '🟢 Activo' : '🔴 Inactivo'}
+                  </span>
+                  <span class="ficha-hero-pill">
+                    💼 ${escHtml(cleanCargo)}
+                  </span>
+                  <span class="ficha-hero-pill">
+                    🏢 ${escHtml(cleanDep)}
+                  </span>
+                </div>
+              </div>
+              <div class="ficha-hero-logo-wrap" title="Gobernación de Boyacá">
+                <img src="imgs/logoCondor.png" alt="Cóndor — Boyacá" class="ficha-hero-condor logo-light-theme" />
+                <img src="imgs/logoCondorBlanco.png" alt="Cóndor — Boyacá" class="ficha-hero-condor logo-dark-theme" />
+              </div>
+            </div>
           </div>
 
-          <!-- 3. Fechas y Cálculos Dinámicos -->
-          <div class="detail-section-title" style="font-weight: 700; color: var(--color-gold); margin-bottom: 12px; font-size: 13px; text-transform: uppercase; border-bottom: 1px solid var(--color-border); padding-bottom: 6px;">
-            📅 Fechas y Tiempos de Servicio
+          <!-- ─── Tabs Navigation ─── -->
+          <div class="ficha-tabs">
+            <button class="ficha-tab-btn active" data-tab="ficha-personal" onclick="EmployeesModule.switchFichaTab('ficha-personal')">
+              <svg style="width:15px;height:15px;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              Datos Personales
+            </button>
+            <button class="ficha-tab-btn" data-tab="ficha-cargo" onclick="EmployeesModule.switchFichaTab('ficha-cargo')">
+              <svg style="width:15px;height:15px;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+              Cargo & Ubicación
+            </button>
+            <button class="ficha-tab-btn" data-tab="ficha-tiempos" onclick="EmployeesModule.switchFichaTab('ficha-tiempos')">
+              <svg style="width:15px;height:15px;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              Tiempos de Servicio
+            </button>
+            <button class="ficha-tab-btn" data-tab="ficha-contacto" onclick="EmployeesModule.switchFichaTab('ficha-contacto')">
+              <svg style="width:15px;height:15px;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+              Formación & Contacto
+            </button>
           </div>
-          <div class="detail-grid" style="margin-bottom: 20px;">
-            <div class="detail-item">
-              <span class="detail-label">Fecha de Ingreso</span>
-              <span class="detail-value">${escHtml(emp.fechaIngreso || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Tiempo de Servicio (Cálculo Dinámico)</span>
-              <span class="detail-value" style="color: var(--color-green-bright); font-weight: 700;">${escHtml(emp.tiempoServicioCalculado || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Fecha de Encargo</span>
-              <span class="detail-value">${escHtml(emp.fechaEncargo || '—')}</span>
-            </div>
-            <div class="detail-item detail-grid--full">
-              <span class="detail-label">Otro Tiempo con la Gobernación (Experiencia Múltiple)</span>
-              ${(Array.isArray(emp.otroTiempoPeriodos) && emp.otroTiempoPeriodos.length) ? `
-                <div style="margin-top: 6px; border: 1px solid var(--color-border); border-radius: 6px; overflow: hidden;">
-                  <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                    <thead>
-                      <tr style="background: var(--color-bg-secondary); border-bottom: 1px solid var(--color-border); text-align: left;">
-                        <th style="padding: 6px 10px;">#</th>
-                        <th style="padding: 6px 10px;">Desde</th>
-                        <th style="padding: 6px 10px;">Hasta</th>
-                        <th style="padding: 6px 10px;">Duración Periodo</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${emp.otroTiempoPeriodos.map((p, idx) => `
-                        <tr style="border-bottom: 1px solid var(--color-border);">
-                          <td style="padding: 6px 10px; color: var(--text-muted);">${idx + 1}</td>
-                          <td style="padding: 6px 10px; font-weight: 600;">${escHtml(p.desde)}</td>
-                          <td style="padding: 6px 10px; font-weight: 600;">${escHtml(p.hasta)}</td>
-                          <td style="padding: 6px 10px; color: var(--color-green-bright); font-weight: 600;">${escHtml(p.duracionTexto || '—')}</td>
-                        </tr>
-                      `).join('')}
-                    </tbody>
-                    <tfoot>
-                      <tr style="background: rgba(34, 197, 94, 0.08); font-weight: 700;">
-                        <td colspan="3" style="padding: 8px 10px; text-align: right; color: var(--text-primary);">Total Acumulado:</td>
-                        <td style="padding: 8px 10px; color: var(--color-green-bright); font-weight: 700;">${escHtml(emp.otroTiempoGobernacion || '—')}</td>
-                      </tr>
-                    </tfoot>
-                  </table>
+
+          <!-- ─── Tab 1: Datos Personales ─── -->
+          <div class="ficha-tab-pane active" id="ficha-personal">
+            <div class="ficha-grid">
+              <div class="ficha-card">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">🪪</div>
+                  <span class="ficha-card-label">Cédula de Ciudadanía</span>
                 </div>
-              ` : `
-                <div style="font-size:14px; font-weight:700; color:var(--color-green-bright);">
-                  ${escHtml(emp.otroTiempoCalculado && emp.otroTiempoCalculado !== '0 años, 0 meses, 0 días' ? emp.otroTiempoCalculado : (emp.otroTiempoGobernacion || 'No registra experiencia histórica'))}
+                <div class="ficha-card-val font-mono" style="font-size:1.1rem; color:var(--color-primary, #287522);">
+                  ${isProv
+          ? `<span class="badge badge--pendiente font-mono" style="font-size:12px; font-weight:700;">${escHtml(emp.cedula)} (Provisional)</span>`
+          : (emp.cedula ? `C.C. ${escHtml(formattedCc)}` : 'Sin Cédula Registrada')
+        }
                 </div>
-                ${(emp.otroTiempoCalculado && emp.otroTiempoGobernacion && emp.otroTiempoGobernacion !== emp.otroTiempoCalculado && emp.otroTiempoGobernacion !== 'NO REGISTRADO') ? `
-                  <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Registro histórico / Fechas: <strong>${escHtml(emp.otroTiempoGobernacion)}</strong></div>
+                <div class="ficha-card-sub">
+                  Expedida en: <strong>${escHtml(cleanMuni)}, ${escHtml(cleanDepto)}</strong>
+                </div>
+              </div>
+
+              <div class="ficha-card">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">🩸</div>
+                  <span class="ficha-card-label">Grupo Sanguíneo y RH</span>
+                </div>
+                <div class="ficha-card-val">
+                  <span class="badge-blood">🩸 ${escHtml(emp.tipoSangre || 'No registrado')}</span>
+                </div>
+                <div class="ficha-card-sub">Factor RH para atención en salud</div>
+              </div>
+
+              <div class="ficha-card">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">🚻</div>
+                  <span class="ficha-card-label">Sexo Biológico</span>
+                </div>
+                <div class="ficha-card-val">${escHtml(formatSexo(emp.sexo))}</div>
+                <div class="ficha-card-sub">Registro civil institucional</div>
+              </div>
+
+              <div class="ficha-card">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">🎂</div>
+                  <span class="ficha-card-label">Fecha de Nacimiento</span>
+                </div>
+                <div class="ficha-card-val font-mono">${escHtml(emp.fechaNacimiento || 'No registrada')}</div>
+                <div class="ficha-card-sub">Día / Mes / Año</div>
+              </div>
+
+              <!-- Stat Destacado: Edad Exacta -->
+              <div class="ficha-card ficha-card--featured ficha-grid--full">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">⏳</div>
+                  <span class="ficha-card-label" style="color:#2563eb;">Edad Exacta (Cálculo Dinámico)</span>
+                </div>
+                <div class="ficha-card-val" style="font-size: 1.25rem; font-weight: 800; color: #10b981;">
+                  ${escHtml(emp.edadCalculada || 'No disponible')}
+                </div>
+                <div class="ficha-card-sub" style="color:#2563eb;">
+                  Actualizado en tiempo real a la fecha de hoy con base en la fecha de nacimiento
+                </div>
+              </div>
+
+              <div class="ficha-card ficha-grid--full">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">♿</div>
+                  <span class="ficha-card-label">Condición Especial / Discapacidad</span>
+                </div>
+                <div class="ficha-card-val">
+                  ${emp.tipoDiscapacidad
+          ? `<span class="badge badge--revision" style="text-transform: capitalize; font-size:12px; font-weight:700;">${escHtml(emp.tipoDiscapacidad)}</span>`
+          : '<span style="color:var(--text-muted); font-size:0.9rem; font-weight:500;">No registra condición de discapacidad</span>'
+        }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── Tab 2: Cargo & Ubicación ─── -->
+          <div class="ficha-tab-pane" id="ficha-cargo">
+            <div class="ficha-grid">
+              <div class="ficha-card ficha-grid--full ficha-card--gold">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">🏢</div>
+                  <span class="ficha-card-label">Dependencia Institucional</span>
+                </div>
+                <div class="ficha-card-val" style="font-size: 1.12rem; color: var(--text-primary);">
+                  ${escHtml(cleanDep)}
+                </div>
+                <div class="ficha-card-sub">Área orgánica asignada en la Gobernación de Boyacá</div>
+              </div>
+
+              <div class="ficha-card">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">💼</div>
+                  <span class="ficha-card-label">Denominación del Cargo Actual</span>
+                </div>
+                <div class="ficha-card-val" style="color: var(--color-gold); font-size:1.02rem;">
+                  ${escHtml(cleanCargo)}
+                </div>
+                ${emp.cargoBase && emp.cargoBase !== emp.cargoActual ? `
+                  <div class="ficha-card-sub">Cargo Base / Titular: <strong>${escHtml(emp.cargoBase)}</strong></div>
                 ` : ''}
-              `}
-            </div>
-            <div class="detail-item detail-grid--full" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 8px; padding: 12px; margin-top: 8px;">
-              <span class="detail-label" style="color: #2563eb; font-weight: 700; font-size: 13px;">🏆 Tiempo Total en la Gobernación (Suma de Tiempos Calculados)</span>
-              <span class="detail-value" style="font-size: 15px; font-weight: 800; color: #1d4ed8; margin-top: 4px; display: block;">
-                ${escHtml(emp.tiempoTotalGobernacion || emp.tiempoServicioCalculado || '—')}
-              </span>
-              <span style="font-size:12px; color:#2563eb; display:block; margin-top:3px;">
-                Servicio: <strong>${escHtml(emp.tiempoServicioCalculado || '0')}</strong> + Otro Tiempo: <strong>${escHtml(emp.otroTiempoCalculado || '0')}</strong>
-              </span>
+              </div>
+
+              <div class="ficha-card">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">🏷</div>
+                  <span class="ficha-card-label">Nivel, Código y Grado</span>
+                </div>
+                <div class="ficha-card-val font-mono">
+                  Cód. <strong>${escHtml(emp.codigoActual || 'N/A')}</strong> • Grado <strong>${escHtml(emp.gradoActual || 'N/A')}</strong>
+                </div>
+                ${emp.codigoBase ? `
+                  <div class="ficha-card-sub">Base: Cód. ${escHtml(emp.codigoBase)} • Grado ${escHtml(emp.gradoBase)}</div>
+                ` : ''}
+              </div>
+
+              <div class="ficha-card">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">📋</div>
+                  <span class="ficha-card-label">Clasificación del Empleo</span>
+                </div>
+                <div class="ficha-card-val">
+                  ${badgeClasificacion(emp.clasificacionEmpleo || 'CARRERA ADMINISTRATIVA')}
+                </div>
+              </div>
+
+              <div class="ficha-card">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">📌</div>
+                  <span class="ficha-card-label">Situación Administrativa</span>
+                </div>
+                <div class="ficha-card-val">
+                  <span style="font-weight:800; color:var(--color-primary, #287522);">${escHtml(emp.situacion || 'ACTIVO')}</span>
+                </div>
+                <div class="ficha-card-sub">Condición operativa del funcionario</div>
+              </div>
+
+              <div class="ficha-card">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">🔢</div>
+                  <span class="ficha-card-label">Concurso / Código OPEC</span>
+                </div>
+                <div class="ficha-card-val font-mono">
+                  ${emp.opec ? `OPEC # <strong>${escHtml(emp.opec)}</strong>` : '<span style="color:var(--text-muted);">No registra OPEC</span>'}
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- 4. Formación, Novedades y Contacto -->
-          <div class="detail-section-title" style="font-weight: 700; color: var(--color-gold); margin-bottom: 12px; font-size: 13px; text-transform: uppercase; border-bottom: 1px solid var(--color-border); padding-bottom: 6px;">
-            🎓 Formación, Novedades y Contacto
+          <!-- ─── Tab 3: Tiempos de Servicio ─── -->
+          <div class="ficha-tab-pane" id="ficha-tiempos">
+            <div class="ficha-grid">
+              <!-- Grand Highlight: Tiempo Total Acumulado -->
+              <div class="ficha-card ficha-card--featured ficha-grid--full" style="background: linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(16,185,129,0.08) 100%); border: 1.5px solid rgba(37,99,235,0.35); padding: 18px 20px;">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon" style="background: rgba(37,99,235,0.15); color: #2563eb; font-size:16px;">🏆</div>
+                  <span class="ficha-card-label" style="color: #1d4ed8; font-size: 0.78rem;">Tiempo Total en la Gobernación de Boyacá</span>
+                </div>
+                <div class="ficha-card-val" style="font-size: 1.38rem; font-weight: 800; color: #1d4ed8; margin: 6px 0;">
+                  ${escHtml(emp.tiempoTotalGobernacion || emp.tiempoServicioCalculado || '0 años, 0 meses, 0 días')}
+                </div>
+                <div style="font-size:0.8rem; color:#2563eb; background:rgba(37,99,235,0.08); padding: 6px 12px; border-radius: 8px; display: inline-flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                  <span>Servicio Actual: <strong>${escHtml(emp.tiempoServicioCalculado || '0')}</strong></span>
+                  <span>+</span>
+                  <span>Otro Tiempo: <strong>${escHtml(emp.otroTiempoCalculado || emp.otroTiempoGobernacion || '0')}</strong></span>
+                </div>
+              </div>
+
+              <div class="ficha-card">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">📅</div>
+                  <span class="ficha-card-label">Fecha de Ingreso a la Gobernación</span>
+                </div>
+                <div class="ficha-card-val font-mono" style="font-size:1.05rem;">
+                  ${escHtml(emp.fechaIngreso || 'No registrada')}
+                </div>
+                <div class="ficha-card-sub">Inicio de vinculación administrativa</div>
+              </div>
+
+              <div class="ficha-card ficha-card--emerald">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">⏱</div>
+                  <span class="ficha-card-label">Tiempo de Servicio Actual</span>
+                </div>
+                <div class="ficha-card-val" style="color: #10b981; font-weight:800;">
+                  ${escHtml(emp.tiempoServicioCalculado || '—')}
+                </div>
+                <div class="ficha-card-sub">Cálculo dinámico a partir de la fecha de ingreso</div>
+              </div>
+
+              <div class="ficha-card ficha-grid--full">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">🔖</div>
+                  <span class="ficha-card-label">Fecha de Encargo</span>
+                </div>
+                <div class="ficha-card-val font-mono">
+                  ${emp.fechaEncargo ? escHtml(emp.fechaEncargo) : '<span style="color:var(--text-muted); font-size:0.9rem;">No registra encargo activo</span>'}
+                </div>
+              </div>
+
+              <!-- Experiencia Múltiple / Otro Tiempo -->
+              <div class="ficha-card ficha-grid--full">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">📜</div>
+                  <span class="ficha-card-label">Otro Tiempo con la Gobernación (Experiencia Histórica / Múltiple)</span>
+                </div>
+                ${(Array.isArray(emp.otroTiempoPeriodos) && emp.otroTiempoPeriodos.length) ? `
+                  <div style="margin-top: 8px; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                      <thead>
+                        <tr style="background: var(--color-bg-secondary, rgba(0,0,0,0.03)); border-bottom: 1px solid var(--color-border); text-align: left;">
+                          <th style="padding: 7px 12px; color: var(--text-muted);">#</th>
+                          <th style="padding: 7px 12px;">Fecha Desde</th>
+                          <th style="padding: 7px 12px;">Fecha Hasta</th>
+                          <th style="padding: 7px 12px;">Duración Acreditada</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${emp.otroTiempoPeriodos.map((p, idx) => `
+                          <tr style="border-bottom: 1px solid var(--color-border);">
+                            <td style="padding: 7px 12px; color: var(--text-muted);">${idx + 1}</td>
+                            <td style="padding: 7px 12px; font-weight: 600;">${escHtml(p.desde)}</td>
+                            <td style="padding: 7px 12px; font-weight: 600;">${escHtml(p.hasta)}</td>
+                            <td style="padding: 7px 12px; color: #10b981; font-weight: 700;">${escHtml(p.duracionTexto || '—')}</td>
+                          </tr>
+                        `).join('')}
+                      </tbody>
+                      <tfoot>
+                        <tr style="background: rgba(34, 197, 94, 0.08); font-weight: 700;">
+                          <td colspan="3" style="padding: 8px 12px; text-align: right; color: var(--text-primary);">Total Acumulado Otros Tiempos:</td>
+                          <td style="padding: 8px 12px; color: #10b981; font-weight: 800;">${escHtml(emp.otroTiempoGobernacion || '—')}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                ` : `
+                  <div class="ficha-card-val" style="color: #10b981; font-size:1.05rem; margin-top:4px;">
+                    ${escHtml(emp.otroTiempoCalculado && emp.otroTiempoCalculado !== '0 años, 0 meses, 0 días' ? emp.otroTiempoCalculado : (emp.otroTiempoGobernacion || 'No registra experiencia previa o externa'))}
+                  </div>
+                  ${(emp.otroTiempoCalculado && emp.otroTiempoGobernacion && emp.otroTiempoGobernacion !== emp.otroTiempoCalculado && emp.otroTiempoGobernacion !== 'NO REGISTRADO') ? `
+                    <div class="ficha-card-sub">Registro histórico original: <strong>${escHtml(emp.otroTiempoGobernacion)}</strong></div>
+                  ` : ''}
+                `}
+              </div>
+            </div>
           </div>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <span class="detail-label">Funciones</span>
-              <span class="detail-value">${escHtml(emp.funciones || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Novedades</span>
-              <span class="detail-value">${escHtml(emp.novedades || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Estudios</span>
-              <span class="detail-value">${escHtml(emp.estudios || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Institución de Estudios</span>
-              <span class="detail-value">${escHtml(emp.institucionEstudios || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Matrícula Profesional</span>
-              <span class="detail-value font-mono">${escHtml(emp.matriculaProfesional || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Diplomado / Cap. SENA</span>
-              <span class="detail-value">${emp.tieneDiplomado ? `Sí — ${escHtml(emp.diplomadoCapSena || 'Certificado')}` : 'No registra'}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Teléfono Fijo</span>
-              <span class="detail-value font-mono">${escHtml(emp.telefonoFijo || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Celulares Registrados</span>
-              <span class="detail-value font-mono">
-                ${(Array.isArray(emp.celulares) && emp.celulares.length)
-                  ? emp.celulares.map(c => `<span class="badge badge--info font-mono" style="margin-right:4px;">${escHtml(c)}</span>`).join('')
-                  : (emp.celular ? escHtml(emp.celular) : '—')}
-              </span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Correo Institucional</span>
-              <span class="detail-value font-mono">${escHtml(emp.correo || '—')}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Correo Personal</span>
-              <span class="detail-value font-mono">${escHtml(emp.correoPersonal || '—')}</span>
-            </div>
-            <div class="detail-item detail-grid--full">
-              <span class="detail-label">Dirección y Residencia</span>
-              <span class="detail-value">${escHtml(emp.direccion || '—')}, ${escHtml(emp.ciudad || '—')}</span>
+
+          <!-- ─── Tab 4: Formación & Contacto ─── -->
+          <div class="ficha-tab-pane" id="ficha-contacto">
+            <div class="ficha-grid">
+              <div class="ficha-card">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">🎓</div>
+                  <span class="ficha-card-label">Estudios / Título Académico</span>
+                </div>
+                <div class="ficha-card-val" style="font-size:1.02rem;">
+                  ${escHtml(sanitizeText(emp.estudios || 'No registrado'))}
+                </div>
+                <div class="ficha-card-sub">
+                  Institución: <strong>${escHtml(sanitizeText(emp.institucionEstudios || 'No registrada'))}</strong>
+                </div>
+              </div>
+
+              <div class="ficha-card">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">📜</div>
+                  <span class="ficha-card-label">Matrícula Profesional</span>
+                </div>
+                <div class="ficha-card-val font-mono">
+                  ${emp.matriculaProfesional ? escHtml(emp.matriculaProfesional) : '<span style="color:var(--text-muted);">No registra</span>'}
+                </div>
+                <div class="ficha-card-sub">Tarjeta o número de registro profesional</div>
+              </div>
+
+              <div class="ficha-card ficha-grid--full">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">📘</div>
+                  <span class="ficha-card-label">Diplomados y Capacitación Técnica SENA</span>
+                </div>
+                <div class="ficha-card-val">
+                  ${emp.tieneDiplomado
+          ? `<span class="badge badge--success" style="font-size:12px; font-weight:700; padding:3px 8px;">Certificado SENA</span> <span style="font-weight:700; margin-left:6px;">${escHtml(emp.diplomadoCapSena || 'Certificación vigente')}</span>`
+          : '<span style="color:var(--text-muted); font-size:0.9rem; font-weight:500;">No registra diplomados o cursos SENA certificados</span>'
+        }
+                </div>
+              </div>
+
+              <!-- Canales de Contacto Directo -->
+              <div class="ficha-card ficha-grid--full ficha-card--featured" style="padding: 16px 18px;">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">📞</div>
+                  <span class="ficha-card-label" style="color:#2563eb;">Canales de Contacto Directo</span>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:6px;">
+                  <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <span style="font-size:12px; font-weight:700; color:var(--text-muted); min-width:90px;">Institucional:</span>
+                    ${emp.correo ? `
+                      <a href="mailto:${escHtml(emp.correo)}" class="ficha-contact-link">
+                        <svg style="width:13px;height:13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        ${escHtml(emp.correo)}
+                      </a>
+                      <button class="ficha-copy-btn" id="btn-copy-mail-inst" onclick="EmployeesModule.copyFichaText('${escHtml(emp.correo)}', 'btn-copy-mail-inst')" title="Copiar correo">
+                        Copiar
+                      </button>
+                    ` : '<span style="color:var(--text-muted); font-size:12px;">No registrado</span>'}
+                  </div>
+
+                  <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <span style="font-size:12px; font-weight:700; color:var(--text-muted); min-width:90px;">Personal:</span>
+                    ${emp.correoPersonal ? `
+                      <a href="mailto:${escHtml(emp.correoPersonal)}" class="ficha-contact-link">
+                        <svg style="width:13px;height:13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        ${escHtml(emp.correoPersonal)}
+                      </a>
+                    ` : '<span style="color:var(--text-muted); font-size:12px;">No registrado</span>'}
+                  </div>
+
+                  <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <span style="font-size:12px; font-weight:700; color:var(--text-muted); min-width:90px;">Celulares:</span>
+                    ${(Array.isArray(emp.celulares) && emp.celulares.length)
+          ? emp.celulares.map(c => `<a href="tel:${escHtml(c)}" class="ficha-contact-link">📱 ${escHtml(c)}</a>`).join('')
+          : (emp.celular ? `<a href="tel:${escHtml(emp.celular)}" class="ficha-contact-link">📱 ${escHtml(emp.celular)}</a>` : '<span style="color:var(--text-muted); font-size:12px;">No registrado</span>')
+        }
+                    ${emp.telefonoFijo ? `<span class="ficha-card-sub" style="margin-left:8px;">☎ Tel. Fijo: <strong>${escHtml(emp.telefonoFijo)}</strong></span>` : ''}
+                  </div>
+
+                  <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:2px;">
+                    <span style="font-size:12px; font-weight:700; color:var(--text-muted); min-width:90px;">Residencia:</span>
+                    <span style="font-size:13px; color:var(--text-primary);">
+                      📍 ${escHtml(sanitizeText(emp.direccion || 'No registrada'))}, ${escHtml(sanitizeText(emp.ciudad || 'Tunja, Boyacá'))}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ficha-card ficha-grid--full">
+                <div class="ficha-card-top">
+                  <div class="ficha-card-icon">📝</div>
+                  <span class="ficha-card-label">Novedades y Observaciones de Personal</span>
+                </div>
+                <div class="ficha-card-val" style="font-weight:500; font-size:0.92rem; color:var(--text-secondary);">
+                  ${escHtml(sanitizeText(emp.novedades || 'Sin novedades registradas a la fecha'))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -584,7 +948,74 @@ const EmployeesModule = (() => {
         }
       });
     }
-    App.openModal(isVacante ? 'Ficha de Plaza Vacante' : 'Ficha Integral del Servidor Público', content, actions);
+    App.openModal(isVacante ? 'Ficha de Plaza Vacante' : 'Ficha Integral del Servidor Público', content, actions, 'modal-ficha modal-lg');
+    const box = document.querySelector('.modal-box');
+    if (box) {
+      box.classList.add('modal-ficha', 'modal-lg');
+      box.style.maxWidth = '900px';
+      box.style.width = '92vw';
+    }
+    const modalBody = document.getElementById('modal-body');
+    if (modalBody) {
+      modalBody.scrollTop = 0;
+    }
+  }
+
+  function switchFormTab(tabId) {
+    const tabs = document.querySelectorAll('.form-tabs .form-tab-btn');
+    const panes = document.querySelectorAll('.form-tab-pane');
+
+    tabs.forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
+    });
+
+    panes.forEach(pane => {
+      pane.classList.toggle('active', pane.id === tabId);
+    });
+
+    const modalBody = document.getElementById('modal-body');
+    if (modalBody) {
+      modalBody.scrollTop = 0;
+    }
+  }
+
+  function markInvalidField(fieldOrId, message) {
+    const el = typeof fieldOrId === 'string' ? document.getElementById(fieldOrId) : fieldOrId;
+    if (!el) {
+      if (message) App.showToast(message, 'error');
+      return;
+    }
+
+    // Limpiar estados de error previos
+    document.querySelectorAll('.input-invalid').forEach(inp => inp.classList.remove('input-invalid'));
+
+    // Si el campo pertenece a una pestaña específica, cambiar a esa pestaña
+    const pane = el.closest('.form-tab-pane');
+    if (pane && pane.id) {
+      switchFormTab(pane.id);
+    }
+
+    // Marcar campo en rojo visual con animación
+    el.classList.add('input-invalid');
+
+    // Desplazar la vista suavemente hasta el campo y hacer foco
+    setTimeout(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      try { el.focus(); } catch (_) { }
+    }, 100);
+
+    if (message) {
+      App.showToast(message, 'error');
+    }
+
+    // Quitar automáticamente el resaltado rojo cuando el usuario interactúe
+    const clearHandler = () => {
+      el.classList.remove('input-invalid');
+      el.removeEventListener('input', clearHandler);
+      el.removeEventListener('change', clearHandler);
+    };
+    el.addEventListener('input', clearHandler);
+    el.addEventListener('change', clearHandler);
   }
 
   async function openCreate() {
@@ -592,7 +1023,13 @@ const EmployeesModule = (() => {
     App.openModal('Nuevo Servidor Público', buildForm(), [
       { text: 'Cancelar', cls: 'btn-secondary', action: () => App.closeModal() },
       { text: 'Guardar Servidor', cls: 'btn-primary', id: 'emp-save-btn', action: saveCreate },
-    ]);
+    ], 'modal-form-emp modal-lg');
+    const box = document.querySelector('.modal-box');
+    if (box) {
+      box.classList.add('modal-form-emp', 'modal-lg');
+      box.style.maxWidth = '860px';
+      box.style.width = '92vw';
+    }
     attachFormListeners();
   }
 
@@ -601,14 +1038,20 @@ const EmployeesModule = (() => {
     try {
       const full = await API.getEmployeeByCedula(idOrCedula);
       if (full) emp = full;
-    } catch (_) {}
+    } catch (_) { }
 
     if (!emp) return;
     await loadCatalogs();
     App.openModal('Editar Servidor Público', buildForm(emp), [
       { text: 'Cancelar', cls: 'btn-secondary', action: () => App.closeModal() },
       { text: 'Actualizar Servidor', cls: 'btn-gold', id: 'emp-save-btn', action: () => saveEdit(idOrCedula) },
-    ]);
+    ], 'modal-form-emp modal-lg');
+    const box = document.querySelector('.modal-box');
+    if (box) {
+      box.classList.add('modal-form-emp', 'modal-lg');
+      box.style.maxWidth = '860px';
+      box.style.width = '92vw';
+    }
     attachFormListeners(emp);
   }
 
@@ -624,19 +1067,19 @@ const EmployeesModule = (() => {
         </div>
         <div class="form-grid">
           <div class="form-group span-2">
-            <label class="form-label">Denominación de la Plaza *</label>
+            <label class="form-label" for="ef-nombre">Denominación de la Plaza *</label>
             <input id="ef-nombre" class="form-input" value="${escHtml(emp.nombreCompleto || 'PLAZA VACANTE')}" required />
           </div>
           <input type="hidden" id="ef-cedula" value="" />
           <div class="form-group span-2">
-            <label class="form-label">Dependencia *</label>
+            <label class="form-label" for="ef-dep">Dependencia *</label>
             <select id="ef-dep" class="filter-select">
               <option value="">Seleccionar Dependencia...</option>
               ${cats.dependencias.map(d => `<option value="${escHtml(d)}" ${d === emp.dependencia ? 'selected' : ''}>${escHtml(d)}</option>`).join('')}
             </select>
           </div>
           <div class="form-group span-2">
-            <label class="form-label">Cargo *</label>
+            <label class="form-label" for="ef-cargo">Cargo *</label>
             <select id="ef-cargo" class="filter-select">
               <option value="${escHtml(emp.cargoActual || '')}">${escHtml(emp.cargoActual || 'Seleccionar Cargo...')}</option>
             </select>
@@ -655,13 +1098,29 @@ const EmployeesModule = (() => {
       : [];
 
     return `
-      <div style="max-height: 72vh; overflow-y: auto; padding-right: 6px;">
+      <div class="emp-form-wrapper">
+        <!-- BARRA ÚNICA DE NAVEGACIÓN HORIZONTAL (SIN NÚMEROS, SOLO EMOJI Y NOMBRE) -->
+        <div class="form-tabs">
+          <button type="button" class="form-tab-btn active" data-tab="tab-form-personales" onclick="EmployeesModule.switchFormTab('tab-form-personales')">
+            <svg style="width:15px;height:15px;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Datos Personales
+          </button>
+          <button type="button" class="form-tab-btn" data-tab="tab-form-cargo" onclick="EmployeesModule.switchFormTab('tab-form-cargo')">
+            <svg style="width:15px;height:15px;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+            Cargo & Ubicación
+          </button>
+          <button type="button" class="form-tab-btn" data-tab="tab-form-tiempos" onclick="EmployeesModule.switchFormTab('tab-form-tiempos')">
+            <svg style="width:15px;height:15px;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Tiempos de Servicio
+          </button>
+          <button type="button" class="form-tab-btn" data-tab="tab-form-formacion" onclick="EmployeesModule.switchFormTab('tab-form-formacion')">
+            <svg style="width:15px;height:15px;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+            Formación & Contacto
+          </button>
+        </div>
 
-        <!-- SECCIÓN 1: DATOS PERSONALES Y DOCUMENTOS -->
-        <div style="margin-bottom: 20px;">
-          <div style="font-weight: 700; font-size: 13px; color: var(--color-gold); text-transform: uppercase; border-bottom: 1px solid var(--color-border); padding-bottom: 6px; margin-bottom: 14px; display:flex; align-items:center; gap:6px;">
-            <span>👤</span> 1. Datos Personales y Documentos
-          </div>
+        <!-- ─── PESTAÑA: DATOS PERSONALES ─── -->
+        <div id="tab-form-personales" class="form-tab-pane active" style="padding-top: 6px;">
           <div class="form-grid">
             <div class="form-group span-2">
               <label class="form-label" for="ef-nombre">Nombres y Apellidos * <span style="font-size:11px; color:var(--text-muted);">(Solo admite letras y espacios)</span></label>
@@ -677,7 +1136,7 @@ const EmployeesModule = (() => {
               <label class="form-label" for="ef-sexo">Sexo <span style="font-size:11px; color:var(--text-muted);">(Opcional)</span></label>
               <select id="ef-sexo" class="filter-select">
                 <option value="">(Sin especificar / Vacío)</option>
-                ${cats.sexos.map(s => `<option value="${escHtml(s)}" ${emp.sexo && emp.sexo.toUpperCase().includes(s.substring(0,3).toUpperCase()) ? 'selected' : ''}>${escHtml(s)}</option>`).join('')}
+                ${cats.sexos.map(s => `<option value="${escHtml(s)}" ${emp.sexo && emp.sexo.toUpperCase().includes(s.substring(0, 3).toUpperCase()) ? 'selected' : ''}>${escHtml(s)}</option>`).join('')}
               </select>
             </div>
 
@@ -714,11 +1173,8 @@ const EmployeesModule = (() => {
           </div>
         </div>
 
-        <!-- SECCIÓN 2: UBICACIÓN, CARGOS Y ESTADO -->
-        <div style="margin-bottom: 20px;">
-          <div style="font-weight: 700; font-size: 13px; color: var(--color-gold); text-transform: uppercase; border-bottom: 1px solid var(--color-border); padding-bottom: 6px; margin-bottom: 14px; display:flex; align-items:center; gap:6px;">
-            <span>🏛</span> 2. Ubicación, Cargos y Estado
-          </div>
+        <!-- ─── PESTAÑA: CARGO Y UBICACIÓN ─── -->
+        <div id="tab-form-cargo" class="form-tab-pane" style="padding-top: 6px;">
           <div class="form-grid">
             <div class="form-group span-2">
               <label class="form-label" for="ef-dep">Dependencia <span style="font-size:11px; color:var(--text-muted);">(Opcional)</span></label>
@@ -736,9 +1192,9 @@ const EmployeesModule = (() => {
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="ef-codigo-cargo">Código de Cargo <span style="font-size:11px; color:var(--text-muted);">(Opcional, números ≤ 1000)</span></label>
-              <input id="ef-codigo-cargo" class="form-input font-mono" placeholder="Ej: 219 (Opcional)" value="${escHtml(emp.codigoActual || '')}" />
-              <small id="ef-codigo-hint" style="font-size:11px; color:var(--text-muted);">Solo números entre 0 y 1000 (puede quedar vacío).</small>
+              <label class="form-label" for="ef-codigo-cargo">Código de Cargo <span style="font-size:11px; color:var(--text-muted);">(Opcional, letras o números)</span></label>
+              <input id="ef-codigo-cargo" class="form-input font-mono" placeholder="Ej: 219, C-01, 100" value="${escHtml(emp.codigoActual || '')}" />
+              <small id="ef-codigo-hint" style="font-size:11px; color:var(--text-muted);">Código alfanumérico asignado al cargo.</small>
             </div>
 
             <div class="form-group">
@@ -781,7 +1237,7 @@ const EmployeesModule = (() => {
               </select>
             </div>
 
-            <!-- Regla 12: Campo condicional de Discapacidad -->
+            <!-- Campo condicional de Discapacidad -->
             <div class="form-group span-2" id="ef-discapacidad-group" style="${emp.situacion === 'DISCAPACIDAD' ? '' : 'display:none;'}">
               <label class="form-label" for="ef-tipo-discapacidad" style="color:var(--color-gold); font-weight:700;">Tipo de Discapacidad <span style="font-size:11px; color:var(--text-muted);">(Opcional)</span></label>
               <select id="ef-tipo-discapacidad" class="filter-select">
@@ -792,11 +1248,8 @@ const EmployeesModule = (() => {
           </div>
         </div>
 
-        <!-- SECCIÓN 3: FECHAS Y CÁLCULOS DINÁMICOS -->
-        <div style="margin-bottom: 20px;">
-          <div style="font-weight: 700; font-size: 13px; color: var(--color-gold); text-transform: uppercase; border-bottom: 1px solid var(--color-border); padding-bottom: 6px; margin-bottom: 14px; display:flex; align-items:center; gap:6px;">
-            <span>📅</span> 3. Fechas y Tiempos de Servicio
-          </div>
+        <!-- ─── PESTAÑA: TIEMPOS DE SERVICIO ─── -->
+        <div id="tab-form-tiempos" class="form-tab-pane" style="padding-top: 6px;">
           <div class="form-grid">
             <div class="form-group">
               <label class="form-label" for="ef-fecha-ingreso">Fecha de Ingreso</label>
@@ -847,11 +1300,8 @@ const EmployeesModule = (() => {
           </div>
         </div>
 
-        <!-- SECCIÓN 4: FORMACIÓN, NOVEDADES Y CONTACTO -->
-        <div style="margin-bottom: 20px;">
-          <div style="font-weight: 700; font-size: 13px; color: var(--color-gold); text-transform: uppercase; border-bottom: 1px solid var(--color-border); padding-bottom: 6px; margin-bottom: 14px; display:flex; align-items:center; gap:6px;">
-            <span>🎓</span> 4. Formación, Novedades y Contacto
-          </div>
+        <!-- ─── PESTAÑA: FORMACIÓN Y CONTACTO ─── -->
+        <div id="tab-form-formacion" class="form-tab-pane" style="padding-top: 6px;">
           <div class="form-grid">
             <div class="form-group span-2">
               <label class="form-label" for="ef-funciones">Funciones <span style="font-size:11px; color:var(--text-muted);">(00 a 999 o texto explicativo / decreto)</span></label>
@@ -874,8 +1324,8 @@ const EmployeesModule = (() => {
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="ef-matricula">Matrícula Profesional <span style="font-size:11px; color:var(--text-muted);">(Solo números)</span></label>
-              <input id="ef-matricula" class="form-input font-mono" placeholder="Solo dígitos" value="${escHtml(emp.matriculaProfesional || '')}" />
+              <label class="form-label" for="ef-matricula">Matrícula Profesional <span style="font-size:11px; color:var(--text-muted);">(Opcional: letras, números, guiones, etc.)</span></label>
+              <input id="ef-matricula" class="form-input font-mono" placeholder="Ej: 15-28490-T, MP-1049" value="${escHtml(emp.matriculaProfesional || '')}" />
             </div>
 
             <div class="form-group">
@@ -886,7 +1336,7 @@ const EmployeesModule = (() => {
               </select>
             </div>
 
-            <!-- Regla 19: Desplegable de diplomados condicional -->
+            <!-- Desplegable de diplomados condicional -->
             <div class="form-group span-2" id="ef-diplomado-group" style="${emp.tieneDiplomado ? '' : 'display:none;'}">
               <label class="form-label" for="ef-diplomado-opt">Opciones de Diplomado / Capacitación</label>
               <select id="ef-diplomado-opt" class="filter-select">
@@ -905,7 +1355,7 @@ const EmployeesModule = (() => {
               <div id="ef-celulares-container" style="display:flex; flex-direction:column; gap:8px;">
                 ${celularesList.map((cel, idx) => `
                   <div class="celular-row" style="display:flex; align-items:center; gap:8px;">
-                    <input class="form-input ef-celular-input font-mono" placeholder="Celular ${idx+1} (9 o 10 dígitos)" value="${escHtml(cel)}" maxlength="10" />
+                    <input class="form-input ef-celular-input font-mono" placeholder="Celular ${idx + 1} (9 o 10 dígitos)" value="${escHtml(cel)}" maxlength="10" />
                     ${idx > 0 ? `<button type="button" class="btn btn-secondary btn-sm" onclick="this.parentElement.remove()" style="padding:4px 8px;">✕</button>` : ''}
                   </div>
                 `).join('')}
@@ -990,13 +1440,13 @@ const EmployeesModule = (() => {
       }
     }
 
-    // 4. Regla 2: Al seleccionar el cargo, el código se autorrellena (validando números y <= 1000)
+    // 4. Al seleccionar el cargo, se autorrellena código (letras o números) y grado
     if (cargoSelect) {
-      cargoSelect.addEventListener('change', (e) => {
+      cargoSelect.addEventListener('change', () => {
         const selOpt = cargoSelect.selectedOptions[0];
         if (selOpt && codigoInput) {
           const defaultCode = selOpt.getAttribute('data-codigo');
-          if (defaultCode && /^\d+$/.test(defaultCode) && parseInt(defaultCode, 10) <= 1000) {
+          if (defaultCode) {
             codigoInput.value = defaultCode;
           }
           const defaultGrado = selOpt.getAttribute('data-grado');
@@ -1004,19 +1454,6 @@ const EmployeesModule = (() => {
             const match = cats.grados.find(g => g.toLowerCase() === defaultGrado.toLowerCase());
             if (match) gradoSelect.value = match;
           }
-        }
-      });
-    }
-
-    if (codigoInput) {
-      codigoInput.addEventListener('input', (e) => {
-        e.target.value = e.target.value.replace(/[^\d]/g, '');
-        if (e.target.value && parseInt(e.target.value, 10) > 1000) {
-          const hint = document.getElementById('ef-codigo-hint');
-          if (hint) { hint.style.color = '#ef4444'; hint.textContent = '¡Atención! El código no puede superar el número 1000.'; }
-        } else {
-          const hint = document.getElementById('ef-codigo-hint');
-          if (hint) { hint.style.color = 'var(--text-muted)'; hint.textContent = 'Solo números entre 0 y 1000.'; }
         }
       });
     }
@@ -1211,19 +1648,13 @@ const EmployeesModule = (() => {
       });
     }
 
-    // 9. Regla 18: Matrícula profesional solo números
-    const matInput = document.getElementById('ef-matricula');
-    if (matInput) {
-      matInput.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/[^\d]/g, ''); });
-    }
-
-    // 10. Regla 20: Teléfono fijo (solo dígitos)
+    // 9. Teléfono fijo (solo dígitos)
     const telFijoInput = document.getElementById('ef-telefono-fijo');
     if (telFijoInput) {
       telFijoInput.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/[^\d]/g, ''); });
     }
 
-    // 11. Regla 21: Celular dinámico (hasta 3 números independientes de 9-10 dígitos)
+    // 10. Celular dinámico (hasta 3 números independientes de 9-10 dígitos)
     const btnAddCel = document.getElementById('btn-add-celular');
     const celContainer = document.getElementById('ef-celulares-container');
 
@@ -1283,23 +1714,23 @@ const EmployeesModule = (() => {
 
     // 1. Validar Nombres y Apellidos (OBLIGATORIO: solo letras y espacios)
     if (!nombre) {
-      App.showToast('Nombres y Apellidos son obligatorios.', 'warning');
+      markInvalidField('ef-nombre', 'Nombres y Apellidos son obligatorios.');
       return null;
     }
     if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(nombre)) {
-      App.showToast('Nombres y Apellidos solo admiten letras y espacios.', 'error');
+      markInvalidField('ef-nombre', 'Nombres y Apellidos solo admiten letras y espacios.');
       return null;
     }
 
-    // 2. Validar Cédula de Ciudadanía (OBLIGATORIA: solo números, salvo en edición de vacantes)
+    // 2. Validar Cédula de Ciudadanía (OBLIGATORIA: solo números, salvo en vacantes)
     const isVacanteForm = document.getElementById('ef-cedula')?.type === 'hidden' || (nombre && nombre.startsWith('PLAZA VACANTE'));
     if (!isVacanteForm) {
       if (!cedula) {
-        App.showToast('La Cédula de Ciudadanía es obligatoria.', 'warning');
+        markInvalidField('ef-cedula', 'La Cédula de Ciudadanía es obligatoria.');
         return null;
       }
       if (!/^\d+$/.test(cedula) && !/^PROV-\d+$/i.test(cedula)) {
-        App.showToast('La Cédula debe contener únicamente números.', 'error');
+        markInvalidField('ef-cedula', 'La Cédula debe contener únicamente números.');
         return null;
       }
     }
@@ -1309,20 +1740,14 @@ const EmployeesModule = (() => {
     let tipoSangre = null;
     if (tipoSangreRaw) {
       if (!['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].includes(tipoSangreRaw)) {
-        App.showToast('Tipo de Sangre inválido. Seleccione una opción válida (A+, A-, B+, B-, AB+, AB-, O+, O-).', 'warning');
+        markInvalidField('ef-tipo-sangre', 'Tipo de Sangre inválido. Seleccione una opción válida (A+, A-, B+, B-, AB+, AB-, O+, O-).');
         return null;
       }
       tipoSangre = tipoSangreRaw;
     }
 
-    // 4. Código de cargo (Opcional; si tiene valor: sólo números y <= 1000)
-    const codigoCargo = document.getElementById('ef-codigo-cargo')?.value.trim();
-    if (codigoCargo) {
-      if (!/^\d+$/.test(codigoCargo) || parseInt(codigoCargo, 10) > 1000) {
-        App.showToast('El código de cargo debe ser numérico y no mayor a 1000.', 'error');
-        return null;
-      }
-    }
+    // 4. Código de cargo (Opcional; puede contener letras, números, etc.)
+    const codigoCargo = document.getElementById('ef-codigo-cargo')?.value.trim() || null;
 
     // 5. Grado (Opcional)
     const grado = document.getElementById('ef-grado')?.value || null;
@@ -1342,18 +1767,23 @@ const EmployeesModule = (() => {
     const otroTiempoPeriodos = [];
     for (let i = 0; i < periodoRows.length; i++) {
       const row = periodoRows[i];
-      const desde = row.querySelector('.ef-periodo-desde')?.value.trim();
-      const hasta = row.querySelector('.ef-periodo-hasta')?.value.trim();
+      const desdeInp = row.querySelector('.ef-periodo-desde');
+      const hastaInp = row.querySelector('.ef-periodo-hasta');
+      const desde = desdeInp?.value.trim();
+      const hasta = hastaInp?.value.trim();
 
       if (!desde && !hasta) continue; // Fila vacía se ignora
 
-      if (!desde || !hasta) {
-        App.showToast(`En el periodo #${i + 1}, tanto la fecha inicial (desde) como la final (hasta) son obligatorias si ingresa un periodo.`, 'warning');
+      if (!desde) {
+        markInvalidField(desdeInp, `En el periodo #${i + 1}, la fecha inicial (desde) es obligatoria.`);
         return null;
       }
-
+      if (!hasta) {
+        markInvalidField(hastaInp, `En el periodo #${i + 1}, la fecha final (hasta) es obligatoria.`);
+        return null;
+      }
       if (hasta < desde) {
-        App.showToast(`En el periodo #${i + 1}, la fecha final (${hasta}) debe ser mayor o igual a la fecha inicial (${desde}).`, 'error');
+        markInvalidField(hastaInp, `En el periodo #${i + 1}, la fecha final (${hasta}) debe ser mayor o igual a la inicial (${desde}).`);
         return null;
       }
 
@@ -1367,7 +1797,7 @@ const EmployeesModule = (() => {
       const val = inp.value.trim().replace(/[^\d]/g, '');
       if (val) {
         if (val.length < 9 || val.length > 10) {
-          App.showToast(`El celular "${val}" debe tener entre 9 y 10 dígitos.`, 'error');
+          markInvalidField(inp, `El celular "${val}" debe tener entre 9 y 10 dígitos.`);
           return null;
         }
         celulares.push(val);
@@ -1375,23 +1805,26 @@ const EmployeesModule = (() => {
     }
 
     // 10. Teléfono fijo (Opcional, 6 a 12 dígitos)
-    const telefonoFijo = document.getElementById('ef-telefono-fijo')?.value.trim().replace(/[^\d]/g, '');
+    const telFijoInp = document.getElementById('ef-telefono-fijo');
+    const telefonoFijo = telFijoInp?.value.trim().replace(/[^\d]/g, '');
     if (telefonoFijo && (telefonoFijo.length < 6 || telefonoFijo.length > 12)) {
-      App.showToast('El teléfono fijo debe contener entre 6 y 12 dígitos numéricos.', 'error');
+      markInvalidField(telFijoInp, 'El teléfono fijo debe contener entre 6 y 12 dígitos numéricos.');
       return null;
     }
 
     // 11. Correo institucional (Opcional, solo valida @ si se ingresa)
-    const correo = document.getElementById('ef-correo-inst')?.value.trim();
+    const correoInp = document.getElementById('ef-correo-inst');
+    const correo = correoInp?.value.trim();
     if (correo && !correo.includes('@')) {
-      App.showToast('El Correo Institucional debe contener "@".', 'error');
+      markInvalidField(correoInp, 'El Correo Institucional debe contener "@".');
       return null;
     }
 
     // 12. Correo personal (Opcional, solo valida @ si se ingresa)
-    const correoPersonal = document.getElementById('ef-correo-pers')?.value.trim();
+    const correoPersInp = document.getElementById('ef-correo-pers');
+    const correoPersonal = correoPersInp?.value.trim();
     if (correoPersonal && !correoPersonal.includes('@')) {
-      App.showToast('El Correo Personal debe contener "@".', 'error');
+      markInvalidField(correoPersInp, 'El Correo Personal debe contener "@".');
       return null;
     }
 
@@ -1399,6 +1832,9 @@ const EmployeesModule = (() => {
     const diplomadoCapSena = tieneDiplomado ? (document.getElementById('ef-diplomado-opt')?.value || 'Diplomado Registrado') : null;
 
     const mpioVal = document.getElementById('ef-municipio-exp')?.value || document.getElementById('ef-ciudad-exp')?.value || null;
+
+    // Matrícula profesional (admite letras, números, guiones, etc.)
+    const matricula = document.getElementById('ef-matricula')?.value.trim() || null;
 
     return {
       nombreCompleto: nombre,
@@ -1422,12 +1858,12 @@ const EmployeesModule = (() => {
       fechaIngreso: document.getElementById('ef-fecha-ingreso')?.value || null,
       fechaEncargo: document.getElementById('ef-fecha-encargo')?.value || null,
       otroTiempoPeriodos,
-      otroTiempoGobernacion: document.getElementById('ef-periodos-total-display')?.textContent.replace('Tiempo total acumulado: ', '') || null,
+      otroTiempoGobernacion: document.getElementById('ef-periodos-total-display')?.textContent.replace('Otro Tiempo acumulado: ', '') || null,
       funciones: document.getElementById('ef-funciones')?.value.trim() || null,
       novedades: document.getElementById('ef-novedades')?.value.trim() || null,
       estudios: document.getElementById('ef-estudios')?.value.trim() || null,
       institucionEstudios: document.getElementById('ef-inst-estudios')?.value.trim() || null,
-      matriculaProfesional: document.getElementById('ef-matricula')?.value.trim() || null,
+      matriculaProfesional: matricula,
       tieneDiplomado,
       diplomadoCapSena,
       telefonoFijo: telefonoFijo || null,
@@ -1451,7 +1887,11 @@ const EmployeesModule = (() => {
       App.showToast(`Servidor registrado exitosamente.${msgCc}`, 'success');
       await load();
     } catch (err) {
-      App.showToast(err.message, 'error');
+      if (err.message && err.message.toLowerCase().includes('cédula')) {
+        markInvalidField('ef-cedula', err.message);
+      } else {
+        App.showToast(err.message, 'error');
+      }
     } finally {
       if (btn) { btn.disabled = false; btn.textContent = 'Guardar Servidor'; }
     }
@@ -1468,23 +1908,103 @@ const EmployeesModule = (() => {
       App.showToast('Servidor actualizado exitosamente.', 'success');
       await load();
     } catch (err) {
-      App.showToast(err.message, 'error');
+      if (err.message && err.message.toLowerCase().includes('cédula')) {
+        markInvalidField('ef-cedula', err.message);
+      } else {
+        App.showToast(err.message, 'error');
+      }
     } finally {
       if (btn) { btn.disabled = false; btn.textContent = 'Actualizar Servidor'; }
     }
   }
 
   function confirmDelete(idOrCedula, nombre) {
-    App.openModal('Confirmar Eliminación', `<p style="color:var(--text-secondary)">¿Está seguro de eliminar al servidor <strong style="color:var(--text-primary)">${nombre}</strong>?<br><br>Esta acción no se puede deshacer.</p>`, [
+    App.openModal('Confirmar Eliminación', `
+      <div style="padding: 6px 4px;">
+        <p style="color:var(--text-secondary); margin: 0 0 14px; font-size: 14px; line-height: 1.6;">
+          ¿Está seguro de que desea eliminar al servidor público <strong style="color:var(--text-primary); font-weight: 700;">${escHtml(nombre)}</strong>?
+        </p>
+        <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 18px; line-height: 1;">⚠️</span>
+          <span style="color: #ef4444; font-size: 12.5px; font-weight: 600; line-height: 1.4;">
+            Esta acción eliminará el registro de manera definitiva y no se puede deshacer.
+          </span>
+        </div>
+      </div>
+    `, [
       { text: 'Cancelar', cls: 'btn-secondary', action: () => App.closeModal() },
-      { text: 'Eliminar', cls: 'btn-danger', action: async () => {
-        try {
-          await API.deleteEmployee(idOrCedula);
-          App.closeModal();
-          App.showToast('Servidor eliminado exitosamente.', 'success');
-          await load();
-        } catch (err) { App.showToast(err.message, 'error'); }
-      }},
+      {
+        text: 'Eliminar Servidor',
+        cls: 'btn-danger',
+        id: 'btn-confirm-delete-emp',
+        action: async () => {
+          const deleteBtn = document.getElementById('btn-confirm-delete-emp');
+          const footerEl = document.getElementById('modal-footer');
+          const titleEl = document.getElementById('modal-title');
+          const bodyEl = document.getElementById('modal-body');
+
+          if (deleteBtn) {
+            deleteBtn.disabled = true;
+            deleteBtn.innerHTML = `
+              <span class="spinner" style="width:13px;height:13px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin 0.8s linear infinite;margin-right:6px;vertical-align:middle;"></span>
+              Eliminando...
+            `;
+          }
+
+          try {
+            await API.deleteEmployee(idOrCedula);
+            await load();
+
+            if (titleEl) {
+              titleEl.textContent = 'Servidor Eliminado';
+            }
+
+            if (bodyEl) {
+              bodyEl.innerHTML = `
+                <div style="text-align: center; padding: 18px 10px 12px;">
+                  <div style="width: 54px; height: 54px; margin: 0 auto 16px; border-radius: 50%; background: rgba(34, 197, 94, 0.12); border: 2px solid rgba(34, 197, 94, 0.4); display: flex; align-items: center; justify-content: center; color: #22c55e;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 26px; height: 26px;">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </div>
+                  <h3 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin: 0 0 8px;">
+                    Servidor Eliminado Exitosamente
+                  </h3>
+                  <p style="color: var(--text-secondary); font-size: 13.5px; line-height: 1.5; margin: 0;">
+                    El servidor público <strong style="color: var(--text-primary); font-weight: 700;">${escHtml(nombre)}</strong> ha sido eliminado del sistema.
+                  </p>
+                </div>
+              `;
+            }
+
+            if (footerEl) {
+              footerEl.innerHTML = `
+                <button type="button" class="btn btn-primary" id="btn-accept-emp-deleted" style="min-width: 140px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  Aceptar
+                </button>
+              `;
+
+              const acceptBtn = footerEl.querySelector('#btn-accept-emp-deleted');
+              if (acceptBtn) {
+                acceptBtn.onclick = () => {
+                  App.closeModal();
+                  App.showToast('Servidor eliminado exitosamente.', 'success');
+                };
+                acceptBtn.focus();
+              }
+            }
+          } catch (err) {
+            App.showToast(err.message || 'Error al eliminar el servidor.', 'error');
+            if (deleteBtn) {
+              deleteBtn.disabled = false;
+              deleteBtn.textContent = 'Eliminar Servidor';
+            }
+          }
+        }
+      },
     ]);
   }
 
@@ -1573,7 +2093,7 @@ const EmployeesModule = (() => {
     overlay.id = 'excel-emp-modal-overlay';
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
-      <div class="modal-card" style="max-width: 720px; width: 95%;">
+      <div class="modal-card" style="max-width: 680px; width: 95%;">
         <div class="modal-header">
           <div class="modal-header-info">
             <h2 class="modal-title" style="display:flex; align-items:center; gap:8px;">
@@ -1584,54 +2104,72 @@ const EmployeesModule = (() => {
                 <line x1="16" y1="17" x2="8" y2="17"></line>
                 <polyline points="10 9 9 9 8 9"></polyline>
               </svg>
-              Carga Masiva — TIEMPO DE SERVICIO 2026.xlsx
+              Carga Masiva de Servidores Públicos
             </h2>
-            <p class="modal-desc">Importación con mapeo DIVIPOLA, celulares en arreglo, estados Activos por defecto y cálculo dinámico.</p>
+            <p class="modal-desc">Cargue un archivo Excel (.xlsx o .xls) para importar o actualizar servidores públicos en el sistema.</p>
           </div>
           <button class="modal-close" id="btn-close-emp-import">&times;</button>
         </div>
 
         <div class="modal-body" style="padding: 20px 24px; max-height: 75vh; overflow-y: auto;">
-          <div style="background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.25); border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; font-size: 13px; color: var(--text-main); line-height: 1.5;">
-            <strong style="color: var(--color-green-bright); display: block; margin-bottom: 4px;">⚡ Reglas de Negocio Automatizadas en la Importación:</strong>
-            <ul style="margin: 0; padding-left: 18px; color: var(--text-muted);">
-              <li><strong>Estado Activo (Regla 6):</strong> Todos los servidores históricos quedan guardados con estado "Activo" por defecto.</li>
-              <li><strong>Mapeo DIVIPOLA (Regla 10):</strong> Mapea automáticamente la ciudad de expedición con su departamento correspondiente.</li>
-              <li><strong>Celulares en Arreglo (Regla 21):</strong> Celdas con varios números separados por <code>/</code> se convierten a arreglo de celulares limpios.</li>
-              <li><strong>ID Temporal Secuencial (Regla 9):</strong> Asigna identificador <code>PROV-00001</code> correlativo a quienes no tengan cédula.</li>
-              <li><strong>Plazas Vacantes:</strong> Identifica plazas vacantes y preserva la estructura de cargo y dependencia.</li>
-            </ul>
+          <!-- Sección de Selección y Confirmación de Archivo -->
+          <div id="emp-upload-section">
+            <div class="excel-dropzone" id="emp-excel-dropzone" style="border: 2px dashed var(--color-border); border-radius: 12px; padding: 32px 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; background: var(--bg-surface);">
+              <input type="file" id="emp-excel-file-input" accept=".xlsx, .xls" style="display:none;" />
+              <div style="margin-bottom: 12px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-green-bright)" stroke-width="2" style="width:48px;height:48px;">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+              </div>
+              <p style="font-weight: 700; font-size: 15px; margin-bottom: 4px; color: var(--text-main);" id="dropzone-main-text">
+                Haz clic para seleccionar o arrastra aquí tu archivo Excel
+              </p>
+              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">
+                Formatos soportados: archivos Excel (.xlsx, .xls)
+              </p>
+            </div>
+
+            <!-- Previsualización del archivo seleccionado con opción de cancelar/cambiar -->
+            <div id="emp-file-preview" style="display:none; margin-top: 16px;">
+              <div style="background: var(--bg-surface-elevated, #f8fafc); border: 1.5px solid var(--color-border); border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(34,197,94,0.15); display: flex; align-items: center; justify-content: center; color: var(--color-green-bright); font-size: 20px;">
+                    📊
+                  </div>
+                  <div>
+                    <div id="emp-file-name" style="font-weight: 700; font-size: 13.5px; color: var(--text-primary);"></div>
+                    <div id="emp-file-size" style="font-size: 11.5px; color: var(--text-muted);"></div>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-change-file" style="font-size: 12px; padding: 5px 12px;">
+                  Cambiar archivo
+                </button>
+              </div>
+
+              <!-- Cuadro Informativo de Confirmación Previa -->
+              <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 10px; padding: 14px 16px; margin-top: 14px; display: flex; align-items: flex-start; gap: 12px;">
+                <div style="font-size: 22px; line-height: 1;">📋</div>
+                <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5;">
+                  <strong style="color: #2563eb; display: block; font-size: 13px; margin-bottom: 2px;">Confirmación de Carga Masiva</strong>
+                  Al confirmar la importación, se procesarán los registros del archivo para crear o actualizar los servidores públicos en la base de datos institucional.
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="excel-dropzone" id="emp-excel-dropzone" style="border: 2px dashed var(--color-border); border-radius: 10px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.2s ease; background: var(--bg-surface);">
-            <input type="file" id="emp-excel-file-input" accept=".xlsx, .xls" style="display:none;" />
-            <div style="margin-bottom: 12px;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-green-bright)" stroke-width="2" style="width:48px;height:48px;">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
-            </div>
-            <p style="font-weight: 600; font-size: 15px; margin-bottom: 4px; color: var(--text-main);" id="dropzone-main-text">
-              Haz clic para seleccionar o arrastra aquí tu archivo Excel
-            </p>
-            <p style="font-size: 12px; color: var(--text-muted); margin: 0;">
-              Soporta "TIEMPO DE SERVICIO 2026.xlsx" (.xlsx, .xls)
-            </p>
-            <div id="emp-file-tag" style="display:none; margin-top: 14px; padding: 8px 14px; background: var(--color-green-glow); border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--color-green-bright); display: inline-flex; align-items: center; gap: 8px;">
-            </div>
-          </div>
-
-          <div id="emp-import-result" style="display:none; margin-top: 20px;"></div>
+          <!-- Mensaje de Aceptación y Resultados (Aparece tras procesar con éxito) -->
+          <div id="emp-import-result" style="display:none;"></div>
         </div>
 
-        <div class="modal-footer" style="padding: 16px 24px; display:flex; justify-content:flex-end; gap:12px; border-top: 1px solid var(--color-border);">
-          <button type="button" class="btn btn-secondary" id="btn-cancel-emp-import">Cerrar</button>
-          <button type="button" class="btn btn-primary" id="btn-start-emp-import" disabled style="display:inline-flex; align-items:center; gap:8px;">
+        <div class="modal-footer" id="emp-import-footer" style="padding: 16px 24px; display:flex; justify-content:flex-end; gap:12px; border-top: 1px solid var(--color-border);">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-emp-import">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btn-confirm-emp-import" disabled style="display:inline-flex; align-items:center; gap:8px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
-            <span id="btn-start-emp-text">Procesar e Importar</span>
+            <span id="btn-confirm-emp-text">Confirmar Importación</span>
           </button>
         </div>
       </div>
@@ -1643,14 +2181,34 @@ const EmployeesModule = (() => {
     const cancelBtn = overlay.querySelector('#btn-cancel-emp-import');
     const dropzone = overlay.querySelector('#emp-excel-dropzone');
     const fileInput = overlay.querySelector('#emp-excel-file-input');
-    const fileTag = overlay.querySelector('#emp-file-tag');
-    const startBtn = overlay.querySelector('#btn-start-emp-import');
-    const startText = overlay.querySelector('#btn-start-emp-text');
+    const filePreview = overlay.querySelector('#emp-file-preview');
+    const fileNameEl = overlay.querySelector('#emp-file-name');
+    const fileSizeEl = overlay.querySelector('#emp-file-size');
+    const changeFileBtn = overlay.querySelector('#btn-change-file');
+    const confirmBtn = overlay.querySelector('#btn-confirm-emp-import');
+    const confirmText = overlay.querySelector('#btn-confirm-emp-text');
+    const uploadSection = overlay.querySelector('#emp-upload-section');
     const resultDiv = overlay.querySelector('#emp-import-result');
+    const modalFooter = overlay.querySelector('#emp-import-footer');
 
     const closeModal = () => overlay.remove();
     closeBtn.addEventListener('click', closeModal);
     cancelBtn.addEventListener('click', closeModal);
+
+    const resetSelection = () => {
+      selectedFile = null;
+      fileInput.value = '';
+      dropzone.style.display = 'block';
+      filePreview.style.display = 'none';
+      confirmBtn.disabled = true;
+      confirmText.textContent = 'Confirmar Importación';
+    };
+
+    changeFileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      resetSelection();
+      fileInput.click();
+    });
 
     const selectFile = (file) => {
       if (!file) return;
@@ -1665,32 +2223,48 @@ const EmployeesModule = (() => {
         return;
       }
       selectedFile = file;
-      fileTag.style.display = 'inline-flex';
-      fileTag.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-        ${file.name} (${(file.size / 1024).toFixed(1)} KB)
-      `;
-      startBtn.disabled = false;
-      resultDiv.style.display = 'none';
+
+      // Mostrar previsualización y cuadro de confirmación
+      fileNameEl.textContent = file.name;
+      const sizeKb = (file.size / 1024);
+      fileSizeEl.textContent = sizeKb >= 1024
+        ? `${(sizeKb / 1024).toFixed(2)} MB`
+        : `${sizeKb.toFixed(1)} KB`;
+
+      dropzone.style.display = 'none';
+      filePreview.style.display = 'block';
+      confirmBtn.disabled = false;
+      confirmText.textContent = 'Confirmar Importación';
     };
 
     dropzone.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (e) => {
       if (e.target.files && e.target.files.length) selectFile(e.target.files[0]);
     });
-    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.style.borderColor = 'var(--color-green-bright)'; });
-    dropzone.addEventListener('dragleave', () => { dropzone.style.borderColor = 'var(--color-border)'; });
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = 'var(--color-green-bright)';
+    });
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.style.borderColor = 'var(--color-border)';
+    });
     dropzone.addEventListener('drop', (e) => {
       e.preventDefault();
       dropzone.style.borderColor = 'var(--color-border)';
       if (e.dataTransfer.files && e.dataTransfer.files.length) selectFile(e.dataTransfer.files[0]);
     });
 
-    startBtn.addEventListener('click', async () => {
+    // Acción al confirmar la importación
+    confirmBtn.addEventListener('click', async () => {
       if (!selectedFile) return;
-      startBtn.disabled = true;
-      startText.textContent = 'Procesando en servidor...';
-      App.showToast('Procesando archivo con reglas de negocio...', 'info');
+
+      confirmBtn.disabled = true;
+      cancelBtn.disabled = true;
+      confirmText.innerHTML = `
+        <span style="display:inline-block; width:13px; height:13px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; margin-right:6px;"></span>
+        Procesando Carga Masiva...
+      `;
+      App.showToast('Procesando archivo masivo... Por favor espere.', 'info');
 
       try {
         const res = await API.uploadEmployeesExcel(selectedFile);
@@ -1698,41 +2272,61 @@ const EmployeesModule = (() => {
 
         const { resumen = {}, errores = [], hojasProcesadas = [] } = res;
 
+        // Ocultar sección de carga y mostrar mensaje de aceptación + resumen
+        uploadSection.style.display = 'none';
         resultDiv.style.display = 'block';
         resultDiv.innerHTML = `
-          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--color-border); border-radius: 8px; padding: 16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">
-              <strong style="color:var(--color-green-bright); font-size: 15px;">✅ Importación Completada</strong>
-              <span class="badge badge--info" style="font-size:11px;">${hojasProcesadas.length} Hoja(s) Procesada(s)</span>
+          <!-- Mensaje de Aceptación de Carga Masiva -->
+          <div style="background: rgba(34,197,94,0.08); border: 1.5px solid rgba(34,197,94,0.35); border-radius: 12px; padding: 22px 18px; text-align: center; margin-bottom: 20px;">
+            <div style="width: 50px; height: 50px; margin: 0 auto 10px; border-radius: 50%; background: rgba(34,197,94,0.18); display: flex; align-items: center; justify-content: center; font-size: 26px;">
+              ✅
+            </div>
+            <h3 style="font-size: 1.18rem; font-weight: 800; color: var(--color-green-bright, #16a34a); margin-bottom: 4px;">
+              ¡Carga Masiva Aceptada y Procesada con Éxito!
+            </h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">
+              El archivo <strong>${escHtml(selectedFile.name)}</strong> fue validado y cargado en el sistema correctamente.
+            </p>
+          </div>
+
+          <!-- Información Detallada sobre lo Realizado -->
+          <div style="background: var(--bg-surface-elevated, #f8fafc); border: 1px solid var(--color-border); border-radius: 10px; padding: 18px; margin-bottom: 10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px; border-bottom: 1px solid var(--color-border); padding-bottom: 10px;">
+              <span style="font-weight: 700; font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+                <span>📊</span> Resumen de Operaciones Realizadas
+              </span>
+              <span class="badge badge--info" style="font-size:11px; font-weight:700;">
+                ${hojasProcesadas.length} Hoja(s) Procesada(s)
+              </span>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; text-align: center; margin-bottom: 14px;">
-              <div style="background: var(--bg-surface); padding: 10px; border-radius: 6px; border: 1px solid var(--color-border);">
-                <span style="font-size: 11px; color: var(--text-muted); display: block;">Total Filas</span>
-                <span style="font-size: 18px; font-weight: 700;">${resumen.totalFilas || 0}</span>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; text-align: center;">
+              <div style="background: var(--bg-surface); padding: 10px 8px; border-radius: 8px; border: 1px solid var(--color-border);">
+                <span style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px;">Total Filas</span>
+                <span style="font-size: 19px; font-weight: 800; color: var(--text-primary);">${resumen.totalFilas || 0}</span>
               </div>
-              <div style="background: rgba(34,197,94,0.1); padding: 10px; border-radius: 6px; border: 1px solid rgba(34,197,94,0.25);">
-                <span style="font-size: 11px; color: var(--color-green-bright); display: block;">Nuevos (Insert)</span>
-                <span style="font-size: 18px; font-weight: 700; color: var(--color-green-bright);">${resumen.insertados || 0}</span>
+              <div style="background: rgba(34,197,94,0.1); padding: 10px 8px; border-radius: 8px; border: 1px solid rgba(34,197,94,0.25);">
+                <span style="font-size: 11px; color: var(--color-green-bright); display: block; margin-bottom: 2px;">Nuevos Registros</span>
+                <span style="font-size: 19px; font-weight: 800; color: var(--color-green-bright);">${resumen.insertados || 0}</span>
               </div>
-              <div style="background: rgba(234,179,8,0.1); padding: 10px; border-radius: 6px; border: 1px solid rgba(234,179,8,0.25);">
-                <span style="font-size: 11px; color: var(--color-gold); display: block;">Actualizados</span>
-                <span style="font-size: 18px; font-weight: 700; color: var(--color-gold);">${resumen.actualizados || 0}</span>
+              <div style="background: rgba(234,179,8,0.1); padding: 10px 8px; border-radius: 8px; border: 1px solid rgba(234,179,8,0.25);">
+                <span style="font-size: 11px; color: var(--color-gold); display: block; margin-bottom: 2px;">Actualizados</span>
+                <span style="font-size: 19px; font-weight: 800; color: var(--color-gold);">${resumen.actualizados || 0}</span>
               </div>
-              <div style="background: rgba(59,130,246,0.1); padding: 10px; border-radius: 6px; border: 1px solid rgba(59,130,246,0.25);">
-                <span style="font-size: 11px; color: #3b82f6; display: block;">ID Temporal PROV-</span>
-                <span style="font-size: 18px; font-weight: 700; color: #3b82f6;">${resumen.provisionales || 0}</span>
+              <div style="background: rgba(59,130,246,0.1); padding: 10px 8px; border-radius: 8px; border: 1px solid rgba(59,130,246,0.25);">
+                <span style="font-size: 11px; color: #3b82f6; display: block; margin-bottom: 2px;">IDs Temporales</span>
+                <span style="font-size: 19px; font-weight: 800; color: #3b82f6;">${resumen.provisionales || 0}</span>
               </div>
-              <div style="background: rgba(254, 240, 138, 0.15); padding: 10px; border-radius: 6px; border: 1px solid rgba(250, 204, 21, 0.35);">
-                <span style="font-size: 11px; color: #a16207; display: block;">Plazas Vacantes</span>
-                <span style="font-size: 18px; font-weight: 700; color: #eab308;">${resumen.vacantes || 0}</span>
+              <div style="background: rgba(254, 240, 138, 0.15); padding: 10px 8px; border-radius: 8px; border: 1px solid rgba(250, 204, 21, 0.35);">
+                <span style="font-size: 11px; color: #a16207; display: block; margin-bottom: 2px;">Plazas Vacantes</span>
+                <span style="font-size: 19px; font-weight: 800; color: #eab308;">${resumen.vacantes || 0}</span>
               </div>
             </div>
 
             ${errores.length > 0 ? `
-              <div style="margin-top: 10px; max-height: 160px; overflow-y: auto; background: var(--bg-surface); border: 1px solid #ef4444; border-radius: 6px; padding: 10px;">
-                <strong style="color:#ef4444; font-size:12px; display:block; margin-bottom: 6px;">Errores (${errores.length}):</strong>
-                <ul style="margin:0; padding-left: 16px; font-size: 11px;">
+              <div style="margin-top: 14px; max-height: 150px; overflow-y: auto; background: var(--bg-surface); border: 1px solid #ef4444; border-radius: 8px; padding: 10px 14px;">
+                <strong style="color:#ef4444; font-size:12px; display:block; margin-bottom: 6px;">Observaciones / Inconsistencias (${errores.length}):</strong>
+                <ul style="margin:0; padding-left: 16px; font-size: 11.5px; color: var(--text-secondary);">
                   ${errores.slice(0, 30).map(e => `<li>Fila ${e.fila} (CC: ${escHtml(e.cedula)}): ${escHtml(e.error)}</li>`).join('')}
                 </ul>
               </div>
@@ -1740,14 +2334,28 @@ const EmployeesModule = (() => {
           </div>
         `;
 
-        startText.textContent = 'Procesado Exitosamente';
-        App.showToast(`Importación completada: ${resumen.insertados} creados, ${resumen.actualizados} actualizados.`, 'success');
-        await load();
+        // Botón único "Aceptar" para cerrar la ventana y refrescar la vista
+        modalFooter.innerHTML = `
+          <button type="button" class="btn btn-primary" id="btn-accept-emp-import" style="min-width: 140px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:17px;height:17px;">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Aceptar
+          </button>
+        `;
+
+        const acceptBtn = modalFooter.querySelector('#btn-accept-emp-import');
+        acceptBtn.addEventListener('click', async () => {
+          overlay.remove();
+          App.showToast(`Carga masiva finalizada: ${resumen.insertados} creados, ${resumen.actualizados} actualizados.`, 'success');
+          await load();
+        });
 
       } catch (err) {
         App.showToast('Error al importar: ' + err.message, 'error');
-        startBtn.disabled = false;
-        startText.textContent = 'Reintentar';
+        confirmBtn.disabled = false;
+        confirmText.textContent = 'Reintentar Importación';
+        cancelBtn.disabled = false;
       }
     });
   }
@@ -1758,7 +2366,7 @@ const EmployeesModule = (() => {
         <div class="page-header">
           <div class="page-header-info">
             <h1 class="page-heading">Servidores Públicos</h1>
-            <p class="page-desc">Módulo de gestión del talento humano con 22 reglas de negocio integradas</p>
+            <p class="page-desc">Módulo de gestión integral del talento humano — Gobernación de Boyacá</p>
           </div>
           <div class="page-actions">
             <button class="btn btn-secondary" onclick="EmployeesModule.exportExcel()" style="display:inline-flex; align-items:center; gap:6px;">
@@ -1852,6 +2460,9 @@ const EmployeesModule = (() => {
     clearSearch,
     exportExcel,
     openImportModal,
-    formatCedulaDots
+    formatCedulaDots,
+    switchFichaTab,
+    switchFormTab,
+    copyFichaText
   };
 })();

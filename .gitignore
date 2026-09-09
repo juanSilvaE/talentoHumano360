@@ -8,3 +8,5 @@ node_modules/
 # Scratch & temporary test scripts
 scratch/
 web/scratch/
+database/backup_*.sql
+*.sql.bak

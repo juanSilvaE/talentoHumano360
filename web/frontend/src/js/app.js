@@ -36,13 +36,17 @@ const App = (() => {
   }
 
   // ─── Modal System ──────────────────────────────────────────────────────────
-  function openModal(title, bodyHtml, footerButtons = []) {
+  function openModal(title, bodyHtml, footerButtons = [], customClass = '') {
     const overlay = document.getElementById('modal-overlay');
     const titleEl = document.getElementById('modal-title');
     const bodyEl = document.getElementById('modal-body');
     const footerEl = document.getElementById('modal-footer');
     const box = document.querySelector('.modal-box');
     if (!overlay || !titleEl || !bodyEl || !footerEl) return;
+
+    if (box) {
+      box.className = 'modal-box' + (customClass ? ' ' + customClass : '');
+    }
 
     titleEl.textContent = title;
     bodyEl.innerHTML = bodyHtml;
@@ -72,6 +76,12 @@ const App = (() => {
     const overlay = document.getElementById('modal-overlay');
     const box = document.querySelector('.modal-box');
     if (!overlay) return;
+
+    if (box) {
+      box.className = 'modal-box';
+      box.style.maxWidth = '';
+      box.style.width = '';
+    }
 
     if (typeof FX !== 'undefined') {
       FX.animateModalClose(overlay, box, () => {

@@ -50,24 +50,13 @@ const DIPLOMADOS_OPCIONES = [
 /**
  * Regla 2: Valida el código de cargo para formularios de creación y edición.
  * Es opcional: puede quedar vacío o null.
- * Si tiene valor y esFormulario: solo se admiten números y no deben ser mayores a 1000.
- * En modo histórico (Excel) acepta códigos alfanuméricos existentes.
+ * Admite cualquier combinación de caracteres (letras, números, códigos alfanuméricos).
  */
-function validateCodigoCargo(val, esFormulario = true) {
+function validateCodigoCargo(val) {
   if (val === null || val === undefined || String(val).trim() === '' || String(val).trim().toUpperCase() === 'N/A') {
     return { valido: true, valor: null };
   }
   const str = String(val).trim();
-  if (esFormulario) {
-    if (!/^\d+$/.test(str)) {
-      return { valido: false, error: 'El código de cargo debe contener únicamente números.' };
-    }
-    const num = parseInt(str, 10);
-    if (num > 1000) {
-      return { valido: false, error: 'El código de cargo no puede ser mayor a 1000.' };
-    }
-    return { valido: true, valor: str };
-  }
   return { valido: true, valor: str };
 }
 
@@ -305,16 +294,14 @@ function validateFunciones(val) {
 }
 
 /**
- * Regla 18: Matrícula Profesional (Únicamente números).
+ * Regla 18: Matrícula Profesional.
+ * Admite letras, números, guiones y cualquier formato oficial de tarjeta profesional.
  */
 function validateMatricula(val) {
-  if (val === null || val === undefined || String(val).trim() === '') {
+  if (val === null || val === undefined || String(val).trim() === '' || String(val).trim().toUpperCase() === 'NO REGISTRADO') {
     return { valido: true, valor: null };
   }
   const str = String(val).trim();
-  if (!/^\d+$/.test(str)) {
-    return { valido: false, error: 'La matrícula profesional debe contener únicamente números.' };
-  }
   return { valido: true, valor: str };
 }
 

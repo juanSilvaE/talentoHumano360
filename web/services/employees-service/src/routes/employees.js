@@ -152,8 +152,20 @@ router.get('/', auth, async (req, res) => {
       ${whereClause}
       ORDER BY 
         CASE 
-          WHEN LOWER(COALESCE(e.estado_servidor, 'Activo')) = 'activo' THEN 0 
-          ELSE 1 
+          -- 1. Inactivos de últimas (prioridad 2)
+          WHEN LOWER(COALESCE(e.estado_servidor, 'Activo')) != 'activo' THEN 2
+          -- 2. Sin cédula de penúltimas (prioridad 1): documento_pendiente, prefijo PROV-, nulo/vacío, o vacantes
+          WHEN COALESCE(p.documento_pendiente, false) = true
+            OR p.cedula LIKE 'PROV-%'
+            OR p.cedula IS NULL
+            OR TRIM(p.cedula) = ''
+            OR TRIM(p.cedula) = '0'
+            OR COALESCE(p.es_vacante, false) = true
+            OR e.situacion = 'VACANTE'
+            OR p.nombre_completo LIKE 'PLAZA VACANTE%'
+            THEN 1
+          -- 3. Activos con cédula de primeras (prioridad 0)
+          ELSE 0 
         END ASC,
         p.nombre_completo ASC
       LIMIT ${limitParam} OFFSET ${offsetParam}`;
@@ -1163,25 +1175,71 @@ router.delete('/:cedula', auth, async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+    const cleanTarget = (cedula || '').trim();
+    const numericTarget = cleanTarget.replace(/\D/g, '');
+
     const r = await client.query(
-      'SELECT r.id_registro, r.id_persona, r.id_contacto, r.id_educacion, r.id_estado FROM rel_principal r JOIN personas p ON p.id_persona=r.id_persona WHERE (p.cedula=$1 OR r.id_registro=$1 OR p.id_persona=$1) LIMIT 1',
-      [cedula]);
+      `SELECT r.id_registro, r.id_persona, r.id_contacto, r.id_educacion, r.id_estado
+       FROM rel_principal r
+       LEFT JOIN personas p ON p.id_persona = r.id_persona
+       WHERE r.id_registro = $1
+          OR r.id_persona = $1
+          OR p.id_persona = $1
+          OR p.cedula = $1
+          OR ($2 <> '' AND p.cedula = $2)
+       LIMIT 1`,
+      [cleanTarget, numericTarget]
+    );
+
     if (r.rows.length === 0) {
       await client.query('ROLLBACK');
       return res.status(404).json({ error: 'Servidor no encontrado.' });
     }
+
     const { id_registro, id_persona, id_contacto, id_educacion, id_estado } = r.rows[0];
-    await client.query('DELETE FROM rel_principal WHERE id_registro=$1', [id_registro]);
-    if (id_contacto) await client.query('DELETE FROM contactos WHERE id_contacto=$1', [id_contacto]);
-    if (id_educacion) await client.query('DELETE FROM educacion WHERE id_educacion=$1', [id_educacion]);
-    if (id_estado) await client.query('DELETE FROM estados WHERE id_estado=$1', [id_estado]);
-    if (id_persona) await client.query('DELETE FROM personas WHERE id_persona=$1', [id_persona]);
+
+    // 1. Eliminar la relación principal del servidor
+    await client.query('DELETE FROM rel_principal WHERE id_registro = $1', [id_registro]);
+
+    // 2. Eliminar contactos solo si ningún otro registro los referencia
+    if (id_contacto) {
+      const checkContacto = await client.query('SELECT 1 FROM rel_principal WHERE id_contacto = $1 LIMIT 1', [id_contacto]);
+      if (checkContacto.rows.length === 0) {
+        await client.query('DELETE FROM contactos WHERE id_contacto = $1', [id_contacto]);
+      }
+    }
+
+    // 3. Eliminar educacion solo si ningún otro registro la referencia
+    if (id_educacion) {
+      const checkEducacion = await client.query('SELECT 1 FROM rel_principal WHERE id_educacion = $1 LIMIT 1', [id_educacion]);
+      if (checkEducacion.rows.length === 0) {
+        await client.query('DELETE FROM educacion WHERE id_educacion = $1', [id_educacion]);
+      }
+    }
+
+    // 4. Eliminar persona solo si ningún otro registro la referencia
+    if (id_persona) {
+      const checkPersona = await client.query('SELECT 1 FROM rel_principal WHERE id_persona = $1 LIMIT 1', [id_persona]);
+      if (checkPersona.rows.length === 0) {
+        await client.query('DELETE FROM personas WHERE id_persona = $1', [id_persona]);
+      }
+    }
+
+    // 5. Los estados del catálogo base (EST001..EST005) NUNCA se eliminan.
+    // Solo si fuera un estado personalizado no perteneciente al catálogo se valida si está huérfano.
+    if (id_estado && !/^EST00[1-5]$/i.test(id_estado)) {
+      const checkEstado = await client.query('SELECT 1 FROM rel_principal WHERE id_estado = $1 LIMIT 1', [id_estado]);
+      if (checkEstado.rows.length === 0) {
+        await client.query('DELETE FROM estados WHERE id_estado = $1', [id_estado]);
+      }
+    }
+
     await client.query('COMMIT');
     res.json({ message: 'Servidor eliminado exitosamente.' });
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('[employees] delete error:', err.message);
-    res.status(500).json({ error: 'Error al eliminar el servidor.' });
+    res.status(500).json({ error: 'Error al eliminar el servidor: ' + err.message });
   } finally {
     client.release();
   }
