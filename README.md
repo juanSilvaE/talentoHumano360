@@ -1,185 +1,119 @@
-# 🏢 Talento 360 — Plataforma Institucional de Talento Humano
+# Talento 360 — Plataforma de Gestión de Talento Humano
 
-> **Sistema Web Institucional** para la administración integral de servidores públicos, solicitudes de vacaciones, trámites administrativos (permisos, incapacidades, licencias) y comisiones de viáticos, construido sobre una arquitectura modular de **microservicios** con **Docker** y **PostgreSQL**.
-
----
-
-## 📑 Tabla de Contenido
-1. [Arquitectura y Estructura del Proyecto](#-arquitectura-y-estructura-del-proyecto)
-2. [Requisitos Previos](#-requisitos-previos)
-3. [Cómo Ejecutar el Proyecto por Primera Vez](#-cómo-ejecutar-el-proyecto-por-primera-vez)
-4. [Usuarios, Roles y Permisos de Acceso](#-usuarios-roles-y-permisos-de-acceso)
-5. [¿Qué hacer cuando modificas un archivo del proyecto?](#-qué-hacer-cuando-modificas-un-archivo-del-proyecto)
-6. [Guía Paso a Paso de Git y GitHub](#-guía-paso-a-paso-de-git-y-github)
-7. [Comandos Útiles de Docker y Solución de Problemas](#-comandos-útiles-de-docker-y-solución-de-problemas)
+Plataforma web institucional para la administración integral de servidores públicos, solicitudes de vacaciones, trámites administrativos (permisos, incapacidades, licencias), comisiones de viáticos y modalidades de trabajo/horarios, implementada con una interfaz web SPA, microservicios en Node.js y base de datos PostgreSQL orquestados mediante Docker.
 
 ---
 
-## 🏛 Arquitectura y Estructura del Proyecto
+## Requisitos
 
-El proyecto opera bajo una arquitectura desacoplada de microservicios contenerizados, con **Nginx** actuando como servidor web del Frontend SPA y **API Gateway** hacia los servicios internos:
+Para ejecutar el proyecto en tu máquina únicamente necesitas tener instalado y en ejecución:
 
-```text
-talento360/
-├── web/
-│   ├── docker-compose.yml          # Orquestador maestro de contenedores
-│   ├── database/                   # Scripts SQL de inicialización y esquemas
-│   │   ├── 01_schema_and_data.sql  # Tablas principales, cargos, dependencias y usuarios
-│   │   ├── 03_new_modules.sql      # Tablas de viáticos, solicitudes admin e historial
-│   │   └── 04_horarios.sql         # Tablas de horarios, modalidades y trazabilidad
-│   ├── frontend/                   # Cliente Web SPA (HTML5, Vanilla CSS, JS Modular)
-│   │   └── src/
-│   │       ├── index.html          # Punto de entrada de la aplicación
-│   │       ├── css/                # Hojas de estilos (main, components, animations)
-│   │       └── js/                 # Lógica de la aplicación y módulos (horarios, viaticos, etc.)
-│   └── services/                   # Microservicios en Node.js / Express
-│       ├── auth-service/           # Autenticación JWT y validación de usuarios (Puerto 3001)
-│       ├── employees-service/      # Directorio de personal y hojas de vida (Puerto 3002)
-│       ├── requests-service/       # Solicitudes de Vacaciones (Puerto 3003)
-│       ├── admin-requests-service/ # Permisos, Incapacidades y Licencias (Puerto 3004)
-│       ├── viaticos-service/       # Comisiones y Viáticos (Puerto 3005)
-│       ├── dashboard-service/      # Analítica y métricas del sistema (Puerto 3006)
-│       └── horarios-service/       # Horarios y Modalidades de Trabajo (Puerto 3007)
-└── README.md
-```
+* **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** (con Docker Compose v2+)
+* **[Git](https://git-scm.com/)**
 
 ---
 
-## ⚙️ Requisitos Previos
+## Ejecutar desde cero
 
-Antes de iniciar, asegúrate de tener instalado en tu máquina:
-- **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** (Debe estar abierto y en ejecución).
-- **[Git](https://git-scm.com/)** para el control de versiones.
+Sigue estos pasos si acabas de clonar el repositorio o nunca has levantado el proyecto:
 
----
-
-## 🚀 Cómo Ejecutar el Proyecto por Primera Vez
-
-Sigue estos 3 sencillos pasos para levantar toda la plataforma desde cero:
-
-### 1. Clonar el repositorio y abrir terminal
+### 1. Clonar el repositorio y entrar a la carpeta de ejecución
+Abre una terminal y ejecuta:
 ```bash
 git clone https://github.com/juanSilvaE/talentoHumano360.git
 cd talentoHumano360/web
 ```
 
-### 2. Construir y levantar los contenedores de Docker
-Ejecuta el siguiente comando en la carpeta `web/`:
+### 2. Configurar variables de entorno (Solo la primera vez)
+Copia el archivo de ejemplo para crear tu archivo `.env`:
+
+* **En Windows (PowerShell):**
+  ```powershell
+  Copy-Item .env.example .env
+  ```
+* **En Linux / macOS / Git Bash:**
+  ```bash
+  cp .env.example .env
+  ```
+
+### 3. Construir y levantar todos los contenedores
+Ejecuta el siguiente comando dentro de la carpeta `web/`:
 ```bash
 docker compose up --build -d
 ```
-> **¿Qué hace este comando?**
-> - Crea la red interna `talento360_net`.
-> - Inicializa la base de datos **PostgreSQL** y ejecuta automáticamente los scripts de esquema y datos iniciales.
-> - Construye las imágenes de los 6 microservicios y del Frontend con Nginx.
-> - Deja todos los contenedores corriendo en segundo plano (`-d`).
+> Este comando crea la red interna, inicializa PostgreSQL ejecutando automáticamente los esquemas y datos iniciales en orden, compila los microservicios y levanta el servidor web Nginx en segundo plano.
 
-### 3. Abrir la aplicación en el navegador
-Ingresa a: **[http://localhost](http://localhost)**
+### 4. Abrir la aplicación
+Ingresa en tu navegador web a:
+👉 **[http://localhost](http://localhost)**
 
----
+### 5. Iniciar sesión
+Puedes ingresar con cualquiera de las credenciales de administrador precargadas:
 
-## 👥 Usuarios, Roles y Permisos de Acceso
-
-La plataforma cuenta con control de acceso basado en roles (**RBAC**). Puedes iniciar sesión usando el correo completo o solo el alias del usuario:
-
-| Usuario / Alias | Contraseña | Nombre del Funcionario | Rol | Nivel de Permisos |
-|---|---|---|---|---|
-| **`admin`**<br>`admin@boyaca.gov.co` | `admin123` | Administrador Maestro | **Administrador** | 🟢 **Acceso Total**: Crear, editar, eliminar, aprobar solicitudes y cambio rápido de estados con 1 clic. |
-| **`angela.ussa`**<br>`angela.ussa@boyaca.gov.co` | `@Angela123` | Angela Ussa | **Administrador** | 🟢 **Acceso Total**: Administradora principal institucional. Aparece como aprobador por defecto. |
-| **`carlos`**<br>`carlos@boyaca.gov.co` | `carlos123` | Carlos Andrés Torres | **Coordinador** | 🟡 **Intermedio**: Gestión operativa y revisión técnica. |
-| **`maria`**<br>`maria@boyaca.gov.co` | `maria123` | María Camila Rodríguez | **Consulta** | 🔴 **Solo Lectura**: No puede crear, editar ni cambiar estados (los botones de acción se ocultan automáticamente por seguridad). |
-
-> ℹ️ **¿Por qué Carlos y María tienen restricciones?**
-> - **María (`Consulta`)**: Está configurada intencionalmente con rol de solo lectura para auditorías o consultas informativas. Si inicias sesión con María, la interfaz oculta los botones de "Nuevo", "Editar", "Eliminar" y la interacción de cambio de estados.
-> - **Para pruebas y administración completa**, usa siempre las cuentas de **`admin`** o **`angela.ussa`**.
+| Usuario / Alias | Contraseña | Rol |
+|---|---|---|
+| `admin` o `admin@boyaca.gov.co` | `admin123` | Administrador |
+| `angela.ussa` o `angela.ussa@boyaca.gov.co` | `@Angela123` | Administrador |
 
 ---
 
-## 🔄 ¿Qué hacer cuando modificas un archivo del proyecto?
+## Ejecutar después de realizar cambios
 
-Cada vez que hagas un cambio en los archivos de frontend (`.html`, `.css`, `.js`), en los microservicios o en los scripts de base de datos, debes seguir estos dos pasos para ver reflejados los cambios:
+Una vez que el proyecto ya fue configurado y levantado previamente, utiliza el flujo adecuado según el tipo de cambio que hayas realizado:
 
-### 1. Reconstruir los contenedores con Docker
-Ubícate en la carpeta `web/` en tu terminal y ejecuta:
+### Si modificaste archivos de Frontend (`.html`, `.css`, `.js`)
+La carpeta `frontend/src/` está montada directamente como volumen en el contenedor. **No es necesario reconstruir los contenedores.**
+1. Guarda tus cambios en el editor.
+2. Ve al navegador y recarga forzando la limpieza de caché con **`Ctrl + F5`** (o **`Shift + F5`** / **`Cmd + Shift + R`** en Mac).
+
+### Si modificaste código de los Microservicios (`services/`) o agregaste dependencias
+El código de los servicios se empaqueta en las imágenes de Docker. Debes recompilar los servicios modificados:
+* **Recompilar todos los servicios:**
+  ```bash
+  docker compose up --build -d
+  ```
+* **Recompilar un solo servicio específico (ejemplo: employees-service):**
+  ```bash
+  docker compose up --build -d employees-service
+  ```
+
+### Si modificaste la configuración del servidor web (`frontend/nginx.conf`)
+Basta con reiniciar el contenedor del frontend:
 ```bash
-cd web
+docker compose restart frontend
+```
+
+### Si necesitas reiniciar la base de datos desde cero
+Si modificaste los scripts SQL de `database/` y deseas reconstruir la base de datos limpia con todos los esquemas iniciales:
+> ⚠️ **Atención:** Este comando borrará los datos creados localmente en la base de datos.
+```bash
+docker compose down -v
 docker compose up --build -d
 ```
-> Docker detectará únicamente los archivos modificados, reconstruirá las capas necesarias en pocos segundos y reiniciará los contenedores sin perder los datos de la base de datos.
 
-### 2. Recargar el navegador limpiando la caché
-Los navegadores guardan en memoria los archivos `.js` y `.css`. Para forzar la carga de la nueva versión:
-- Presiona **`Ctrl + F5`** (o **`Shift + F5`** / **`Ctrl + Shift + R`**).
-
----
-
-## 🌿 Guía Paso a Paso de Git y GitHub
-
-Sigue este flujo estándar cada vez que desees guardar tus cambios y enviarlos al repositorio remoto en GitHub:
-
-### Paso 1: Ubicarte en la raíz del proyecto
-Asegúrate de estar en la carpeta principal `talentoHumano360`:
-```bash
-cd c:\Users\TuUsuario\Desktop\talento360\talentoHumano360
-```
-
-### Paso 2: Revisar qué archivos se modificaron
-```bash
-git status
-```
-
-### Paso 3: Preparar todos los cambios (Staging)
-```bash
-git add .
-```
-
-### Paso 4: Confirmar los cambios con un mensaje claro (Commit)
-```bash
-git commit -m "feat: descripción clara de los cambios realizados"
-```
-
-### Paso 5: Descargar cambios remotos (Buena práctica para evitar conflictos)
-```bash
-git pull origin main
-```
-
-### Paso 6: Enviar los cambios a GitHub (Push)
-```bash
-git push origin main
-```
-
-> 💡 **En Windows PowerShell**: Si deseas ejecutar todo en una sola línea, usa punto y coma (`;`):
-> ```powershell
-> git add . ; git commit -m "mejoras al sistema" ; git push origin main
-> ```
+### Iniciar y detener el proyecto día a día (sin cambios de código)
+* **Para pausar/detener el proyecto:**
+  ```bash
+  docker compose stop
+  ```
+* **Para volver a iniciarlo:**
+  ```bash
+  docker compose start
+  ```
 
 ---
 
-## 🛠 Comandos Útiles de Docker y Solución de Problemas
+## Comandos principales
 
-| Acción | Comando (ejecutar dentro de `web/`) |
+Todos estos comandos deben ejecutarse desde la carpeta `web/`:
+
+| Acción | Comando |
 |---|---|
-| **Ver estado de los contenedores** | `docker compose ps` |
-| **Ver logs en tiempo real de todos los servicios** | `docker compose logs -f` |
-| **Ver logs de un servicio específico** | `docker compose logs -f viaticos-service` |
-| **Reiniciar los contenedores sin reconstruir** | `docker compose restart` |
-| **Detener la aplicación** | `docker compose down` |
-| **Reinicio completo desde cero (reset de BD)** | `docker compose down -v` luego `docker compose up --build -d` |
-| **Verificar salud de la base de datos PostgreSQL** | `docker exec -it talento360_db pg_isready -U postgres` |
-
----
-
-### 🌟 Resumen de Módulos Implementados en Talento 360:
-1. 📊 **Dashboard Ejecutivo**: Estadísticas en tiempo real, distribución de personal y gráficos dinámicos.
-2. 👥 **Servidores Públicos**: Directorio institucional con búsqueda inteligente y gestión de expedientes.
-3. 🏖️ **Solicitudes de Vacaciones**: Radicación, cálculo de días, periodos y cambio rápido de estados (1 clic).
-4. 📋 **Solicitudes Administrativas**: Gestión de permisos laborales, incapacidades médicas y licencias institucionales.
-5. ✈️ **Viáticos y Comisiones**:
-   - Autocompletado de servidor (cédula, cargo y dependencia).
-   - Selector geográfico nacional (32 departamentos y municipios de Colombia) e internacional.
-   - Cálculo automático de días según fechas de inicio y fin.
-   - Cálculo del valor total en COP en vivo.
-   - Asignación automática de aprobador activo al aprobar.
-   - Carga y visor integrado de soportes/facturas adjuntas (PDF/PNG/JPG).
-   - Cambio rápido de estados directamente desde la tabla.
+| **Levantar todo en segundo plano** | `docker compose up -d` |
+| **Recompilar y levantar tras cambios** | `docker compose up --build -d` |
+| **Detener contenedores (manteniendo datos)** | `docker compose stop` |
+| **Reanudar contenedores detenidos** | `docker compose start` |
+| **Apagar y desmontar contenedores** | `docker compose down` |
+| **Ver estado de los servicios** | `docker compose ps` |
+| **Ver registros/logs en tiempo real** | `docker compose logs -f` |
+| **Ver logs de un servicio puntual** | `docker compose logs -f <nombre-servicio>` |

@@ -2,11 +2,23 @@
 .env
 web/.env
 
-# Node modules
+# Node modules (recursivo)
+**/node_modules/
 node_modules/
 
 # Scratch & temporary test scripts
 scratch/
 web/scratch/
+
+# Database dumps and backups
+database/backups/
 database/backup_*.sql
 *.sql.bak
+
+# IDE and Editor configs
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
