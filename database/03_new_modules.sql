@@ -78,22 +78,4 @@ CREATE TABLE IF NOT EXISTS historial_viaticos (
     fecha_actualizacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- ─── Datos de ejemplo para solicitudes_admin ──────────────────────────────────
-INSERT INTO solicitudes_admin (tipo, dependencia, apellidos_nombres, documento, cargo, fecha_inicio, fecha_fin, dias_solicitados, motivo, estado, fecha_solicitud)
-VALUES
-  ('Permiso Laboral', 'SECRETARÍA DE HACIENDA', 'GARCIA MARTINEZ LUIS FERNANDO', '79850123', 'PROFESIONAL UNIVERSITARIO', '15/05/2026', '15/05/2026', 1, 'Diligencia personal urgente', 'Aprobada', '10/05/2026'),
-  ('Permiso Laboral', 'SECRETARÍA DE EDUCACIÓN', 'RODRIGUEZ PEÑA MARIA ELENA', '52741236', 'AUXILIAR ADMINISTRATIVO', '20/05/2026', '21/05/2026', 2, 'Cita médica especializada', 'Pendiente', '18/05/2026'),
-  ('Incapacidad', 'SECRETARÍA DE SALUD', 'HERNANDEZ TORRES CARLOS ARTURO', '80125478', 'MÉDICO ESPECIALISTA', '01/06/2026', '15/06/2026', 15, 'Recuperación postoperatoria', 'Aprobada', '02/06/2026'),
-  ('Incapacidad', 'SECRETARÍA DE OBRAS PÚBLICAS', 'MORALES JIMENEZ ANA PATRICIA', '46782314', 'INGENIERA CIVIL', '10/06/2026', '20/06/2026', 10, 'Fractura de tobillo', 'En revisión', '11/06/2026'),
-  ('Licencia', 'SECRETARÍA DE GOBIERNO', 'VARGAS SANTOS DIANA CAROLINA', '52963147', 'ABOGADA CONTRATISTA', '01/07/2026', '31/10/2026', 122, 'Licencia de maternidad', 'Aprobada', '25/06/2026'),
-  ('Licencia', 'SECRETARÍA DE PLANEACIÓN', 'CASTRO BERMUDEZ JORGE ANDRES', '1047852369', 'ARQUITECTO', '15/07/2026', '14/08/2026', 30, 'Licencia de estudio - especialización', 'Pendiente', '01/07/2026')
-ON CONFLICT DO NOTHING;
-
--- ─── Datos de ejemplo para viáticos ──────────────────────────────────────────
-INSERT INTO viaticos (dependencia, apellidos_nombres, documento, cargo, destino, motivo, fecha_inicio, fecha_fin, dias, valor_diario, estado, fecha_solicitud)
-VALUES
-  ('SECRETARÍA DE HACIENDA', 'GARCIA MARTINEZ LUIS FERNANDO', '79850123', 'PROFESIONAL UNIVERSITARIO', 'BOGOTÁ D.C.', 'Capacitación en gestión tributaria - DIAN', '20/05/2026', '22/05/2026', 3, 120000, 'Aprobada', '15/05/2026'),
-  ('SECRETARÍA DE EDUCACIÓN', 'RODRIGUEZ PEÑA MARIA ELENA', '52741236', 'AUXILIAR ADMINISTRATIVO', 'MEDELLÍN, ANTIOQUIA', 'Congreso nacional de educación pública', '10/06/2026', '13/06/2026', 4, 135000, 'En revisión', '05/06/2026'),
-  ('SECRETARÍA DE SALUD', 'HERNANDEZ TORRES CARLOS ARTURO', '80125478', 'MÉDICO ESPECIALISTA', 'BUCARAMANGA, SANTANDER', 'Simposio de salud pública regional', '05/07/2026', '07/07/2026', 3, 150000, 'Pendiente', '28/06/2026'),
-  ('SECRETARÍA DE GOBIERNO', 'VARGAS SANTOS PEDRO JOSE', '1098745236', 'SECRETARIO DE DESPACHO', 'CARTAGENA, BOLÍVAR', 'Reunión de gobernadores - Fondo de Regiones', '15/07/2026', '17/07/2026', 3, 200000, 'Aprobada', '10/07/2026')
-ON CONFLICT DO NOTHING;
+-- Tablas transaccionales de viaticos y solicitudes_admin inician vacías para producción.

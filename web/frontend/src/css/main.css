@@ -56,6 +56,8 @@
   --color-surface:   #ffffff;
   --color-surface-2: #f8fafc;
   --color-surface-3: #f1f5f9;
+  --bg-surface:      #ffffff;
+  --bg-surface-elevated: #f8fafc;
   --color-border:    #e2e8f0;
   --color-border-2:  var(--color-slate);
 
@@ -2147,6 +2149,8 @@ body {
   --color-surface:   #061a29;
   --color-surface-2: #0a253a;
   --color-surface-3: #0f324e;
+  --bg-surface:      #061a29;
+  --bg-surface-elevated: #0a253a;
   --color-border:    rgba(115, 137, 147, 0.28);
   --color-border-2:  var(--color-slate);
 

@@ -118,7 +118,7 @@ const ExcelService = (() => {
     overlay.id = 'excel-import-modal-overlay';
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
-      <div class="modal-card excel-modal-card" style="max-width: 820px; width: 95%;">
+      <div class="modal-box excel-modal-card" style="max-width: 820px; width: 95%;">
         <div class="modal-header">
           <div class="modal-header-info">
             <h2 class="modal-title" style="display:flex; align-items:center; gap:8px;">

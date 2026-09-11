@@ -2,7 +2,7 @@
 const multer = require('multer');
 const XLSX = require('xlsx');
 const { mapRowToFuncionarioDTO } = require('../dto/funcionarioExcelDTO');
-const { evaluarCedula, esFilaFantasma, detectarVacante } = require('../utils/excelHelper');
+const { evaluarCedula, esFilaFantasma, detectarVacante, extraerCargoExcel } = require('../utils/excelHelper');
 const EmployeeImportService = require('../services/employeeImportService');
 
 // Configuración de Multer para carga en memoria (hasta 35MB)
@@ -28,6 +28,55 @@ const upload = multer({
 });
 
 const uploadAny = upload.fields([{ name: 'archivo', maxCount: 1 }, { name: 'file', maxCount: 1 }]);
+
+/**
+ * Detecta las posiciones de columnas de cargo, código y grado en la hoja de cálculo.
+ * Prioriza la segunda aparición (Columna F, G, H) como cargo actual/desempeño,
+ * y la primera aparición (Columna A, B, C) como cargo nominal/base.
+ */
+function detectarMapeoCargos(worksheet) {
+  if (!worksheet || !worksheet['!ref']) {
+    return { colCargoNominal: 0, colCodNominal: 1, colGraNominal: 2, colCargoActual: 5, colCodActual: 6, colGraActual: 7 };
+  }
+  const range = XLSX.utils.decode_range(worksheet['!ref']);
+  const cargoCols = [];
+  const codCols = [];
+  const graCols = [];
+  let explicitActualCargo = null;
+  let explicitActualCod = null;
+  let explicitActualGra = null;
+
+  for (let C = range.s.c; C <= range.e.c; ++C) {
+    const cell = worksheet[XLSX.utils.encode_cell({ r: range.s.r, c: C })];
+    const val = String(cell?.v || '').trim().toUpperCase();
+    if (val.includes('CARGO ACTUAL') || val.includes('DENOMINACIÓN ACTUAL') || val.includes('DENOMINACION ACTUAL')) {
+      explicitActualCargo = C;
+    } else if (val.includes('DENOMINAC') || val === 'CARGO') {
+      cargoCols.push(C);
+    }
+
+    if (val.includes('COD') && val.includes('ACTUAL')) {
+      explicitActualCod = C;
+    } else if (val.startsWith('COD') || val.includes('CÓDIGO') || val.includes('CODIGO')) {
+      codCols.push(C);
+    }
+
+    if (val.includes('GRA') && val.includes('ACTUAL')) {
+      explicitActualGra = C;
+    } else if (val.startsWith('GRA') || val.includes('GRADO')) {
+      graCols.push(C);
+    }
+  }
+
+  return {
+    colCargoNominal: cargoCols[0] !== undefined ? cargoCols[0] : 0,
+    colCodNominal: codCols[0] !== undefined ? codCols[0] : 1,
+    colGraNominal: graCols[0] !== undefined ? graCols[0] : 2,
+    colCargoActual: explicitActualCargo !== null ? explicitActualCargo : (cargoCols.length > 1 ? cargoCols[1] : (cargoCols[0] !== undefined ? cargoCols[0] : 5)),
+    colCodActual: explicitActualCod !== null ? explicitActualCod : (codCols.length > 1 ? codCols[1] : (codCols[0] !== undefined ? codCols[0] : 6)),
+    colGraActual: explicitActualGra !== null ? explicitActualGra : (graCols.length > 1 ? graCols[1] : (graCols[0] !== undefined ? graCols[0] : 7)),
+  };
+}
 const uploadMiddleware = (req, res, next) => {
   uploadAny(req, res, (err) => {
     if (err) return next(err);
@@ -126,6 +175,9 @@ async function importarExcel(req, res, pool) {
       const worksheet = workbook.Sheets[sheetName];
       if (!worksheet) continue;
 
+      const colMap = detectarMapeoCargos(worksheet);
+      const range = worksheet['!ref'] ? XLSX.utils.decode_range(worksheet['!ref']) : { s: { r: 0, c: 0 } };
+
       const rawRows = XLSX.utils.sheet_to_json(worksheet, { defval: null });
       if (!rawRows || rawRows.length === 0) {
         desglosePorHoja[sheetName] = {
@@ -150,6 +202,32 @@ async function importarExcel(req, res, pool) {
         const rowNumber = idx + 2; // +2 considerando encabezado en fila 1
         totalFilasLeidas++;
 
+        // Enriquecer rawRow con las celdas directas por coordenadas para garantizar que Col F, G, H siempre se tomen
+        const actualSheetRow = range.s.r + 1 + idx;
+        const getCellVal = (c) => {
+          if (c === undefined || c === null) return null;
+          const cell = worksheet[XLSX.utils.encode_cell({ r: actualSheetRow, c })];
+          if (cell && cell.v !== undefined && cell.v !== null) {
+            const s = String(cell.v).trim();
+            return s !== '' ? s : null;
+          }
+          return null;
+        };
+
+        const cellCargoActual = getCellVal(colMap.colCargoActual);
+        const cellCodActual = getCellVal(colMap.colCodActual);
+        const cellGraActual = getCellVal(colMap.colGraActual);
+        const cellCargoNominal = getCellVal(colMap.colCargoNominal);
+        const cellCodNominal = getCellVal(colMap.colCodNominal);
+        const cellGraNominal = getCellVal(colMap.colGraNominal);
+
+        if (cellCargoActual) rawRow['__CARGO_ACTUAL__'] = cellCargoActual;
+        if (cellCodActual) rawRow['__CODIGO_ACTUAL__'] = cellCodActual;
+        if (cellGraActual) rawRow['__GRADO_ACTUAL__'] = cellGraActual;
+        if (cellCargoNominal) rawRow['__CARGO_NOMINAL__'] = cellCargoNominal;
+        if (cellCodNominal) rawRow['__CODIGO_NOMINAL__'] = cellCodNominal;
+        if (cellGraNominal) rawRow['__GRADO_NOMINAL__'] = cellGraNominal;
+
         // A. Detección y descarte de "Filas Fantasma" (espacios al final, celdas combinadas vacías)
         if (esFilaFantasma(rawRow)) {
           filasFantasmaOmitidas++;
@@ -163,7 +241,7 @@ async function importarExcel(req, res, pool) {
         const apellido2 = String(rawRow['SEGUNDO APELLIDO'] || '').trim();
         const nombreCompleto = [apellido1, apellido2, nombres].filter(Boolean).join(' ').trim() ||
           String(rawRow['NOMBRE COMPLETO'] || rawRow['FUNCIONARIO'] || '').trim();
-        const cargo = String(rawRow['DENOMINACIÓN CARGO'] || rawRow['DENOMINACION CARGO'] || rawRow['CARGO'] || '').trim();
+        const cargo = extraerCargoExcel(rawRow);
         const dependencia = String(rawRow['DEPENDENCIA'] || rawRow['AREA'] || '').trim();
 
         const tieneDatosFuncionario = Boolean(nombreCompleto || cargo || dependencia);

@@ -690,13 +690,13 @@ const EmployeesModule = (() => {
 
               <div class="ficha-card">
                 <div class="ficha-card-top">
-                  <div class="ficha-card-icon">🏷</div>
+                  <div class="ficha-card-icon">🏷️</div>
                   <span class="ficha-card-label">Nivel, Código y Grado</span>
                 </div>
                 <div class="ficha-card-val font-mono">
                   Cód. <strong>${escHtml(emp.codigoActual || 'N/A')}</strong> • Grado <strong>${escHtml(emp.gradoActual || 'N/A')}</strong>
                 </div>
-                ${emp.codigoBase ? `
+                ${(emp.codigoBase && (emp.codigoBase !== emp.codigoActual || emp.gradoBase !== emp.gradoActual)) ? `
                   <div class="ficha-card-sub">Base: Cód. ${escHtml(emp.codigoBase)} • Grado ${escHtml(emp.gradoBase)}</div>
                 ` : ''}
               </div>
@@ -766,7 +766,7 @@ const EmployeesModule = (() => {
 
               <div class="ficha-card ficha-card--emerald">
                 <div class="ficha-card-top">
-                  <div class="ficha-card-icon">⏱</div>
+                  <div class="ficha-card-icon">⏱️</div>
                   <span class="ficha-card-label">Tiempo de Servicio Actual</span>
                 </div>
                 <div class="ficha-card-val" style="color: #10b981; font-weight:800;">
@@ -882,9 +882,8 @@ const EmployeesModule = (() => {
                   <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                     <span style="font-size:12px; font-weight:700; color:var(--text-muted); min-width:90px;">Institucional:</span>
                     ${emp.correo ? `
-                      <a href="mailto:${escHtml(emp.correo)}" class="ficha-contact-link">
-                        <svg style="width:13px;height:13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                        ${escHtml(emp.correo)}
+                      <a href="mailto:${escHtml(emp.correo)}" class="ficha-contact-link" title="Escribir correo institucional">
+                        ✉️ ${escHtml(emp.correo)}
                       </a>
                       <button class="ficha-copy-btn" id="btn-copy-mail-inst" onclick="EmployeesModule.copyFichaText('${escHtml(emp.correo)}', 'btn-copy-mail-inst')" title="Copiar correo">
                         Copiar
@@ -895,20 +894,33 @@ const EmployeesModule = (() => {
                   <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                     <span style="font-size:12px; font-weight:700; color:var(--text-muted); min-width:90px;">Personal:</span>
                     ${emp.correoPersonal ? `
-                      <a href="mailto:${escHtml(emp.correoPersonal)}" class="ficha-contact-link">
-                        <svg style="width:13px;height:13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                        ${escHtml(emp.correoPersonal)}
+                      <a href="mailto:${escHtml(emp.correoPersonal)}" class="ficha-contact-link" title="Escribir correo personal">
+                        📧 ${escHtml(emp.correoPersonal)}
                       </a>
                     ` : '<span style="color:var(--text-muted); font-size:12px;">No registrado</span>'}
                   </div>
 
                   <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                    <span style="font-size:12px; font-weight:700; color:var(--text-muted); min-width:90px;">Celulares:</span>
-                    ${(Array.isArray(emp.celulares) && emp.celulares.length)
-          ? emp.celulares.map(c => `<a href="tel:${escHtml(c)}" class="ficha-contact-link">📱 ${escHtml(c)}</a>`).join('')
-          : (emp.celular ? `<a href="tel:${escHtml(emp.celular)}" class="ficha-contact-link">📱 ${escHtml(emp.celular)}</a>` : '<span style="color:var(--text-muted); font-size:12px;">No registrado</span>')
-        }
-                    ${emp.telefonoFijo ? `<span class="ficha-card-sub" style="margin-left:8px;">☎ Tel. Fijo: <strong>${escHtml(emp.telefonoFijo)}</strong></span>` : ''}
+                    <span style="font-size:12px; font-weight:700; color:var(--text-muted); min-width:90px;">Teléfonos:</span>
+                    ${(() => {
+                      const telFijoClean = (emp.telefonoFijo || '').trim();
+                      const hasTelFijo = telFijoClean && !['NO REGISTRADO', 'NO REPORTADO', 'N/A', 'NONE', 'NULL', '0', '-', '.'].includes(telFijoClean.toUpperCase());
+                      const celulares = (Array.isArray(emp.celulares) && emp.celulares.length)
+                        ? emp.celulares.filter(c => c && !['NO REGISTRADO', 'NO REPORTADO', 'N/A'].includes(c.toUpperCase()))
+                        : (emp.celular && !['NO REGISTRADO', 'NO REPORTADO', 'N/A'].includes(emp.celular.toUpperCase()) ? [emp.celular] : []);
+
+                      const pills = [];
+                      celulares.forEach(c => {
+                        pills.push(`<a href="tel:${escHtml(c)}" class="ficha-contact-link" title="Llamar: ${escHtml(c)}">📱 ${escHtml(c)}</a>`);
+                      });
+                      if (hasTelFijo) {
+                        pills.push(`<a href="tel:${escHtml(telFijoClean)}" class="ficha-contact-link ficha-contact-link--fijo" title="Llamar: ${escHtml(telFijoClean)}">☎️ ${escHtml(telFijoClean)}</a>`);
+                      }
+
+                      return pills.length > 0
+                        ? pills.join('')
+                        : '<span style="color:var(--text-muted); font-size:12px;">No registrado</span>';
+                    })()}
                   </div>
 
                   <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:2px;">
@@ -2017,40 +2029,75 @@ const EmployeesModule = (() => {
   /**
    * Regla 7: Para la función de descarga a Excel, el sistema debe exportarlo en dos columnas:
    * una casilla para los "Apellidos" (ambos) y otra casilla para los "Nombres" (ambos).
+   * Se exportan la totalidad de los datos y dimensiones gestionados en la plataforma.
    */
   const EXCEL_COLUMNS = [
-    { header: 'Apellidos', key: 'apellidos', width: 25, sample: 'PEREZ RODRIGUEZ' },
-    { header: 'Nombres', key: 'nombres', width: 25, sample: 'JUAN CARLOS' },
-    { header: 'Cédula', key: 'cedula', width: 16, sample: '1049601234' },
-    { header: 'Estado Servidor', key: 'estadoServidor', width: 16, sample: 'Activo' },
-    { header: 'Dependencia', key: 'dependencia', width: 30, sample: 'SECRETARÍA DE HACIENDA' },
-    { header: 'Denominación Cargo', key: 'cargoActual', width: 28, sample: 'PROFESIONAL UNIVERSITARIO' },
-    { header: 'Código Cargo', key: 'codigoActual', width: 14, sample: '219' },
-    { header: 'Grado', key: 'gradoActual', width: 10, sample: '03' },
-    { header: 'Municipio Expedición', key: 'municipioExpedicion', width: 22, sample: 'TUNJA' },
-    { header: 'Depto. Expedición', key: 'departamentoExpedicion', width: 20, sample: 'BOYACÁ' },
-    { header: 'Tipo de Sangre', key: 'tipoSangre', width: 14, sample: 'O+' },
+    // ── 1. Identificación Personal ──
+    { header: 'Apellidos', key: 'apellidos', width: 24, sample: 'PEREZ RODRIGUEZ' },
+    { header: 'Primer Apellido', key: 'primerApellido', width: 20, sample: 'PEREZ' },
+    { header: 'Segundo Apellido', key: 'segundoApellido', width: 20, sample: 'RODRIGUEZ' },
+    { header: 'Nombres', key: 'nombres', width: 24, sample: 'JUAN CARLOS' },
+    { header: 'Nombre Completo', key: 'nombreCompleto', width: 32, sample: 'JUAN CARLOS PEREZ RODRIGUEZ' },
+    { header: 'Cédula / Documento', key: 'cedula', width: 18, sample: '1049601234' },
+    { header: 'Cédula Formato Visual', key: 'cedulaVisual', width: 20, sample: '1.049.601.234' },
+    { header: '¿Doc. Pendiente?', key: 'documento_pendiente', width: 16, sample: 'NO' },
+    { header: '¿Es Plaza Vacante?', key: 'es_vacante', width: 18, sample: 'NO' },
+    { header: 'Código Plaza Vacante', key: 'codigoVacante', width: 22, sample: 'PLAZA VACANTE 0001' },
     { header: 'Sexo', key: 'sexo', width: 14, sample: 'MASCULINO' },
-    { header: 'Edad', key: 'edadCalculada', width: 24, sample: '32 años, 5 meses, 10 días' },
-    { header: 'Tiempo de Servicio', key: 'tiempoServicioCalculado', width: 24, sample: '6 años, 2 meses, 4 días' },
-    { header: 'Otro Tiempo con la Gobernación', key: 'otroTiempoGobernacion', width: 30, sample: '2 años, 1 meses, 15 días' },
-    { header: 'Tiempo Total en la Gobernación', key: 'tiempoTotalGobernacion', width: 30, sample: '8 años, 3 meses, 19 días' },
-    { header: 'Situación', key: 'situacion', width: 18, sample: 'ACTIVO' },
-    { header: 'Funciones', key: 'funciones', width: 24, sample: '01' },
-    { header: 'OPEC', key: 'opec', width: 14, sample: '12345' },
-    { header: 'Celulares', key: 'celularesStr', width: 28, sample: '3101234567 / 3209876543' },
-    { header: 'Teléfono Fijo', key: 'telefonoFijo', width: 16, sample: '7401234' },
-    { header: 'Correo Institucional', key: 'correo', width: 28, sample: 'juan.perez@boyaca.gov.co' },
-    { header: 'Correo Personal', key: 'correoPersonal', width: 28, sample: 'juanperez@gmail.com' }
+    { header: 'Tipo de Sangre (RH)', key: 'tipoSangre', width: 16, sample: 'O+' },
+    { header: 'Tipo de Discapacidad', key: 'tipoDiscapacidad', width: 22, sample: 'VISUAL / NINGUNA' },
+    { header: 'Fecha de Nacimiento', key: 'fechaNacimiento', width: 18, sample: '1985-05-15' },
+    { header: 'Edad Calculada', key: 'edadCalculada', width: 26, sample: '38 años, 9 meses, 20 días' },
+    { header: 'Depto. Expedición', key: 'departamentoExpedicion', width: 20, sample: 'BOYACÁ' },
+    { header: 'Municipio Expedición', key: 'municipioExpedicion', width: 22, sample: 'TUNJA' },
+
+    // ── 2. Información Laboral e Institucional ──
+    { header: 'Estado Servidor', key: 'estadoServidor', width: 16, sample: 'Activo' },
+    { header: 'Situación Administrativa', key: 'situacion', width: 22, sample: 'ACTIVO' },
+    { header: 'Dependencia / Secretaría', key: 'dependencia', width: 34, sample: 'SECRETARÍA DE HACIENDA' },
+    { header: 'Denominación Cargo Actual', key: 'cargoActual', width: 32, sample: 'PROFESIONAL UNIVERSITARIO' },
+    { header: 'Código Cargo Actual', key: 'codigoActual', width: 18, sample: '219' },
+    { header: 'Grado Cargo Actual', key: 'gradoActual', width: 16, sample: '03' },
+    { header: 'Cargo Base / Titular', key: 'cargoBase', width: 30, sample: 'TÉCNICO OPERATIVO' },
+    { header: 'Código Cargo Base', key: 'codigoBase', width: 16, sample: '314' },
+    { header: 'Grado Cargo Base', key: 'gradoBase', width: 14, sample: '01' },
+    { header: 'Clasificación Empleo', key: 'clasificacionEmpleo', width: 28, sample: 'CARRERA ADMINISTRATIVA' },
+    { header: 'Fecha de Ingreso', key: 'fechaIngreso', width: 18, sample: '2018-02-01' },
+    { header: 'Tiempo Servicio Cargo Actual', key: 'tiempoServicioCalculado', width: 28, sample: '6 años, 2 meses, 4 días' },
+    { header: 'Fecha de Encargo', key: 'fechaEncargo', width: 18, sample: '2021-06-15' },
+    { header: 'Otro Tiempo Gobernación', key: 'otroTiempoGobernacion', width: 26, sample: '2 años, 1 meses, 15 días' },
+    { header: 'Otro Tiempo Calculado', key: 'otroTiempoCalculado', width: 26, sample: '2 años, 1 meses, 15 días' },
+    { header: 'Detalle Periodos Previos', key: 'periodosPrevios', width: 36, sample: '2015-01-01 a 2017-06-30' },
+    { header: 'Tiempo Total en la Gobernación', key: 'tiempoTotalGobernacion', width: 32, sample: '8 años, 3 meses, 19 días' },
+    { header: 'Funciones del Cargo', key: 'funciones', width: 22, sample: '01' },
+    { header: 'Código OPEC', key: 'opec', width: 16, sample: '12345' },
+
+    // ── 3. Formación Académica y Certificaciones ──
+    { header: 'Nivel / Título Profesional', key: 'estudios', width: 30, sample: 'ADMINISTRACIÓN DE EMPRESAS' },
+    { header: 'Institución de Estudios', key: 'institucionEstudios', width: 28, sample: 'UPTC' },
+    { header: 'Matrícula Profesional', key: 'matriculaProfesional', width: 22, sample: 'TP-123456' },
+    { header: 'Postgrado / Especialización', key: 'postgrado', width: 30, sample: 'GERENCIA PÚBLICA' },
+    { header: 'Institución de Postgrado', key: 'institucionPostgrado', width: 28, sample: 'ESAP' },
+    { header: '¿Tiene Diplomado / Cap. SENA?', key: 'tieneDiplomado', width: 24, sample: 'SÍ' },
+    { header: 'Diplomado / Cap. SENA Realizada', key: 'diplomadoCapSena', width: 32, sample: 'MIPG Y CONTRATACIÓN ESTATAL' },
+
+    // ── 4. Contacto y Localización ──
+    { header: 'Teléfonos Celulares', key: 'celularesStr', width: 30, sample: '3101234567 / 3209876543' },
+    { header: 'Teléfono Fijo', key: 'telefonoFijo', width: 18, sample: '7401234' },
+    { header: 'Correo Institucional', key: 'correo', width: 30, sample: 'juan.perez@boyaca.gov.co' },
+    { header: 'Correo Personal', key: 'correoPersonal', width: 30, sample: 'juanperez@gmail.com' },
+    { header: 'Dirección de Residencia', key: 'direccion', width: 30, sample: 'CALLE 20 # 10-40' },
+    { header: 'Ciudad de Residencia', key: 'ciudad', width: 22, sample: 'TUNJA' },
+    { header: 'Novedades / Observaciones', key: 'novedades', width: 35, sample: 'SIN NOVEDAD' }
   ];
 
   async function exportExcel() {
     try {
-      App.showToast('Generando archivo Excel con las 22 reglas de negocio...', 'info');
+      App.showToast('Generando archivo Excel con todos los datos de la plataforma...', 'info');
       const res = await API.getEmployees({ q: state.q, page: 1, limit: 10000 });
       const recordsRaw = res.data || state.data;
 
-      // Desagregación estricta de Apellidos y Nombres (Regla 7)
+      // Mapeo exhaustivo de todos los campos de la plataforma
       const records = recordsRaw.map(e => {
         let apellidos = e.apellidos;
         let nombres = e.nombres;
@@ -2061,13 +2108,81 @@ const EmployeesModule = (() => {
         }
         const celularesStr = (Array.isArray(e.celulares) && e.celulares.length)
           ? e.celulares.join(' / ')
-          : (e.celular || '');
+          : (e.celular || '—');
+
+        // Formatear tipo de discapacidad
+        let disc = e.tipoDiscapacidad ? String(e.tipoDiscapacidad).trim() : '';
+        if (!disc || disc.toLowerCase() === 'ninguna' || disc.toLowerCase() === 'ninguno') {
+          disc = 'NINGUNA';
+        } else {
+          disc = disc.toUpperCase();
+        }
+
+        // Formatear periodos de experiencia previa si existen
+        let periodosPrevios = '—';
+        if (Array.isArray(e.otroTiempoPeriodos) && e.otroTiempoPeriodos.length) {
+          periodosPrevios = e.otroTiempoPeriodos.map(p => {
+            const fIni = p.fechaInicio || p.inicio || '';
+            const fFin = p.fechaFin || p.fin || '';
+            const dif = p.tiempoCalculado || p.duracion || '';
+            return `${fIni} a ${fFin}${dif ? ' (' + dif + ')' : ''}`;
+          }).join('; ');
+        } else if (e.otroTiempoGobernacion && e.otroTiempoGobernacion !== '0 años, 0 meses, 0 días') {
+          periodosPrevios = e.otroTiempoGobernacion;
+        }
 
         return {
           ...e,
-          apellidos: apellidos || '—',
-          nombres: nombres || '—',
-          celularesStr
+          apellidos: apellidos || (e.es_vacante ? 'VACANTE' : '—'),
+          primerApellido: e.primerApellido || (e.es_vacante ? 'VACANTE' : '—'),
+          segundoApellido: e.segundoApellido || (e.es_vacante ? '' : '—'),
+          nombres: nombres || (e.es_vacante ? 'PLAZA VACANTE' : '—'),
+          nombreCompleto: e.nombreCompleto || '—',
+          cedula: e.cedula || (e.es_vacante ? 'PLAZA VACANTE' : 'SIN CÉDULA'),
+          cedulaVisual: e.cedulaVisual || (e.es_vacante ? 'PLAZA VACANTE' : (e.cedula || '—')),
+          documento_pendiente: e.documento_pendiente ? 'SÍ' : 'NO',
+          es_vacante: e.es_vacante ? 'SÍ' : 'NO',
+          codigoVacante: e.codigoVacante || (e.es_vacante ? 'PLAZA VACANTE' : '—'),
+          tipoDiscapacidad: disc,
+          sexo: e.sexo || '—',
+          tipoSangre: e.tipoSangre || '—',
+          fechaNacimiento: e.fechaNacimiento || '—',
+          edadCalculada: e.edadCalculada || 'No disponible',
+          departamentoExpedicion: e.departamentoExpedicion || '—',
+          municipioExpedicion: e.municipioExpedicion || e.ciudadExpedicion || '—',
+          estadoServidor: e.estadoServidor || 'Activo',
+          situacion: e.situacion || 'ACTIVO',
+          dependencia: e.dependencia || '—',
+          cargoActual: e.cargoActual || '—',
+          codigoActual: e.codigoActual || '—',
+          gradoActual: e.gradoActual || '—',
+          cargoBase: e.cargoBase || '—',
+          codigoBase: e.codigoBase || '—',
+          gradoBase: e.gradoBase || '—',
+          clasificacionEmpleo: e.clasificacionEmpleo || '—',
+          fechaIngreso: e.fechaIngreso || '—',
+          tiempoServicioCalculado: e.tiempoServicioCalculado || 'No disponible',
+          fechaEncargo: e.fechaEncargo || '—',
+          otroTiempoGobernacion: e.otroTiempoGobernacion || '—',
+          otroTiempoCalculado: e.otroTiempoCalculado || '0 años, 0 meses, 0 días',
+          periodosPrevios: periodosPrevios,
+          tiempoTotalGobernacion: e.tiempoTotalGobernacion || e.tiempoServicioCalculado || 'No disponible',
+          funciones: e.funciones || '—',
+          opec: e.opec || '—',
+          estudios: e.estudios || '—',
+          institucionEstudios: e.institucionEstudios || '—',
+          matriculaProfesional: e.matriculaProfesional || '—',
+          postgrado: e.postgrado || '—',
+          institucionPostgrado: e.institucionPostgrado || '—',
+          tieneDiplomado: (e.tieneDiplomado || (e.diplomadoCapSena && e.diplomadoCapSena !== 'NINGUNO')) ? 'SÍ' : 'NO',
+          diplomadoCapSena: e.diplomadoCapSena || '—',
+          celularesStr,
+          telefonoFijo: e.telefonoFijo || '—',
+          correo: e.correo || '—',
+          correoPersonal: e.correoPersonal || '—',
+          direccion: e.direccion || '—',
+          ciudad: e.ciudad || '—',
+          novedades: e.novedades || '—'
         };
       });
 
@@ -2077,7 +2192,7 @@ const EmployeesModule = (() => {
         columns: EXCEL_COLUMNS,
         data: records
       });
-      App.showToast(`Se exportaron ${records.length} servidores exitosamente con columnas desagregadas.`, 'success');
+      App.showToast(`Se exportaron exitosamente ${records.length} servidores públicos con todos los campos de la plataforma.`, 'success');
     } catch (err) {
       App.showToast('Error al exportar a Excel: ' + err.message, 'error');
     }
@@ -2093,7 +2208,7 @@ const EmployeesModule = (() => {
     overlay.id = 'excel-emp-modal-overlay';
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
-      <div class="modal-card" style="max-width: 680px; width: 95%;">
+      <div class="modal-box excel-import-modal-box" style="max-width: 680px; width: 95%;">
         <div class="modal-header">
           <div class="modal-header-info">
             <h2 class="modal-title" style="display:flex; align-items:center; gap:8px;">
@@ -2114,46 +2229,46 @@ const EmployeesModule = (() => {
         <div class="modal-body" style="padding: 20px 24px; max-height: 75vh; overflow-y: auto;">
           <!-- Sección de Selección y Confirmación de Archivo -->
           <div id="emp-upload-section">
-            <div class="excel-dropzone" id="emp-excel-dropzone" style="border: 2px dashed var(--color-border); border-radius: 12px; padding: 32px 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; background: var(--bg-surface);">
+            <div class="excel-dropzone" id="emp-excel-dropzone">
               <input type="file" id="emp-excel-file-input" accept=".xlsx, .xls" style="display:none;" />
-              <div style="margin-bottom: 12px;">
+              <div class="excel-dropzone-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-green-bright)" stroke-width="2" style="width:48px;height:48px;">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                   <polyline points="17 8 12 3 7 8"></polyline>
                   <line x1="12" y1="3" x2="12" y2="15"></line>
                 </svg>
               </div>
-              <p style="font-weight: 700; font-size: 15px; margin-bottom: 4px; color: var(--text-main);" id="dropzone-main-text">
+              <p class="excel-dropzone-title" id="dropzone-main-text">
                 Haz clic para seleccionar o arrastra aquí tu archivo Excel
               </p>
-              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">
+              <p class="excel-dropzone-sub">
                 Formatos soportados: archivos Excel (.xlsx, .xls)
               </p>
             </div>
 
             <!-- Previsualización del archivo seleccionado con opción de cancelar/cambiar -->
             <div id="emp-file-preview" style="display:none; margin-top: 16px;">
-              <div style="background: var(--bg-surface-elevated, #f8fafc); border: 1.5px solid var(--color-border); border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                  <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(34,197,94,0.15); display: flex; align-items: center; justify-content: center; color: var(--color-green-bright); font-size: 20px;">
+              <div class="excel-file-preview-card">
+                <div class="excel-file-preview-left">
+                  <div class="excel-file-preview-icon">
                     📊
                   </div>
-                  <div>
-                    <div id="emp-file-name" style="font-weight: 700; font-size: 13.5px; color: var(--text-primary);"></div>
-                    <div id="emp-file-size" style="font-size: 11.5px; color: var(--text-muted);"></div>
+                  <div class="excel-file-preview-info">
+                    <div id="emp-file-name" class="excel-file-preview-name"></div>
+                    <div id="emp-file-size" class="excel-file-preview-size"></div>
                   </div>
                 </div>
-                <button type="button" class="btn btn-secondary btn-sm" id="btn-change-file" style="font-size: 12px; padding: 5px 12px;">
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-change-file" style="font-size: 12px; padding: 6px 14px; font-weight: 600;">
                   Cambiar archivo
                 </button>
               </div>
 
               <!-- Cuadro Informativo de Confirmación Previa -->
-              <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 10px; padding: 14px 16px; margin-top: 14px; display: flex; align-items: flex-start; gap: 12px;">
-                <div style="font-size: 22px; line-height: 1;">📋</div>
-                <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5;">
-                  <strong style="color: #2563eb; display: block; font-size: 13px; margin-bottom: 2px;">Confirmación de Carga Masiva</strong>
-                  Al confirmar la importación, se procesarán los registros del archivo para crear o actualizar los servidores públicos en la base de datos institucional.
+              <div class="excel-notice-card">
+                <div class="excel-notice-icon">📋</div>
+                <div class="excel-notice-content">
+                  <strong>Confirmación de Carga Masiva</strong>
+                  <p>Al confirmar la importación, se procesarán los registros del archivo para crear o actualizar los servidores públicos en la base de datos institucional.</p>
                 </div>
               </div>
             </div>
@@ -2243,14 +2358,14 @@ const EmployeesModule = (() => {
     });
     dropzone.addEventListener('dragover', (e) => {
       e.preventDefault();
-      dropzone.style.borderColor = 'var(--color-green-bright)';
+      dropzone.classList.add('excel-dropzone-dragover');
     });
     dropzone.addEventListener('dragleave', () => {
-      dropzone.style.borderColor = 'var(--color-border)';
+      dropzone.classList.remove('excel-dropzone-dragover');
     });
     dropzone.addEventListener('drop', (e) => {
       e.preventDefault();
-      dropzone.style.borderColor = 'var(--color-border)';
+      dropzone.classList.remove('excel-dropzone-dragover');
       if (e.dataTransfer.files && e.dataTransfer.files.length) selectFile(e.dataTransfer.files[0]);
     });
 
@@ -2277,56 +2392,56 @@ const EmployeesModule = (() => {
         resultDiv.style.display = 'block';
         resultDiv.innerHTML = `
           <!-- Mensaje de Aceptación de Carga Masiva -->
-          <div style="background: rgba(34,197,94,0.08); border: 1.5px solid rgba(34,197,94,0.35); border-radius: 12px; padding: 22px 18px; text-align: center; margin-bottom: 20px;">
-            <div style="width: 50px; height: 50px; margin: 0 auto 10px; border-radius: 50%; background: rgba(34,197,94,0.18); display: flex; align-items: center; justify-content: center; font-size: 26px;">
+          <div class="excel-success-banner">
+            <div class="excel-success-icon-badge">
               ✅
             </div>
-            <h3 style="font-size: 1.18rem; font-weight: 800; color: var(--color-green-bright, #16a34a); margin-bottom: 4px;">
+            <h3 class="excel-success-title">
               ¡Carga Masiva Aceptada y Procesada con Éxito!
             </h3>
-            <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">
+            <p class="excel-success-desc">
               El archivo <strong>${escHtml(selectedFile.name)}</strong> fue validado y cargado en el sistema correctamente.
             </p>
           </div>
 
           <!-- Información Detallada sobre lo Realizado -->
-          <div style="background: var(--bg-surface-elevated, #f8fafc); border: 1px solid var(--color-border); border-radius: 10px; padding: 18px; margin-bottom: 10px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px; border-bottom: 1px solid var(--color-border); padding-bottom: 10px;">
-              <span style="font-weight: 700; font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+          <div class="excel-summary-box">
+            <div class="excel-summary-topbar">
+              <span class="excel-summary-heading">
                 <span>📊</span> Resumen de Operaciones Realizadas
               </span>
-              <span class="badge badge--info" style="font-size:11px; font-weight:700;">
+              <span class="badge badge--info excel-sheets-badge">
                 ${hojasProcesadas.length} Hoja(s) Procesada(s)
               </span>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; text-align: center;">
-              <div style="background: var(--bg-surface); padding: 10px 8px; border-radius: 8px; border: 1px solid var(--color-border);">
-                <span style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px;">Total Filas</span>
-                <span style="font-size: 19px; font-weight: 800; color: var(--text-primary);">${resumen.totalFilas || 0}</span>
+            <div class="excel-kpi-grid">
+              <div class="excel-kpi-tile excel-kpi-tile--total">
+                <span class="excel-kpi-label">Total Filas</span>
+                <span class="excel-kpi-value">${resumen.totalFilas || 0}</span>
               </div>
-              <div style="background: rgba(34,197,94,0.1); padding: 10px 8px; border-radius: 8px; border: 1px solid rgba(34,197,94,0.25);">
-                <span style="font-size: 11px; color: var(--color-green-bright); display: block; margin-bottom: 2px;">Nuevos Registros</span>
-                <span style="font-size: 19px; font-weight: 800; color: var(--color-green-bright);">${resumen.insertados || 0}</span>
+              <div class="excel-kpi-tile excel-kpi-tile--inserted">
+                <span class="excel-kpi-label">Nuevos Registros</span>
+                <span class="excel-kpi-value">${resumen.insertados || 0}</span>
               </div>
-              <div style="background: rgba(234,179,8,0.1); padding: 10px 8px; border-radius: 8px; border: 1px solid rgba(234,179,8,0.25);">
-                <span style="font-size: 11px; color: var(--color-gold); display: block; margin-bottom: 2px;">Actualizados</span>
-                <span style="font-size: 19px; font-weight: 800; color: var(--color-gold);">${resumen.actualizados || 0}</span>
+              <div class="excel-kpi-tile excel-kpi-tile--updated">
+                <span class="excel-kpi-label">Actualizados</span>
+                <span class="excel-kpi-value">${resumen.actualizados || 0}</span>
               </div>
-              <div style="background: rgba(59,130,246,0.1); padding: 10px 8px; border-radius: 8px; border: 1px solid rgba(59,130,246,0.25);">
-                <span style="font-size: 11px; color: #3b82f6; display: block; margin-bottom: 2px;">IDs Temporales</span>
-                <span style="font-size: 19px; font-weight: 800; color: #3b82f6;">${resumen.provisionales || 0}</span>
+              <div class="excel-kpi-tile excel-kpi-tile--provisional">
+                <span class="excel-kpi-label">IDs Temporales</span>
+                <span class="excel-kpi-value">${resumen.provisionales || 0}</span>
               </div>
-              <div style="background: rgba(254, 240, 138, 0.15); padding: 10px 8px; border-radius: 8px; border: 1px solid rgba(250, 204, 21, 0.35);">
-                <span style="font-size: 11px; color: #a16207; display: block; margin-bottom: 2px;">Plazas Vacantes</span>
-                <span style="font-size: 19px; font-weight: 800; color: #eab308;">${resumen.vacantes || 0}</span>
+              <div class="excel-kpi-tile excel-kpi-tile--vacant">
+                <span class="excel-kpi-label">Plazas Vacantes</span>
+                <span class="excel-kpi-value">${resumen.vacantes || 0}</span>
               </div>
             </div>
 
             ${errores.length > 0 ? `
-              <div style="margin-top: 14px; max-height: 150px; overflow-y: auto; background: var(--bg-surface); border: 1px solid #ef4444; border-radius: 8px; padding: 10px 14px;">
-                <strong style="color:#ef4444; font-size:12px; display:block; margin-bottom: 6px;">Observaciones / Inconsistencias (${errores.length}):</strong>
-                <ul style="margin:0; padding-left: 16px; font-size: 11.5px; color: var(--text-secondary);">
+              <div class="excel-error-log-card">
+                <strong class="excel-error-log-title">Observaciones / Inconsistencias (${errores.length}):</strong>
+                <ul class="excel-error-log-list">
                   ${errores.slice(0, 30).map(e => `<li>Fila ${e.fila} (CC: ${escHtml(e.cedula)}): ${escHtml(e.error)}</li>`).join('')}
                 </ul>
               </div>

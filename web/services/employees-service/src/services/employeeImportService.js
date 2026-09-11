@@ -137,9 +137,12 @@ class EmployeeImportService {
 
           // Resolver dependencias y cargos
           const depId = await this.findOrCreateDependencia(client, depCache, idGenerators, dependencia);
-          const cargoBaseId = await this.findOrCreateCargo(client, cargoCache, idGenerators, cargoNominal, 'PROFESIONAL UNIVERSITARIO');
+          const cargoNominalDef = (cargoNominal?.denominacion && cargoNominal.denominacion !== 'CARGO POR DEFINIR')
+            ? cargoNominal
+            : (cargoActual?.denominacion ? cargoActual : cargoNominal);
+          const cargoBaseId = await this.findOrCreateCargo(client, cargoCache, idGenerators, cargoNominalDef, 'PROFESIONAL UNIVERSITARIO');
           const cargoActualId = cargoActual?.denominacion
-            ? await this.findOrCreateCargo(client, cargoCache, idGenerators, cargoActual, cargoNominal?.denominacion)
+            ? await this.findOrCreateCargo(client, cargoCache, idGenerators, cargoActual, cargoNominalDef?.denominacion || 'PROFESIONAL UNIVERSITARIO')
             : cargoBaseId;
 
           // Regla 10: Auto-asignar Departamento usando tabla DIVIPOLA

@@ -62,12 +62,49 @@ function mapRowToFuncionarioDTO(rawRow, rowNumber, sheetName = 'Principal', cedu
   const tiempoServicioObj = fechaIngreso ? calcularDiferenciaFechasExacta(fechaIngreso) : null;
 
   // 4. Denominación del Cargo y Consolidación de Columnas (Regla 1)
-  const cargoNominalText = sanitizeString(row['DENOMINACIÓN CARGO'] || row['DENOMINACION CARGO'] || row['CARGO']) || 'CARGO POR DEFINIR';
-  const cargoActualText = sanitizeString(row['DENOMINACIÓN CARGO.1'] || row['DENOMINACION CARGO.1'] || row['CARGO ACTUAL']) || cargoNominalText;
-  const codigoNominal = sanitizeString(row['COD.'] || row['CODIGO'] || row['CÓDIGO']);
-  const codigoActual = sanitizeString(row['COD..1'] || row['CODIGO.1']) || codigoNominal;
-  const gradoNominal = sanitizeString(row['GRA.'] || row['GRADO']);
-  const gradoActual = sanitizeString(row['GRA..1'] || row['GRADO.1']) || gradoNominal;
+  // Se prioriza de forma estricta la columna F (Cargo Actual), G (Código Actual), H (Grado Actual)
+  // pero manteniendo compatibilidad total si la fila trae denominación nominal en columnas A, B, C.
+  const cargoActualText = sanitizeString(
+    rawRow['__CARGO_ACTUAL__'] ||
+    row['DENOMINACIÓN CARGO_1'] || row['DENOMINACION CARGO_1'] || row['CARGO_1'] ||
+    row['DENOMINACIÓN CARGO.1'] || row['DENOMINACION CARGO.1'] || row['CARGO.1'] ||
+    row['CARGO ACTUAL'] || row['DENOMINACIÓN CARGO ACTUAL'] || row['DENOMINACION CARGO ACTUAL'] ||
+    row['DENOMINACIÓN CARGO'] || row['DENOMINACION CARGO'] || row['CARGO']
+  ) || null;
+
+  const codigoActual = sanitizeString(
+    rawRow['__CODIGO_ACTUAL__'] ||
+    row['COD._1'] || row['COD_1'] || row['CODIGO_1'] || row['CÓDIGO_1'] ||
+    row['COD..1'] || row['COD.1'] || row['CODIGO.1'] || row['CÓDIGO.1'] ||
+    row['CODIGO ACTUAL'] || row['CÓDIGO ACTUAL'] || row['COD. ACTUAL'] || row['COD ACTUAL'] ||
+    row['COD.'] || row['COD'] || row['CODIGO'] || row['CÓDIGO']
+  ) || null;
+
+  const gradoActual = sanitizeString(
+    rawRow['__GRADO_ACTUAL__'] ||
+    row['GRA._1'] || row['GRA_1'] || row['GRADO_1'] ||
+    row['GRA..1'] || row['GRA.1'] || row['GRADO.1'] ||
+    row['GRADO ACTUAL'] || row['GRA. ACTUAL'] || row['GRA ACTUAL'] ||
+    row['GRA.'] || row['GRA'] || row['GRADO']
+  ) || null;
+
+  const cargoNominalText = sanitizeString(
+    rawRow['__CARGO_NOMINAL__'] ||
+    row['DENOMINACIÓN CARGO'] || row['DENOMINACION CARGO'] || row['CARGO BASE'] || row['CARGO NOMINAL']
+  ) || cargoActualText || 'CARGO POR DEFINIR';
+
+  const codigoNominal = sanitizeString(
+    rawRow['__CODIGO_NOMINAL__'] ||
+    row['COD.'] || row['COD'] || row['CODIGO'] || row['CÓDIGO']
+  ) || codigoActual;
+
+  const gradoNominal = sanitizeString(
+    rawRow['__GRADO_NOMINAL__'] ||
+    row['GRA.'] || row['GRA'] || row['GRADO']
+  ) || gradoActual;
+
+  // Cargo principal consolidado (prioriza F, G, H)
+  const cargoPrincipal = cargoActualText || cargoNominalText;
 
   // 5. Nombres y Apellidos (Regla 7)
   let primerApellido = sanitizeString(row['PRIMER APELLIDO']) || '';
@@ -76,10 +113,10 @@ function mapRowToFuncionarioDTO(rawRow, rowNumber, sheetName = 'Principal', cedu
   let nombreCompleto = [primerApellido, segundoApellido, nombres].filter(Boolean).join(' ').trim();
 
   if (esVacante || (!nombreCompleto && esDocumentoPendiente)) {
-    nombreCompleto = `PLAZA VACANTE - ${cargoNominalText}`;
+    nombreCompleto = `PLAZA VACANTE - ${cargoPrincipal}`;
     nombres = 'PLAZA VACANTE';
     primerApellido = 'VACANTE';
-    segundoApellido = cargoNominalText;
+    segundoApellido = cargoPrincipal;
   } else if (!nombreCompleto) {
     nombreCompleto = sanitizeString(row['NOMBRE COMPLETO'] || row['FUNCIONARIO']) || `SERVIDOR SIN CÉDULA #${rowNumber}`;
   }
@@ -116,7 +153,7 @@ function mapRowToFuncionarioDTO(rawRow, rowNumber, sheetName = 'Principal', cedu
       nombres: esVacante ? 'PLAZA VACANTE' : (nombres || nombreCompleto),
       primerApellido: esVacante ? 'VACANTE' : primerApellido,
       segundoApellido: esVacante ? '' : segundoApellido,
-      nombreCompleto: esVacante ? `PLAZA VACANTE - ${cargoNominalText}` : nombreCompleto,
+      nombreCompleto: esVacante ? `PLAZA VACANTE - ${cargoPrincipal}` : nombreCompleto,
       tipoSangre: esVacante ? null : sanitizeString(row['TIPO DE SANGRE']),
       fechaNacimientoDate: esVacante ? null : fechaNacimiento,
       fechaNacimientoStr: esVacante ? null : formatDateISO(fechaNacimiento),
@@ -128,12 +165,12 @@ function mapRowToFuncionarioDTO(rawRow, rowNumber, sheetName = 'Principal', cedu
       denominacion: cargoNominalText,
       codigo: codigoNominal,
       grado: gradoNominal,
-      asignacion: sanitizeMoney(row['ASIGNACION'] || row['ASIGNACIÓN'])
+      asignacion: sanitizeMoney(row['ASIGNACION'] || row['ASIGNACIÓN'] || rawRow['__ASIGNACION__'])
     },
     cargoActual: {
-      denominacion: cargoActualText,
-      codigo: codigoActual,
-      grado: gradoActual
+      denominacion: cargoPrincipal,
+      codigo: codigoActual || codigoNominal,
+      grado: gradoActual || gradoNominal
     },
     dependencia: sanitizeString(row['DEPENDENCIA'] || row['AREA'] || row['DEPENDENCIA ACTUAL']),
     vinculacion: {

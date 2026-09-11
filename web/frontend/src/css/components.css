@@ -173,6 +173,7 @@
   gap: 2px;
   position: relative;
   z-index: 2;
+  overflow: hidden;
 }
 
 .stat-value {
@@ -196,20 +197,23 @@
 }
 
 .stat-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  width: fit-content;
+  display: inline-block;
+  vertical-align: middle;
+  width: auto;
   max-width: 100%;
-  font-size: 0.72rem;
+  font-size: 0.67rem;
   font-weight: 700;
-  padding: 3px 9px;
-  border-radius: var(--radius-full);
+  padding: 2px 7px;
+  border-radius: var(--radius-full, 9999px);
   margin-top: 3px;
-  letter-spacing: 0.1px;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
@@ -321,6 +325,31 @@
   width: 100%;
   min-width: 0;
   z-index: 1;
+}
+
+.chart-card--wide {
+  grid-column: 1 / -1;
+}
+
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-tertiary, #94a3b8);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: center;
+  gap: 10px;
+  padding: 16px;
+}
+
+.chart-empty svg {
+  width: 36px;
+  height: 36px;
+  opacity: 0.45;
+  stroke: currentColor;
 }
 
 /* ─── Filters Card ───────────────────────────────────────────────────────── */
@@ -2572,6 +2601,461 @@ tbody tr:last-child td {
   white-space: nowrap;
 }
 
+/* ─── Excel Service Modal & Preview / Summary Components (Light & Dark) ──── */
+.modal-card {
+  width: 100%;
+  max-height: 90vh;
+  border-radius: var(--radius-xl, 16px);
+  display: flex;
+  flex-direction: column;
+  animation: modal-in 0.3s var(--transition-spring, ease);
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .modal-card {
+  background: var(--color-surface, #061a29) !important;
+  border: 1px solid var(--color-border, rgba(115, 137, 147, 0.28)) !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.75) !important;
+}
+
+.excel-import-modal-box {
+  border-radius: var(--radius-xl, 16px);
+  overflow: hidden;
+}
+
+/* File Preview Card (selected file info row) */
+.excel-file-preview-card {
+  background: var(--color-surface-2, #f8fafc);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .excel-file-preview-card {
+  background: rgba(15, 23, 42, 0.65) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.excel-file-preview-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.excel-file-preview-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .excel-file-preview-icon {
+  background: rgba(34, 197, 94, 0.2) !important;
+  border-color: rgba(34, 197, 94, 0.4) !important;
+}
+
+.excel-file-preview-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.excel-file-preview-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-primary, #0f172a);
+  word-break: break-all;
+  line-height: 1.3;
+}
+
+[data-theme="dark"] .excel-file-preview-name {
+  color: #f8fafc !important;
+}
+
+.excel-file-preview-size {
+  font-size: 12px;
+  color: var(--text-muted, #64748b);
+  font-weight: 600;
+}
+
+[data-theme="dark"] .excel-file-preview-size {
+  color: #94a3b8 !important;
+}
+
+/* Notice Card (Info before confirmation) */
+.excel-notice-card {
+  background: rgba(0, 123, 199, 0.08);
+  border: 1px solid rgba(0, 123, 199, 0.22);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+[data-theme="dark"] .excel-notice-card {
+  background: rgba(0, 123, 199, 0.14) !important;
+  border-color: rgba(0, 123, 199, 0.32) !important;
+}
+
+.excel-notice-icon {
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.excel-notice-content {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #334155;
+}
+
+[data-theme="dark"] .excel-notice-content {
+  color: #cbd5e1 !important;
+}
+
+.excel-notice-content strong {
+  color: #005387;
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+[data-theme="dark"] .excel-notice-content strong {
+  color: #60a5fa !important;
+}
+
+.excel-notice-content p {
+  margin: 0;
+}
+
+/* Success Banner */
+.excel-success-banner {
+  background: rgba(40, 135, 27, 0.08);
+  border: 1.5px solid rgba(40, 135, 27, 0.28);
+  border-radius: 14px;
+  padding: 22px 18px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+[data-theme="dark"] .excel-success-banner {
+  background: rgba(34, 197, 94, 0.12) !important;
+  border-color: rgba(34, 197, 94, 0.35) !important;
+}
+
+.excel-success-icon-badge {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  background: rgba(40, 135, 27, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+
+[data-theme="dark"] .excel-success-icon-badge {
+  background: rgba(34, 197, 94, 0.22) !important;
+}
+
+.excel-success-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--color-green-dark, #287522);
+  margin-bottom: 6px;
+}
+
+[data-theme="dark"] .excel-success-title {
+  color: #4ade80 !important;
+}
+
+.excel-success-desc {
+  font-size: 13px;
+  color: #475569;
+  margin: 0;
+  line-height: 1.4;
+}
+
+[data-theme="dark"] .excel-success-desc {
+  color: #cbd5e1 !important;
+}
+
+/* Summary Container Box */
+.excel-summary-box {
+  background: #ffffff;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .excel-summary-box {
+  background: rgba(15, 23, 42, 0.65) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.excel-summary-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+  padding-bottom: 10px;
+}
+
+[data-theme="dark"] .excel-summary-topbar {
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.excel-summary-heading {
+  font-weight: 800;
+  font-size: 13.5px;
+  color: var(--text-primary, #0f172a);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+[data-theme="dark"] .excel-summary-heading {
+  color: #f8fafc !important;
+}
+
+.excel-sheets-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: rgba(0, 123, 199, 0.12) !important;
+  color: #005387 !important;
+  border: 1px solid rgba(0, 123, 199, 0.25) !important;
+}
+
+[data-theme="dark"] .excel-sheets-badge {
+  background: rgba(0, 123, 199, 0.22) !important;
+  color: #93c5fd !important;
+  border-color: rgba(0, 123, 199, 0.4) !important;
+}
+
+/* KPI Tiles Grid */
+.excel-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+  text-align: center;
+}
+
+.excel-kpi-tile {
+  padding: 12px 8px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.excel-kpi-tile:hover {
+  transform: translateY(-2px);
+}
+
+.excel-kpi-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.excel-kpi-value {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+  display: block;
+}
+
+/* 1. Total Filas */
+.excel-kpi-tile--total {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+.excel-kpi-tile--total .excel-kpi-label {
+  color: #64748b;
+}
+.excel-kpi-tile--total .excel-kpi-value {
+  color: #0f172a;
+}
+
+[data-theme="dark"] .excel-kpi-tile--total {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+[data-theme="dark"] .excel-kpi-tile--total .excel-kpi-label {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .excel-kpi-tile--total .excel-kpi-value {
+  color: #ffffff !important;
+}
+
+/* 2. Nuevos Registros */
+.excel-kpi-tile--inserted {
+  background: rgba(40, 135, 27, 0.08);
+  border: 1px solid rgba(40, 135, 27, 0.25);
+}
+.excel-kpi-tile--inserted .excel-kpi-label {
+  color: #1e6b18;
+}
+.excel-kpi-tile--inserted .excel-kpi-value {
+  color: #28871b;
+}
+
+[data-theme="dark"] .excel-kpi-tile--inserted {
+  background: rgba(34, 197, 94, 0.15) !important;
+  border-color: rgba(34, 197, 94, 0.35) !important;
+}
+[data-theme="dark"] .excel-kpi-tile--inserted .excel-kpi-label {
+  color: #86efac !important;
+}
+[data-theme="dark"] .excel-kpi-tile--inserted .excel-kpi-value {
+  color: #4ade80 !important;
+}
+
+/* 3. Actualizados */
+.excel-kpi-tile--updated {
+  background: rgba(209, 173, 42, 0.12);
+  border: 1px solid rgba(209, 173, 42, 0.35);
+}
+.excel-kpi-tile--updated .excel-kpi-label {
+  color: #8a6c08;
+}
+.excel-kpi-tile--updated .excel-kpi-value {
+  color: #a67c00;
+}
+
+[data-theme="dark"] .excel-kpi-tile--updated {
+  background: rgba(234, 179, 8, 0.15) !important;
+  border-color: rgba(234, 179, 8, 0.35) !important;
+}
+[data-theme="dark"] .excel-kpi-tile--updated .excel-kpi-label {
+  color: #fde047 !important;
+}
+[data-theme="dark"] .excel-kpi-tile--updated .excel-kpi-value {
+  color: #facc15 !important;
+}
+
+/* 4. IDs Temporales */
+.excel-kpi-tile--provisional {
+  background: rgba(0, 123, 199, 0.08);
+  border: 1px solid rgba(0, 123, 199, 0.25);
+}
+.excel-kpi-tile--provisional .excel-kpi-label {
+  color: #005387;
+}
+.excel-kpi-tile--provisional .excel-kpi-value {
+  color: #007bc7;
+}
+
+[data-theme="dark"] .excel-kpi-tile--provisional {
+  background: rgba(59, 130, 246, 0.15) !important;
+  border-color: rgba(59, 130, 246, 0.35) !important;
+}
+[data-theme="dark"] .excel-kpi-tile--provisional .excel-kpi-label {
+  color: #93c5fd !important;
+}
+[data-theme="dark"] .excel-kpi-tile--provisional .excel-kpi-value {
+  color: #60a5fa !important;
+}
+
+/* 5. Plazas Vacantes */
+.excel-kpi-tile--vacant {
+  background: rgba(209, 70, 0, 0.08);
+  border: 1px solid rgba(209, 70, 0, 0.25);
+}
+.excel-kpi-tile--vacant .excel-kpi-label {
+  color: #9e3500;
+}
+.excel-kpi-tile--vacant .excel-kpi-value {
+  color: #d14600;
+}
+
+[data-theme="dark"] .excel-kpi-tile--vacant {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+[data-theme="dark"] .excel-kpi-tile--vacant .excel-kpi-label {
+  color: #fcd34d !important;
+}
+[data-theme="dark"] .excel-kpi-tile--vacant .excel-kpi-value {
+  color: #fbbf24 !important;
+}
+
+/* Error log box */
+.excel-error-log-card {
+  margin-top: 14px;
+  max-height: 150px;
+  overflow-y: auto;
+  background: rgba(227, 36, 49, 0.06);
+  border: 1px solid rgba(227, 36, 49, 0.28);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+[data-theme="dark"] .excel-error-log-card {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+}
+
+.excel-error-log-title {
+  color: #b91c1c;
+  font-size: 12px;
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+[data-theme="dark"] .excel-error-log-title {
+  color: #f87171 !important;
+}
+
+.excel-error-log-list {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 11.5px;
+  color: #475569;
+}
+
+[data-theme="dark"] .excel-error-log-list {
+  color: #cbd5e1 !important;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    Liquid Glass — Dashboard Mesh Background & Orb System
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -2641,8 +3125,15 @@ tbody tr:last-child td {
   color: #60a5fa !important;
   border: 1px solid rgba(37, 99, 235, 0.45) !important;
   border-radius: 9999px !important;
-  padding: 3px 9px !important;
-  font-size: 0.72rem !important;
+  padding: 2px 7px !important;
+  font-size: 0.67rem !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
 }
 
 [data-theme="dark"] .stat-badge--warn {
@@ -2650,8 +3141,15 @@ tbody tr:last-child td {
   color: #fbbf24 !important;
   border: 1px solid rgba(245, 158, 11, 0.45) !important;
   border-radius: 9999px !important;
-  padding: 3px 9px !important;
-  font-size: 0.72rem !important;
+  padding: 2px 7px !important;
+  font-size: 0.67rem !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
 }
 
 [data-theme="dark"] .stat-badge--gold {
@@ -2659,8 +3157,15 @@ tbody tr:last-child td {
   color: #facc15 !important;
   border: 1px solid rgba(234, 179, 8, 0.45) !important;
   border-radius: 9999px !important;
-  padding: 3px 9px !important;
-  font-size: 0.72rem !important;
+  padding: 2px 7px !important;
+  font-size: 0.67rem !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
 }
 
 [data-theme="dark"] .stat-badge--success {
@@ -2668,8 +3173,15 @@ tbody tr:last-child td {
   color: #34d399 !important;
   border: 1px solid rgba(16, 185, 129, 0.45) !important;
   border-radius: 9999px !important;
-  padding: 3px 9px !important;
-  font-size: 0.72rem !important;
+  padding: 2px 7px !important;
+  font-size: 0.67rem !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
 }
 
 [data-theme="dark"] .stat-badge--purple {
@@ -2677,8 +3189,15 @@ tbody tr:last-child td {
   color: #c084fc !important;
   border: 1px solid rgba(139, 92, 246, 0.45) !important;
   border-radius: 9999px !important;
-  padding: 3px 9px !important;
-  font-size: 0.72rem !important;
+  padding: 2px 7px !important;
+  font-size: 0.67rem !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
 }
 
 /* ─── Detail Modal (Ver Detalle) ────────────────────────────────────────── */
@@ -3965,16 +4484,17 @@ tbody tr:last-child td {
 }
 
 .ficha-card-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 15px;
   flex-shrink: 0;
   background: rgba(40, 117, 34, 0.08);
   color: var(--color-primary, #287522);
+  line-height: 1;
 }
 
 [data-theme="dark"] .ficha-card-icon {
@@ -4093,6 +4613,31 @@ tbody tr:last-child td {
   background: rgba(59, 130, 246, 0.18);
   transform: translateY(-1px);
   text-decoration: none;
+}
+
+.ficha-contact-link--fijo {
+  background: rgba(14, 165, 233, 0.09);
+  color: #0284c7;
+  border: 1px solid rgba(14, 165, 233, 0.22);
+}
+
+.ficha-contact-link--fijo:hover {
+  background: rgba(14, 165, 233, 0.18);
+  color: #0369a1;
+  border-color: rgba(14, 165, 233, 0.4);
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .ficha-contact-link--fijo {
+  background: rgba(14, 165, 233, 0.16);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.28);
+}
+
+[data-theme="dark"] .ficha-contact-link--fijo:hover {
+  background: rgba(14, 165, 233, 0.26);
+  color: #7dd3fc;
+  border-color: rgba(56, 189, 248, 0.45);
 }
 
 /* ─── Badges de Clasificación de Empleo ─── */

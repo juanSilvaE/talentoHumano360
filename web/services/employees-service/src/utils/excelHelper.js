@@ -99,6 +99,39 @@ function formatCedulaProvisional(num) {
  * @param {string} [sheetName='Principal']
  * @returns {{ esValida: boolean, cedulaLimpia: string|null, sinCedula: boolean, esProvisional: boolean, valorOriginal: string, motivoRechazo?: string }}
  */
+/**
+ * Extrae la denominación del cargo desde una fila de Excel:
+ * Prioriza la Columna F (Cargo Actual / Desempeño) y luego la Columna A (Cargo Nominal / Base).
+ * Tolera nombres repetidos, sufijos de SheetJS (_1) y renombrados (CARGO ACTUAL).
+ *
+ * @param {Object} rawRow
+ * @returns {string}
+ */
+function extraerCargoExcel(rawRow) {
+  if (!rawRow || typeof rawRow !== 'object') return '';
+  return String(
+    rawRow['__CARGO_ACTUAL__'] ||
+    rawRow['DENOMINACIÓN CARGO_1'] || rawRow['DENOMINACION CARGO_1'] || rawRow['CARGO_1'] ||
+    rawRow['DENOMINACIÓN CARGO.1'] || rawRow['DENOMINACION CARGO.1'] || rawRow['CARGO.1'] ||
+    rawRow['CARGO ACTUAL'] || rawRow['DENOMINACIÓN CARGO ACTUAL'] || rawRow['DENOMINACION CARGO ACTUAL'] ||
+    rawRow['__CARGO_NOMINAL__'] ||
+    rawRow['DENOMINACIÓN CARGO'] || rawRow['DENOMINACION CARGO'] || rawRow['CARGO'] ||
+    ''
+  ).trim();
+}
+
+/**
+ * Evalúa y normaliza el valor de la Cédula:
+ * - Valida la columna CEDULA.
+ * - Si es válida, retorna cedulaLimpia.
+ * - Si es inválida pero la fila tiene datos de persona, la marca como sinCedula para asignación de PROV-.
+ *
+ * @param {*} val
+ * @param {Object} [rawRow=null]
+ * @param {number} [rowNumber=0]
+ * @param {string} [sheetName='Principal']
+ * @returns {{ esValida: boolean, cedulaLimpia: string|null, sinCedula: boolean, esProvisional: boolean, valorOriginal: string, motivoRechazo?: string }}
+ */
 function evaluarCedula(val, rawRow = null, rowNumber = 0, sheetName = 'Principal') {
   const resValidacion = validarCedulaExcel(val);
 
@@ -118,7 +151,7 @@ function evaluarCedula(val, rawRow = null, rowNumber = 0, sheetName = 'Principal
     const apellido1 = String(rawRow['PRIMER APELLIDO'] || '').trim();
     const apellido2 = String(rawRow['SEGUNDO APELLIDO'] || '').trim();
     const nombreCompleto = String(rawRow['NOMBRE COMPLETO'] || rawRow['FUNCIONARIO'] || '').trim();
-    const cargo = String(rawRow['DENOMINACIÓN CARGO'] || rawRow['DENOMINACION CARGO'] || rawRow['CARGO'] || '').trim();
+    const cargo = extraerCargoExcel(rawRow);
     const dependencia = String(rawRow['DEPENDENCIA'] || rawRow['AREA'] || '').trim();
 
     const tieneIdentidad = Boolean(nombres || apellido1 || apellido2 || nombreCompleto || cargo || dependencia);
@@ -146,7 +179,7 @@ function evaluarCedula(val, rawRow = null, rowNumber = 0, sheetName = 'Principal
 
 /**
  * Detecta si una fila del Excel corresponde a un cargo/plaza vacante:
- * - Tiene cargo definido (ej: "TECNICO OPERATIVO").
+ * - Tiene cargo definido (ej: "TECNICO OPERATIVO" o "PROFESIONAL UNIVERSITARIO").
  * - Pero no tiene número de cédula válido, y no tiene nombres personales reales (o dice "VACANTE").
  *
  * @param {Object} rawRow
@@ -156,7 +189,7 @@ function evaluarCedula(val, rawRow = null, rowNumber = 0, sheetName = 'Principal
 function detectarVacante(rawRow, resValidacionCedula = null) {
   if (!rawRow || typeof rawRow !== 'object') return false;
 
-  const cargo = String(rawRow['DENOMINACIÓN CARGO'] || rawRow['DENOMINACION CARGO'] || rawRow['CARGO'] || '').trim();
+  const cargo = extraerCargoExcel(rawRow);
   const nombres = String(rawRow['NOMBRES'] || '').trim();
   const apellido1 = String(rawRow['PRIMER APELLIDO'] || '').trim();
   const apellido2 = String(rawRow['SEGUNDO APELLIDO'] || '').trim();
@@ -333,6 +366,7 @@ module.exports = {
   validarCedulaExcel,
   formatCedulaProvisional,
   detectarVacante,
+  extraerCargoExcel,
   esFilaFantasma,
   sanitizeEmail,
   sanitizeMoney,

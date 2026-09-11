@@ -20,7 +20,38 @@ function auth(req, res, next) {
 router.get('/stats', auth, async (_, res) => {
   try {
     const [empleados, vacaciones, adminReqs, viaticos, recientes] = await Promise.all([
-      pool.query('SELECT COUNT(*) AS total FROM rel_principal'),
+      pool.query(`
+        SELECT 
+          COUNT(*) AS total,
+          COUNT(*) FILTER (
+            WHERE COALESCE(p.es_vacante, false) = true 
+               OR UPPER(COALESCE(e.situacion, '')) IN ('VACANTE', 'VACANTE DEFINITIVA') 
+               OR p.nombre_completo LIKE 'PLAZA VACANTE%'
+          ) AS vacantes,
+          COUNT(*) FILTER (
+            WHERE NOT (
+              COALESCE(p.es_vacante, false) = true 
+              OR UPPER(COALESCE(e.situacion, '')) IN ('VACANTE', 'VACANTE DEFINITIVA') 
+              OR p.nombre_completo LIKE 'PLAZA VACANTE%'
+            )
+            AND (
+              LOWER(COALESCE(e.estado_servidor, '')) = 'inactivo' 
+              OR UPPER(COALESCE(e.situacion, '')) = 'RETIRADO'
+            )
+          ) AS inactivos,
+          COUNT(*) FILTER (
+            WHERE NOT (
+              COALESCE(p.es_vacante, false) = true 
+              OR UPPER(COALESCE(e.situacion, '')) IN ('VACANTE', 'VACANTE DEFINITIVA') 
+              OR p.nombre_completo LIKE 'PLAZA VACANTE%'
+            )
+            AND LOWER(COALESCE(e.estado_servidor, 'Activo')) = 'activo'
+            AND UPPER(COALESCE(e.situacion, '')) != 'RETIRADO'
+          ) AS activos
+        FROM rel_principal r
+        LEFT JOIN personas p ON p.id_persona = r.id_persona
+        LEFT JOIN estados e ON e.id_estado = r.id_estado
+      `),
       pool.query(`
         SELECT COUNT(*) AS total,
                COUNT(*) FILTER (WHERE LOWER(estado)='pendiente' OR estado IS NULL) AS pendientes,
@@ -64,7 +95,12 @@ router.get('/stats', auth, async (_, res) => {
     const vi = viaticos.rows[0];
 
     res.json({
-      empleados: { total: parseInt(e.total)||0 },
+      empleados: {
+        total: parseInt(e.total) || 0,
+        activos: parseInt(e.activos) || 0,
+        inactivos: parseInt(e.inactivos) || 0,
+        vacantes: parseInt(e.vacantes) || 0,
+      },
       vacaciones: {
         total: parseInt(v.total)||0,
         pendientes: parseInt(v.pendientes)||0,
@@ -95,33 +131,89 @@ router.get('/stats', auth, async (_, res) => {
 // ─── GET /api/dashboard/chart ─────────────────────────────────────────────────
 router.get('/chart', auth, async (_, res) => {
   try {
-    // Por tipo de solicitud
-    const byType = await pool.query(`
-      SELECT 'Vacaciones' AS tipo, COUNT(*) AS cantidad FROM vacaciones
-      UNION ALL
-      SELECT 'Permisos', COUNT(*) FROM solicitudes_admin WHERE tipo='Permiso Laboral'
-      UNION ALL
-      SELECT 'Incapacidades', COUNT(*) FROM solicitudes_admin WHERE tipo='Incapacidad'
-      UNION ALL
-      SELECT 'Licencias', COUNT(*) FROM solicitudes_admin WHERE tipo='Licencia'
-      UNION ALL
-      SELECT 'Viáticos', COUNT(*) FROM viaticos
-    `);
-    // Por estado
-    const byStatus = await pool.query(`
-      SELECT estado, COUNT(*) AS cantidad FROM (
-        SELECT COALESCE(estado,'Pendiente') AS estado FROM vacaciones
-        UNION ALL SELECT estado FROM solicitudes_admin
-        UNION ALL SELECT estado FROM viaticos
-      ) t GROUP BY estado ORDER BY cantidad DESC`);
+    const [byType, byStatus, byDep, servRes] = await Promise.all([
+      // Por tipo de solicitud
+      pool.query(`
+        SELECT 'Vacaciones' AS tipo, COUNT(*) AS cantidad FROM vacaciones
+        UNION ALL
+        SELECT 'Permisos', COUNT(*) FROM solicitudes_admin WHERE tipo='Permiso Laboral'
+        UNION ALL
+        SELECT 'Incapacidades', COUNT(*) FROM solicitudes_admin WHERE tipo='Incapacidad'
+        UNION ALL
+        SELECT 'Licencias', COUNT(*) FROM solicitudes_admin WHERE tipo='Licencia'
+        UNION ALL
+        SELECT 'Viáticos', COUNT(*) FROM viaticos
+      `),
+      // Por estado
+      pool.query(`
+        SELECT estado, COUNT(*) AS cantidad FROM (
+          SELECT COALESCE(estado,'Pendiente') AS estado FROM vacaciones
+          UNION ALL SELECT estado FROM solicitudes_admin
+          UNION ALL SELECT estado FROM viaticos
+        ) t GROUP BY estado ORDER BY cantidad DESC
+      `),
+      // Top Dependencias reales según servidores asignados
+      pool.query(`
+        SELECT COALESCE(NULLIF(TRIM(d.dependencia), ''), 'Sin Dependencia') AS dependencia, COUNT(r.id_registro) AS cantidad
+        FROM rel_principal r
+        LEFT JOIN dependencias d ON d.id_dependencia = r.id_dependencia
+        GROUP BY d.dependencia
+        ORDER BY cantidad DESC
+        LIMIT 5
+      `),
+      // Servidores por estado (Activos, Inactivos, Vacantes)
+      pool.query(`
+        SELECT 
+          COUNT(*) AS total,
+          COUNT(*) FILTER (
+            WHERE COALESCE(p.es_vacante, false) = true 
+               OR UPPER(COALESCE(e.situacion, '')) IN ('VACANTE', 'VACANTE DEFINITIVA') 
+               OR p.nombre_completo LIKE 'PLAZA VACANTE%'
+          ) AS vacantes,
+          COUNT(*) FILTER (
+            WHERE NOT (
+              COALESCE(p.es_vacante, false) = true 
+              OR UPPER(COALESCE(e.situacion, '')) IN ('VACANTE', 'VACANTE DEFINITIVA') 
+              OR p.nombre_completo LIKE 'PLAZA VACANTE%'
+            )
+            AND (
+              LOWER(COALESCE(e.estado_servidor, '')) = 'inactivo' 
+              OR UPPER(COALESCE(e.situacion, '')) = 'RETIRADO'
+            )
+          ) AS inactivos,
+          COUNT(*) FILTER (
+            WHERE NOT (
+              COALESCE(p.es_vacante, false) = true 
+              OR UPPER(COALESCE(e.situacion, '')) IN ('VACANTE', 'VACANTE DEFINITIVA') 
+              OR p.nombre_completo LIKE 'PLAZA VACANTE%'
+            )
+            AND LOWER(COALESCE(e.estado_servidor, 'Activo')) = 'activo'
+            AND UPPER(COALESCE(e.situacion, '')) != 'RETIRADO'
+          ) AS activos
+        FROM rel_principal r
+        LEFT JOIN personas p ON p.id_persona = r.id_persona
+        LEFT JOIN estados e ON e.id_estado = r.id_estado
+      `)
+    ]);
+
+    const s = servRes.rows[0];
 
     res.json({
       porTipo: byType.rows.map(r => ({ tipo: r.tipo, cantidad: parseInt(r.cantidad)||0 })),
       porEstado: byStatus.rows.map(r => ({ estado: r.estado, cantidad: parseInt(r.cantidad)||0 })),
+      porDependencia: byDep.rows.map(r => ({ dependencia: r.dependencia, cantidad: parseInt(r.cantidad)||0 })),
+      servidores: {
+        activos: parseInt(s.activos) || 0,
+        inactivos: parseInt(s.inactivos) || 0,
+        vacantes: parseInt(s.vacantes) || 0,
+        total: parseInt(s.total) || 0
+      }
     });
   } catch (err) {
+    console.error('[dashboard] chart error:', err.message);
     res.status(500).json({ error: 'Error gráficas.' });
   }
 });
 
 module.exports = router;
+
